@@ -1,13 +1,13 @@
 # Maven
-#/target/
+/target/
 
 # Mac
 .DS_Store
 
 # Eclipse
-#.classpath
-#.settings/
-#.project
+.classpath
+.settings/
+.project
 
 # Other
 /TESTS/
