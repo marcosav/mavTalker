@@ -7,7 +7,6 @@
 # Eclipse
 .classpath
 .settings/
-.project
 
 # Other
 /TESTS/
