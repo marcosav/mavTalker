@@ -1,0 +1,30 @@
+package com.gmail.marcosav2010.main;
+
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.Scanner;
+
+import com.gmail.marcosav2010.command.CommandHandler;
+
+public class Launcher {
+
+	public static void main(String[] args) throws NumberFormatException, IOException, GeneralSecurityException {
+		Main main = new Main();
+		Main.setInstance(main);
+
+		main.main(args);
+
+		listenForCommands();
+	}
+
+	private static void listenForCommands() {
+		Scanner scn = new Scanner(System.in);
+
+		while (scn.hasNextLine()) {
+			String in = scn.nextLine();
+			CommandHandler.handleCommand(in);
+		}
+
+		scn.close();
+	}
+}
