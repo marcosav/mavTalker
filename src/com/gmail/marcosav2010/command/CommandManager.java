@@ -51,8 +51,6 @@ public class CommandManager {
 
 		@Override
 		public void execute(String[] arg, int args) {
-			Logger.log("Exiting application...");
-			Main.getInstance().getPeerManager().shutdown();
 			System.exit(0);
 		}
 	}

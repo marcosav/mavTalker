@@ -53,6 +53,13 @@ public class Main {
 	public static void setInstance(Main instance) {
 		mainInstance = instance;
 	}
+	
+	public void shutdown() {
+		Logger.log("Exiting application...");
+		if (getPeerManager() != null)
+			getPeerManager().shutdown();
+		Logger.log("Bye");
+	}
 
 	public static Main getInstance() {
 		return mainInstance;

@@ -9,6 +9,8 @@ import com.gmail.marcosav2010.command.CommandHandler;
 public class Launcher {
 
 	public static void main(String[] args) throws NumberFormatException, IOException, GeneralSecurityException {
+		addSignalHook();
+		
 		Main main = new Main();
 		Main.setInstance(main);
 
@@ -26,5 +28,11 @@ public class Launcher {
 		}
 
 		scn.close();
+	}
+	
+	private static void addSignalHook() {
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			Main.getInstance().shutdown();
+		}));
 	}
 }
