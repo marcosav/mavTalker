@@ -1,9 +1,8 @@
 package com.gmail.marcosav2010.connection;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.gmail.marcosav2010.communicator.packet.packets.PacketIdentify;
 import com.gmail.marcosav2010.peer.ConnectedPeer;
@@ -18,7 +17,8 @@ public class ConnectionIdentificator extends NetworkIdentificator<ConnectedPeer>
 	private Map<String, ConnectedPeer> namePeer;
 
 	public ConnectionIdentificator() {
-		namePeer = Collections.synchronizedMap(new HashMap<>());
+		//namePeer = Collections.synchronizedMap(new HashMap<>());
+		namePeer = new ConcurrentHashMap<>();
 	}
 
 	protected ConnectedPeer identifyConnection(Connection connection, PacketIdentify info) {

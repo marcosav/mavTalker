@@ -1,10 +1,10 @@
 package com.gmail.marcosav2010.tasker;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -14,8 +14,8 @@ public class Tasker {
 
 	private final Object lock = new Object();
 	private final AtomicInteger taskCounter = new AtomicInteger();
-	private final Map<Integer, Task> tasks = Collections.synchronizedMap(new HashMap<>());
-	private final Map<TaskOwner, Set<Task>> tasksByOwner = Collections.synchronizedMap(new HashMap<>());
+	private final Map<Integer, Task> tasks = new ConcurrentHashMap<>();
+	private final Map<TaskOwner, Set<Task>> tasksByOwner = new ConcurrentHashMap<>();
 
 	public void cancel(int id) {
 		Task task = tasks.get(id);

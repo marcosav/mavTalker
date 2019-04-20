@@ -1,8 +1,7 @@
 package com.gmail.marcosav2010.communicator.packet.handling;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import com.gmail.marcosav2010.main.Main;
@@ -21,7 +20,7 @@ public class PacketActionHandler {
 	private Map<Long, PacketAction> pendingActions;
 
 	public PacketActionHandler() {
-		pendingActions = Collections.synchronizedMap(new HashMap<>());
+		pendingActions = new ConcurrentHashMap<>();
 	}
 
 	public boolean isPending(long id) {

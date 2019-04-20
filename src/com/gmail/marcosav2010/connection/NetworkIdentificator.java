@@ -1,11 +1,11 @@
 package com.gmail.marcosav2010.connection;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.gmail.marcosav2010.peer.NetworkPeer;
 
@@ -19,7 +19,8 @@ public class NetworkIdentificator<T extends NetworkPeer> {
 	protected Map<UUID, T> peers;
 
 	public NetworkIdentificator() {
-		peers = Collections.synchronizedMap(new HashMap<>());
+		//peers = Collections.synchronizedMap(new HashMap<>());
+		peers = new ConcurrentHashMap<>();
 	}
 
 	public T getPeer(UUID uuid) {

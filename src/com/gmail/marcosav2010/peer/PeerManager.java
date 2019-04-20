@@ -1,8 +1,7 @@
 package com.gmail.marcosav2010.peer;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import com.gmail.marcosav2010.logger.Logger;
@@ -27,7 +26,8 @@ public class PeerManager {
 	public PeerManager() {
 		peersCreated = 0;
 		parentPeerThreadGroup = new ThreadGroup("parentPeerThreadGroup");
-		peers = Collections.synchronizedMap(new HashMap<>());
+		//peers = Collections.synchronizedMap(new HashMap<>());
+		peers = new ConcurrentHashMap<>();
 	}
 
 	public Peer get(String name) {

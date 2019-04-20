@@ -6,10 +6,12 @@ public class EncryptedMessage {
 
 	private final byte[] encryptedSimmetricKeyBytes;
 	private final byte[] encryptedData;
+	private final byte[] byteLength;
 
 	EncryptedMessage(byte[] encryptedSimmetricKeyBytes, byte[] encryptedData) {
 		this.encryptedSimmetricKeyBytes = encryptedSimmetricKeyBytes;
 		this.encryptedData = encryptedData;
+		byteLength = Utils.intToBytes(~intLength());
 	}
 
 	byte[] getEncryptedSimmetricKeyBytes() {
@@ -25,6 +27,6 @@ public class EncryptedMessage {
 	}
 	
 	byte[] byteLength() {
-		return Utils.intToBytes(~intLength());
+		return byteLength;
 	}
 }

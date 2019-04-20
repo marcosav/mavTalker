@@ -9,15 +9,21 @@ import com.gmail.marcosav2010.communicator.packet.wrapper.PacketEncoder;
 
 public class PacketIdentify extends StandardPacket {
 
+	public static final byte SUCCESS = 0;
+	public static final byte INVALID_UUID = 1;
+	public static final byte TIMED_OUT = 2;
+	
 	private String name;
 	private UUID newUUID;
+	private byte result;
 
 	public PacketIdentify() {
 	}
 
-	public PacketIdentify(String name, UUID newUUID) {
+	public PacketIdentify(String name, UUID newUUID, byte result) {
 		this.name = name;
 		this.newUUID = newUUID;
+		this.result = result;
 	}
 
 	public String getName() {
@@ -27,23 +33,35 @@ public class PacketIdentify extends StandardPacket {
 	public UUID getNewUUID() {
 		return newUUID;
 	}
+	
+	public byte getResult() {
+		return result;
+	}
 
 	public boolean providesUUID() {
 		return newUUID != null;
 	}
+	
+	public boolean providesName() {
+		return name != null && !name.isBlank();
+	}
 
 	@Override
 	protected void encodeContent(PacketEncoder out) throws IOException {
+		out.write(providesName());
 		out.write(name);
 		out.write(providesUUID());
 		if (providesUUID())
 			out.write(newUUID);
+		out.write(result);
 	}
 
 	@Override
 	protected void decodeContent(PacketDecoder in) throws IOException {
-		name = in.readString();
+		if (in.readBoolean())
+			name = in.readString();
 		if (in.readBoolean())
 			newUUID = in.readUUID();
+		result = in.readByte();
 	}
 }

@@ -79,6 +79,7 @@ public class CipheredCommunicator extends Communicator {
 		// Leer tamaño del mensaje cifrado en complemento
 		byte[] lengthBytes = baseCommunicator.read(LENGTH_BYTES);
 		int length = ~Utils.bytesToInt(lengthBytes);
+		
 		if (length < 0)
 			return null;
 
@@ -97,10 +98,9 @@ public class CipheredCommunicator extends Communicator {
 	}
 
 	public void decrypt(EncryptedMessage encryptedMessage, Consumer<byte[]> onDecrypt) {
-		if (encryptedMessage == null) {
-			Logger.log("NULL EncryptedMessage");
+		if (encryptedMessage == null)
 			return;
-		}
+
 		Main.getInstance().getTasker().run(taskOwner, () -> {
 			try {
 				byte[] simmetricKeyBytes = sessionCipher.decode(encryptedMessage.getEncryptedSimmetricKeyBytes());
@@ -148,8 +148,8 @@ public class CipheredCommunicator extends Communicator {
 		}
 
 		public void cancel() {
-			queue.clear();
 			write.set(false);
+			queue.clear();
 		}
 	}
 

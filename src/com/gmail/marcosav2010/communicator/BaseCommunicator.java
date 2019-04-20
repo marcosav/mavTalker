@@ -36,7 +36,7 @@ public class BaseCommunicator extends Communicator {
 	public void close() throws IOException {
 		if (getIn() != null)
 			getIn().close();
-
+		
 		if (getOut() != null)
 			getOut().close();
 	}

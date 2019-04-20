@@ -4,14 +4,16 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import com.gmail.marcosav2010.common.Utils;
-import com.gmail.marcosav2010.logger.Logger;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.peer.Peer;
 
@@ -22,7 +24,9 @@ import com.gmail.marcosav2010.peer.Peer;
  */
 public class ConnectionManager {
 
-	private static int UUID_BYTES = Long.BYTES * 2;
+	private static final int UUID_BYTES = Long.BYTES * 2;
+
+	private static final long UUID_TIMEOUT = 10L;
 
 	private Peer peer;
 	private Map<UUID, Connection> connections;
@@ -32,7 +36,8 @@ public class ConnectionManager {
 	public ConnectionManager(Peer peer) {
 		this.peer = peer;
 		connectionIdentificador = new ConnectionIdentificator();
-		connections = Collections.synchronizedMap(new HashMap<>());
+		// connections = Collections.synchronizedMap(new HashMap<>());
+		connections = new ConcurrentHashMap<>();
 	}
 
 	public ConnectionIdentificator getIdentificator() {
@@ -51,6 +56,10 @@ public class ConnectionManager {
 
 	public Set<Connection> getConnections() {
 		return Collections.unmodifiableSet(new HashSet<>(connections.values()));
+	}
+	
+	public Set<Map.Entry<UUID, Connection>> getConnectionUUIDs() {
+		return Collections.unmodifiableSet(connections.entrySet());
 	}
 
 	public Connection registerConnection(Connection con) {
@@ -80,18 +89,27 @@ public class ConnectionManager {
 
 	public void manageSocketConnection(Socket remoteSocket) throws IOException {
 		log("Accepted " + remoteSocket.getRemoteSocketAddress().toString());
-		log("Reading temporary remote connection UUID...", VerboseLevel.MEDIUM);
+		log("Reading temporary remote connection UUID, timeout set to " + UUID_TIMEOUT + "s...", VerboseLevel.MEDIUM);
 
-		UUID uuid = readUUID(remoteSocket);
+		UUID uuid;
+		try {
+			uuid = readUUID(remoteSocket);
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			log("Remote peer didn't send UUID at time, closing remote socket...");
+			remoteSocket.close();
+			return;
+		}
 
 		log("Finding and registering remote connection from temporary UUID...", VerboseLevel.MEDIUM);
 		registerConnection(new Connection(peer, uuid));
 		getConnection(uuid).connect(remoteSocket);
 	}
 
-	private UUID readUUID(Socket remoteSocket) throws IOException {
+	private UUID readUUID(Socket remoteSocket) throws InterruptedException, ExecutionException, TimeoutException {
 		byte[] b = new byte[UUID_BYTES];
-		remoteSocket.getInputStream().read(b, 0, UUID_BYTES);
+
+		peer.getExecutorService().submit(() -> remoteSocket.getInputStream().read(b, 0, UUID_BYTES)).get(UUID_TIMEOUT, TimeUnit.SECONDS);
+
 		return Utils.getUUIDFromBytes(b);
 	}
 
@@ -102,14 +120,11 @@ public class ConnectionManager {
 		log("Closing and removing client connections...", VerboseLevel.LOW);
 
 		var iterator = connections.entrySet().iterator();
-		while (iterator.hasNext())
-			try {
-				Connection c = iterator.next().getValue();
-				iterator.remove();
-				c.disconnect(silent);
-			} catch (IOException e) {
-				Logger.log(e);
-			}
+		while (iterator.hasNext()) {
+			Connection c = iterator.next().getValue();
+			iterator.remove();
+			c.disconnect(silent);
+		}
 
 		log("Connections closed and removed successfully.", VerboseLevel.LOW);
 	}

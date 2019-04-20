@@ -190,11 +190,7 @@ public class CommandManager {
 				}
 			}
 
-			try {
-				connection.disconnect(false);
-			} catch (IOException e) {
-				Logger.log(e);
-			}
+			connection.disconnect(false);
 		}
 	}
 

@@ -112,21 +112,16 @@ public class Connection extends NetworkConnection {
 				try {
 					read = cipheredCommunicator.read();
 
-					cipheredCommunicator.decrypt(read, (bytes) -> onRead(bytes));
+					cipheredCommunicator.decrypt(read, bytes -> onRead(bytes));
 
 				} catch (IOException e) {
-					try {
-						if (!connected.get())
-							return;
-						log("Connection lost unexpectedly: " + e.getMessage());
-						Logger.log(e);
-						disconnect(true);
+					if (!connected.get())
 						return;
+					log("Connection lost unexpectedly: " + e.getMessage());
+					Logger.log(e);
+					disconnect(true);
+					return;
 
-					} catch (IOException e1) {
-						Main.handleException(e1, peer.getName());
-						continue;
-					}
 				} catch (Exception e) {
 					Main.handleException(e, peer.getName());
 					continue;
@@ -326,7 +321,7 @@ public class Connection extends NetworkConnection {
 		disconnect(true);
 	}
 
-	public void disconnect(boolean silent) throws IOException {
+	public void disconnect(boolean silent) {
 		if (!isConnected())
 			return;
 
@@ -343,7 +338,11 @@ public class Connection extends NetworkConnection {
 
 		if (!silent) {
 			log("Sending disconnect message to remote peer...", VerboseLevel.HIGH);
-			messager.sendStandardPacket(new PacketShutdown());
+			try {
+				messager.sendStandardPacket(new PacketShutdown());
+			} catch (PacketWriteException e) {
+				log("Could not send disconnect message: " + e.getMessage(), VerboseLevel.HIGH);
+			}
 		}
 
 		log("Stopping communicator pool and closing I/O streams...", VerboseLevel.MEDIUM);
@@ -351,7 +350,10 @@ public class Connection extends NetworkConnection {
 
 		if (hostSocket != null) {
 			log("Closing host socket...", VerboseLevel.MEDIUM);
-			hostSocket.close();
+			try {
+				hostSocket.close();
+			} catch (IOException e) {
+			}
 		}
 
 		peer.getConnectionManager().removeConnection(getUUID());

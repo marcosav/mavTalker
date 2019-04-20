@@ -9,10 +9,10 @@ import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -50,7 +50,7 @@ public class FileTransferHandler {
 	public static final short BLOCK_LIMIT = (short) (MAX_FILE_SIZE / PacketFileSend.MAX_BLOCK_SIZE);
 
 	public static final int MIN_BLOCK_SIZE = Short.MAX_VALUE * 4; // 128 KB
-	public static final int MAX_THREADS = 4;
+	public static final int MAX_TASKS = Runtime.getRuntime().availableProcessors() / 2 + 1;
 
 	private Connection connection;
 
@@ -64,10 +64,15 @@ public class FileTransferHandler {
 	public FileTransferHandler(Connection connection) {
 		this.connection = connection;
 
-		pendingFileRequests = Collections.synchronizedMap(new HashMap<>());
+		/*pendingFileRequests = Collections.synchronizedMap(new HashMap<>());
 		pendingForAcceptFiles = Collections.synchronizedMap(new HashMap<>());
 		pendingReceiveFiles = Collections.synchronizedMap(new HashMap<>());
-		downloading = Collections.synchronizedMap(new HashMap<>());
+		downloading = Collections.synchronizedMap(new HashMap<>());*/
+		
+		pendingFileRequests = new ConcurrentHashMap<>();
+		pendingForAcceptFiles = new ConcurrentHashMap<>();
+		pendingReceiveFiles = new ConcurrentHashMap<>();
+		downloading = new ConcurrentHashMap<>();
 
 		pendingTasks = new HashMap<>();
 	}
@@ -187,20 +192,20 @@ public class FileTransferHandler {
 			return FileSendResult.FILE_EXCEPTION;
 		}
 
-		int threads = blocks < MAX_THREADS ? blocks : MAX_THREADS;
-		int blocksPerThread = (int) Math.ceil((double) blocks / threads);
+		int tasks = blocks < MAX_TASKS ? blocks : MAX_TASKS;
+		int blocksPerThread = (int) Math.ceil((double) blocks / tasks);
 
 		log("Computing File #" + id + " \"" + info.getFileName() + "\" send, splitting up in " + blocks + " block(s) [" + Utils.formatSize(blockSize)
-				+ "/block], using " + threads + " thread(s) [" + blocksPerThread + " block(s)/thread] and hashing with " + HASH_ALGORITHM + "...",
+				+ "/block], using " + tasks + " tasks(s) [" + blocksPerThread + " block(s)/task] and hashing with " + HASH_ALGORITHM + "...",
 				VerboseLevel.HIGH);
 
 		AtomicReference<FileSendResult> exception = new AtomicReference<>();
-		ExecutorService execServ = Executors.newFixedThreadPool(threads);
+		ExecutorService execServ = Executors.newFixedThreadPool(tasks);
 
 		long t1 = System.currentTimeMillis();
 
 		try (FileChannel channel = FileChannel.open(info.getPath(), StandardOpenOption.READ)) {
-			for (int t = 0; t < threads; t++) {
+			for (int t = 0; t < tasks; t++) {
 				int startBlock = t * blocksPerThread;
 				int endBlock = Math.min(startBlock + blocksPerThread, blocks);
 
@@ -225,7 +230,9 @@ public class FileTransferHandler {
 		if (r != null)
 			return r;
 
-		log("File #" + id + " \"" + info.getFileName() + "\" has been sent successfully (" + (t2 - t1) + "ms).");
+		long elapsed = t2 - t1;
+		long speed = fileBytes / elapsed * 1000;
+		log("File #" + id + " \"" + info.getFileName() + "\" has been sent successfully (" + elapsed + "ms | " + Utils.formatSize(speed) + "/s).");
 
 		return FileSendResult.SUCCESS;
 	}

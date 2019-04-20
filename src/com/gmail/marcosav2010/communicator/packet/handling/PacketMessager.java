@@ -61,7 +61,6 @@ public class PacketMessager {
 		} else if (sp instanceof PacketIdentify) {
 			PacketIdentify pi = (PacketIdentify) sp;
 
-			log("Received identification from peer \"" + pi.getName() + "\".", VerboseLevel.HIGH);
 			connection.getIdentificationController().identifyConnection(pi);
 
 		} else if (sp instanceof PacketShutdown) {

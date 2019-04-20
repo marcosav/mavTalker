@@ -7,14 +7,15 @@ public class Logger {
 
 	private static Object lock = new Object();
 
-	public static void log(String str) {
-		log(str, DEFAULT_LEVEL);
+	public static void log(Object o) {
+		log(o, DEFAULT_LEVEL);
 	}
 
-	public static void log(String str, VerboseLevel level) {
+	public static void log(Object o, VerboseLevel level) {
 		if (level.ordinal() <= VERBOSE_LEVEL.ordinal())
 			synchronized (lock) {
-				System.out.println(str);
+				//System.out.printf("[%d] %s\n", System.currentTimeMillis(), o);
+				System.out.printf("%s\n", o);
 			}
 	}
 
