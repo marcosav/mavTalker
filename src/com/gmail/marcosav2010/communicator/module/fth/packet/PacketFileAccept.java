@@ -1,4 +1,4 @@
-package com.gmail.marcosav2010.communicator.packet.packets;
+package com.gmail.marcosav2010.communicator.module.fth.packet;
 
 import java.io.IOException;
 
@@ -6,28 +6,28 @@ import com.gmail.marcosav2010.communicator.packet.Packet;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketDecoder;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketEncoder;
 
-public class PacketMessage extends Packet {
+public class PacketFileAccept extends Packet {
     
-    private String message;
+    private int fileId;
     
-    public PacketMessage() {
+    public PacketFileAccept() {
 	}
     
-    public PacketMessage(String message) {
-        this.message = message;
+    public PacketFileAccept(int fileId) {
+        this.fileId = fileId;
     }
     
-    public String getMessage() {
-        return message;
+    public int getFileId() {
+    	return fileId;
     }
     
     @Override
     protected void encodeContent(PacketEncoder out) throws IOException {
-    	out.write(message);
+    	out.write(fileId);
     }
     
     @Override
     protected void decodeContent(PacketDecoder in) throws IOException {
-    	message = in.readString();
+    	fileId = in.readInt();
     }
 }

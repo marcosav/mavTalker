@@ -22,7 +22,10 @@ public class ExecutedCommand extends CommandBase {
     }
     
     public void tryExecute() {
-        Main.getInstance().getCommandManager().getCommands().stream().filter(c -> c.isCommand(getLabel())).findFirst()
-                .orElseThrow(() -> new CommandNotFoundException("Command not found.")).execute(args, length);
+        var res = Main.getInstance().getCommandManager().fetch(getLabel());
+        if (res == null)
+        	throw new CommandNotFoundException("Command not found.");
+
+        res.execute(args, length);
     }
 }

@@ -1,9 +1,9 @@
-package com.gmail.marcosav2010.communicator.packet.packets;
+package com.gmail.marcosav2010.communicator.module.fth.packet;
 
 import java.io.IOException;
 
+import com.gmail.marcosav2010.communicator.module.fth.FileTransferHandler;
 import com.gmail.marcosav2010.communicator.packet.Packet;
-import com.gmail.marcosav2010.communicator.packet.handling.listener.file.FileTransferHandler;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketDecoder;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketEncoder;
 

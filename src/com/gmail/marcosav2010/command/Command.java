@@ -1,6 +1,6 @@
 package com.gmail.marcosav2010.command;
 
-import java.util.stream.Stream;
+import java.util.Objects;
 
 public abstract class Command extends CommandBase {
     
@@ -37,10 +37,22 @@ public abstract class Command extends CommandBase {
         return usage;
     }
     
-    public boolean isCommand(String label) {
-        return label.equalsIgnoreCase(getLabel())
-                || (aliases.length > 0 && Stream.of(aliases).anyMatch(l -> l.equalsIgnoreCase(label)));
+    public abstract void execute(String[] arg, int length);
+    
+    @Override
+    public boolean equals(Object o) {
+    	if (o == null)
+    		return false;
+    	
+		if (o instanceof Command) {
+			Command c = (Command) o;
+			return c.getLabel().equalsIgnoreCase(getLabel());
+			
+		} else return false;
     }
     
-    public abstract void execute(String[] arg, int length);
+    @Override
+    public int hashCode() {
+    	return Objects.hash(getLabel());
+    }
 }

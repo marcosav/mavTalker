@@ -36,7 +36,6 @@ public class ConnectionManager {
 	public ConnectionManager(Peer peer) {
 		this.peer = peer;
 		connectionIdentificador = new ConnectionIdentificator();
-		// connections = Collections.synchronizedMap(new HashMap<>());
 		connections = new ConcurrentHashMap<>();
 	}
 

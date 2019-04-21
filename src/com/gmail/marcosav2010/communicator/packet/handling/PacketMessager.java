@@ -8,7 +8,6 @@ import com.gmail.marcosav2010.cipher.CipheredCommunicator;
 import com.gmail.marcosav2010.communicator.packet.AbstractPacket;
 import com.gmail.marcosav2010.communicator.packet.Packet;
 import com.gmail.marcosav2010.communicator.packet.StandardPacket;
-import com.gmail.marcosav2010.communicator.packet.handling.listener.DefaultPacketListener;
 import com.gmail.marcosav2010.communicator.packet.handling.listener.PacketEventHandlerManager;
 import com.gmail.marcosav2010.communicator.packet.packets.PacketIdentify;
 import com.gmail.marcosav2010.communicator.packet.packets.PacketRespose;
@@ -93,7 +92,7 @@ public class PacketMessager {
 	public void setupEventHandler() {
 		log("Registering packet handlers...", VerboseLevel.MEDIUM);
 
-		eventHandlerManager.registerListeners(new DefaultPacketListener());
+		eventHandlerManager.registerListeners(connection.getModuleManager().getListeners());
 
 		log("Registered " + eventHandlerManager.getHandlerCount() + " handlers in " + eventHandlerManager.getListenerCount() + " listeners.", VerboseLevel.LOW);
 	}

@@ -26,7 +26,6 @@ public class PeerManager {
 	public PeerManager() {
 		peersCreated = 0;
 		parentPeerThreadGroup = new ThreadGroup("parentPeerThreadGroup");
-		//peers = Collections.synchronizedMap(new HashMap<>());
 		peers = new ConcurrentHashMap<>();
 	}
 

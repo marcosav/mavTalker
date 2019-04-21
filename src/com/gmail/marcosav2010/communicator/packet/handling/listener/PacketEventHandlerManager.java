@@ -2,6 +2,7 @@ package com.gmail.marcosav2010.communicator.packet.handling.listener;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -39,8 +40,8 @@ public class PacketEventHandlerManager {
 		((Map<Method, T>) set).put(m, listener);
 	}
 
-	public void registerListeners(PacketListener... packetListeners) {
-		Stream.of(packetListeners).forEach(l -> {
+	public void registerListeners(Collection<PacketListener> packetListeners) {
+		packetListeners.forEach(l -> {
 			Stream.of(l.getClass().getMethods()).forEach(m -> {
 				if (m.isAnnotationPresent(PacketEventHandler.class) && m.getParameters().length == 2 && Packet.class.isAssignableFrom(m.getParameterTypes()[0])
 						&& ConnectedPeer.class.isAssignableFrom(m.getParameterTypes()[1])) {

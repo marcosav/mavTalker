@@ -17,10 +17,10 @@ import com.gmail.marcosav2010.cipher.EncryptedMessage;
 import com.gmail.marcosav2010.cipher.SessionCipher;
 import com.gmail.marcosav2010.common.Utils;
 import com.gmail.marcosav2010.communicator.BaseCommunicator;
+import com.gmail.marcosav2010.communicator.module.ModuleManager;
 import com.gmail.marcosav2010.communicator.packet.Packet;
 import com.gmail.marcosav2010.communicator.packet.handling.PacketAction;
 import com.gmail.marcosav2010.communicator.packet.handling.PacketMessager;
-import com.gmail.marcosav2010.communicator.packet.handling.listener.file.FileTransferHandler;
 import com.gmail.marcosav2010.communicator.packet.packets.PacketShutdown;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketReader;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
@@ -65,7 +65,7 @@ public class Connection extends NetworkConnection {
 
 	private PacketReader reader;
 	private PacketMessager messager;
-	private FileTransferHandler fileTrafficHandler;
+	private ModuleManager moduleManager;
 
 	public Connection(Peer peer) {
 		this.peer = peer;
@@ -241,6 +241,13 @@ public class Connection extends NetworkConnection {
 		reader = new PacketReader();
 		messager = new PacketMessager(this, cipheredCommunicator);
 		idController.setMessager(messager);
+		
+		log("Initializing connection modules...", VerboseLevel.LOW);
+		
+		moduleManager = new ModuleManager(this);
+		int nModules = moduleManager.initializeModules();
+		
+		log("Loaded " + nModules + " modules.", VerboseLevel.LOW);
 
 		log("Session ciphering done, communicator ciphered and packet messager set.", VerboseLevel.LOW);
 
@@ -250,7 +257,7 @@ public class Connection extends NetworkConnection {
 	}
 
 	public void onPairCompleted() {
-		fileTrafficHandler = new FileTransferHandler(this);
+		moduleManager.enable();
 	}
 
 	private void startAuthentication() throws IOException, GeneralSecurityException {
@@ -312,8 +319,8 @@ public class Connection extends NetworkConnection {
 		return idController;
 	}
 
-	public FileTransferHandler getFileTransferHandler() {
-		return fileTrafficHandler;
+	public ModuleManager getModuleManager() {
+		return moduleManager;
 	}
 
 	private void onException(Exception ex) throws IOException {
@@ -325,6 +332,9 @@ public class Connection extends NetworkConnection {
 		if (!isConnected())
 			return;
 
+		log("Disabling connection modules...", VerboseLevel.MEDIUM);
+		moduleManager.disable();
+		
 		log("Disconnecting from peer...", VerboseLevel.LOW);
 		connected.set(false);
 

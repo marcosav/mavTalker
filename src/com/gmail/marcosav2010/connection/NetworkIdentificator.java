@@ -19,7 +19,6 @@ public class NetworkIdentificator<T extends NetworkPeer> {
 	protected Map<UUID, T> peers;
 
 	public NetworkIdentificator() {
-		//peers = Collections.synchronizedMap(new HashMap<>());
 		peers = new ConcurrentHashMap<>();
 	}
 

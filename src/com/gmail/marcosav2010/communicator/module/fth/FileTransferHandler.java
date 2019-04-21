@@ -1,4 +1,4 @@
-package com.gmail.marcosav2010.communicator.packet.handling.listener.file;
+package com.gmail.marcosav2010.communicator.module.fth;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,9 +19,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.gmail.marcosav2010.common.Utils;
-import com.gmail.marcosav2010.communicator.packet.packets.PacketFileAccept;
-import com.gmail.marcosav2010.communicator.packet.packets.PacketFileRequest;
-import com.gmail.marcosav2010.communicator.packet.packets.PacketFileSend;
+import com.gmail.marcosav2010.communicator.module.fth.packet.PacketFileAccept;
+import com.gmail.marcosav2010.communicator.module.fth.packet.PacketFileRequest;
+import com.gmail.marcosav2010.communicator.module.fth.packet.PacketFileSend;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
 import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.logger.Logger;
@@ -52,6 +52,7 @@ public class FileTransferHandler {
 	public static final int MIN_BLOCK_SIZE = Short.MAX_VALUE * 4; // 128 KB
 	public static final int MAX_TASKS = Runtime.getRuntime().availableProcessors() / 2 + 1;
 
+	private FTModule module;
 	private Connection connection;
 
 	private Map<Integer, FileReceiveInfo> pendingFileRequests;
@@ -61,13 +62,9 @@ public class FileTransferHandler {
 
 	private Map<Integer, Task> pendingTasks;
 
-	public FileTransferHandler(Connection connection) {
+	public FileTransferHandler(FTModule module, Connection connection) {
+		this.module = module;
 		this.connection = connection;
-
-		/*pendingFileRequests = Collections.synchronizedMap(new HashMap<>());
-		pendingForAcceptFiles = Collections.synchronizedMap(new HashMap<>());
-		pendingReceiveFiles = Collections.synchronizedMap(new HashMap<>());
-		downloading = Collections.synchronizedMap(new HashMap<>());*/
 		
 		pendingFileRequests = new ConcurrentHashMap<>();
 		pendingForAcceptFiles = new ConcurrentHashMap<>();
@@ -401,10 +398,10 @@ public class FileTransferHandler {
 	}
 
 	public void log(String str) {
-		connection.log("[FTH] " + str);
+		module.log(str);
 	}
 
 	public void log(String str, VerboseLevel level) {
-		connection.log("[FTH] " + str, level);
+		module.log(str, level);
 	}
 }

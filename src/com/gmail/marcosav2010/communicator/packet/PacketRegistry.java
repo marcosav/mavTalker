@@ -13,19 +13,16 @@ public class PacketRegistry {
 	static {
 		packetsById = new HashMap<Byte, Class<? extends AbstractPacket>>();
 		packetsByClass = new HashMap<Class<? extends AbstractPacket>, Byte>();
-
-		register((byte) 1, PacketFileAccept.class);
-		register((byte) 2, PacketFileRequest.class);
-		register((byte) 3, PacketFileSend.class);
-		register((byte) 4, PacketFileSendFailed.class);
-		register((byte) 5, PacketMessage.class);
 		
-		register((byte) 6, PacketIdentify.class);
-		register((byte) 7, PacketRespose.class);
-		register((byte) 8, PacketShutdown.class);
+		register((byte) 0, PacketIdentify.class);
+		register((byte) 1, PacketRespose.class);
+		register((byte) 2, PacketShutdown.class);
 	}
 
-	private static void register(byte id, Class<? extends AbstractPacket> packet) {
+	public static void register(byte id, Class<? extends AbstractPacket> packet) {
+		if (packetsById.containsKey(id) || packetsByClass.containsKey(packet))
+			throw new IllegalArgumentException("Duplicated id or packet type");
+		
 		packetsById.put(id, packet);
 		packetsByClass.put(packet, id);
 	}

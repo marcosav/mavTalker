@@ -1,4 +1,4 @@
-package com.gmail.marcosav2010.communicator.packet.handling.listener.file;
+package com.gmail.marcosav2010.communicator.module.fth;
 
 public class FileReceiveInfo {
 

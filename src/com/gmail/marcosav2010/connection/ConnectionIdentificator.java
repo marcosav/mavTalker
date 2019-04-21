@@ -17,7 +17,6 @@ public class ConnectionIdentificator extends NetworkIdentificator<ConnectedPeer>
 	private Map<String, ConnectedPeer> namePeer;
 
 	public ConnectionIdentificator() {
-		//namePeer = Collections.synchronizedMap(new HashMap<>());
 		namePeer = new ConcurrentHashMap<>();
 	}
 
