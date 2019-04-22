@@ -37,7 +37,7 @@ public abstract class Module implements Comparable<Module> {
 
 	protected static void registerPacket(int id, Class<? extends Packet> packet) {
 		if (id > Byte.MAX_VALUE)
-			throw new IllegalArgumentException("Id must be byte");
+			throw new IllegalArgumentException("ID must be byte");
 		
 		PacketRegistry.register((byte) id, packet);
 	}
@@ -49,11 +49,11 @@ public abstract class Module implements Comparable<Module> {
 	}
 
 	public void log(String str) {
-		manager.log("[" + name + "] " + str);
+		manager.clog("[" + name + "] " + str);
 	}
 
 	public void log(String str, VerboseLevel level) {
-		manager.log("[" + name + "] " + str, level);
+		manager.clog("[" + name + "] " + str, level);
 	}
 	
 	@Override

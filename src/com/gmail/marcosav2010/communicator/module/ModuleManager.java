@@ -32,6 +32,9 @@ public class ModuleManager {
 		loadModules();
 	}
 	
+	private static final String LOGGER_PREFIX = "[MM] ";
+	private static final String STATIC_LOGGER_PREFIX = "[Static MM] ";
+	
 	private Map<String, Module> names;
 	private PriorityQueue<Module> modules;
 	private List<PacketListener> listeners;
@@ -46,20 +49,25 @@ public class ModuleManager {
 		listeners = new LinkedList<>();
 	}
 	
-	public int initializeModules() {
+	public void initializeModules() {
 		loadedModules.forEach(m -> {
 			try {
 				Module module = m.getConstructor(ModuleManager.class).newInstance(this);
 				
 				names.put(module.getName(), module);
 				modules.add(module);
+				
+				log("Successfully loaded module " + module.getName() + ".", VerboseLevel.HIGH);
+				
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
 					| SecurityException e) {
+				
+				log("There was an error while initializing module \"" + m.getName() + "\".");
 				Logger.log(e);
 			}
 		});
 		
-		return modules.size();
+		log("Loaded " + modules.size() + " modules.", VerboseLevel.LOW);
 	}
 
 	public void enable() {
@@ -96,11 +104,19 @@ public class ModuleManager {
 		return listeners;
 	}
 
-	void log(String str) {
+	private void log(String str) {
+		clog(LOGGER_PREFIX + str);
+	}
+
+	private void log(String str, VerboseLevel level) {
+		clog(LOGGER_PREFIX + str, level);
+	}
+	
+	void clog(String str) {
 		connection.log(str);
 	}
 
-	void log(String str, VerboseLevel level) {
+	void clog(String str, VerboseLevel level) {
 		connection.log(str, level);
 	}
 
@@ -113,15 +129,24 @@ public class ModuleManager {
 			if (Modifier.isAbstract(clazz.getModifiers()))
 				continue;
 			
-			var c = (Class<? extends Module>) clazz;
-			
-			LoadModule m = (LoadModule) clazz.getAnnotation(LoadModule.class);
-			
-			loadedModules.add(c);
-			
-			Class<? extends CommandRegistry> registryClass = m.registry();
-
-			addCommands(registryClass);
+			try {
+				var c = (Class<? extends Module>) clazz;
+				
+				LoadModule m = (LoadModule) clazz.getAnnotation(LoadModule.class);
+				
+				loadedModules.add(c);
+				
+				Class<? extends CommandRegistry> registryClass = m.registry();
+	
+				addCommands(registryClass);
+				
+				Logger.log(STATIC_LOGGER_PREFIX + " Found module in class \"" + c.getName() + "\".", VerboseLevel.HIGH);
+				
+			} catch (Exception e) {
+				
+				Logger.log(STATIC_LOGGER_PREFIX + " There was an error while loading class \"" + clazz.getName() + "\"");
+				Logger.log(e);
+			}
 		}
 	}
 }

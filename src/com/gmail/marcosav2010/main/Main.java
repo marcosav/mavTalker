@@ -23,6 +23,8 @@ public class Main {
 	}
 
 	public void main(String[] args) {
+		Logger.log("\nStarting application...");
+		
 		try {
 			if (args.length == 2)
 				run(args[0], Integer.parseInt(args[1]));
@@ -58,6 +60,7 @@ public class Main {
 		Logger.log("Exiting application...");
 		if (getPeerManager() != null)
 			getPeerManager().shutdown();
+		
 		Logger.log("Bye");
 	}
 

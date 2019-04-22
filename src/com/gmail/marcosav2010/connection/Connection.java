@@ -65,6 +65,7 @@ public class Connection extends NetworkConnection {
 
 	private PacketReader reader;
 	private PacketMessager messager;
+	
 	private ModuleManager moduleManager;
 
 	public Connection(Peer peer) {
@@ -242,12 +243,10 @@ public class Connection extends NetworkConnection {
 		messager = new PacketMessager(this, cipheredCommunicator);
 		idController.setMessager(messager);
 		
-		log("Initializing connection modules...", VerboseLevel.LOW);
+		log("Initializing connection module manager and loading modules...", VerboseLevel.LOW);
 		
 		moduleManager = new ModuleManager(this);
-		int nModules = moduleManager.initializeModules();
-		
-		log("Loaded " + nModules + " modules.", VerboseLevel.LOW);
+		moduleManager.initializeModules();
 
 		log("Session ciphering done, communicator ciphered and packet messager set.", VerboseLevel.LOW);
 

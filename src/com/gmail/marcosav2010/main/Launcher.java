@@ -5,10 +5,13 @@ import java.security.GeneralSecurityException;
 import java.util.Scanner;
 
 import com.gmail.marcosav2010.command.CommandHandler;
+import com.gmail.marcosav2010.logger.Logger;
 
 public class Launcher {
 
 	public static void main(String[] args) throws NumberFormatException, IOException, GeneralSecurityException {
+		Logger.log("Loading...");
+		
 		addSignalHook();
 		
 		Main main = new Main();
