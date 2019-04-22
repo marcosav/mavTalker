@@ -250,12 +250,12 @@ public class Connection extends NetworkConnection {
 
 		log("Session ciphering done, communicator ciphered and packet messager set.", VerboseLevel.LOW);
 
-		messager.setupEventHandler();
-
 		idController.startIdentification();
 	}
 
 	public void onPairCompleted() {
+		messager.setupEventHandler();
+		
 		moduleManager.enable();
 	}
 

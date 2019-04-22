@@ -1,5 +1,9 @@
 package com.gmail.marcosav2010.communicator.module;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Stream;
+
 import com.gmail.marcosav2010.communicator.packet.Packet;
 import com.gmail.marcosav2010.communicator.packet.PacketRegistry;
 import com.gmail.marcosav2010.communicator.packet.handling.listener.PacketListener;
@@ -10,17 +14,18 @@ public abstract class Module implements Comparable<Module> {
 
 	private final String name;
 	private final int priority;
+	private List<PacketListener> listeners;
 
 	private ModuleManager manager;
 
-	public Module(ModuleManager manager, String name) {
-		this(manager, name, 0);
+	public Module(String name) {
+		this(name, 0);
 	}
 
-	public Module(ModuleManager manager, String name, int priority) {
-		this.manager = manager;
+	public Module(String name, int priority) {
 		this.name = name;
 		this.priority = priority;
+		listeners = new LinkedList<>();
 	}
 
 	public String getName() {
@@ -31,8 +36,12 @@ public abstract class Module implements Comparable<Module> {
 		return priority;
 	}
 
-	protected void registerListeners(PacketListener... listeners) {
+	void registerListeners() {
 		manager.registerListeners(listeners);
+	}
+	
+	protected void registerListeners(PacketListener... l) {
+		Stream.of(l).forEach(listeners::add);
 	}
 
 	protected static void registerPacket(int id, Class<? extends Packet> packet) {

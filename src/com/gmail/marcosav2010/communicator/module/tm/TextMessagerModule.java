@@ -2,7 +2,6 @@ package com.gmail.marcosav2010.communicator.module.tm;
 
 import com.gmail.marcosav2010.communicator.module.LoadModule;
 import com.gmail.marcosav2010.communicator.module.Module;
-import com.gmail.marcosav2010.communicator.module.ModuleManager;
 import com.gmail.marcosav2010.communicator.packet.handling.listener.PacketEventHandler;
 import com.gmail.marcosav2010.communicator.packet.handling.listener.PacketListener;
 import com.gmail.marcosav2010.logger.Logger;
@@ -17,8 +16,8 @@ public class TextMessagerModule extends Module implements PacketListener {
 		registerPacket(7, PacketMessage.class);
 	}
 	
-	public TextMessagerModule(ModuleManager manager) {
-		super(manager, "TextMessager");
+	public TextMessagerModule() {
+		super("TextMessager");
 		
 		registerListeners(this);
 	}

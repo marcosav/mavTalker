@@ -10,6 +10,9 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import com.gmail.marcosav2010.communicator.packet.Packet;
+import com.gmail.marcosav2010.connection.Connection;
+import com.gmail.marcosav2010.logger.Logger;
+import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.peer.ConnectedPeer;
 
 /**
@@ -20,10 +23,14 @@ import com.gmail.marcosav2010.peer.ConnectedPeer;
  */
 public class PacketEventHandlerManager {
 
+	private static final String LOGGER_PREFIX = "[PEH] ";
+
+	private final Connection connection;
 	private final Map<Method, ? extends PacketListener> methodListener;
 	private final Map<Class<? extends Packet>, Set<Method>> packetMethods;
 
-	public PacketEventHandlerManager() {
+	public PacketEventHandlerManager(Connection connection) {
+		this.connection = connection;
 		methodListener = new HashMap<>();
 		packetMethods = new HashMap<>();
 	}
@@ -58,7 +65,7 @@ public class PacketEventHandlerManager {
 			});
 		});
 	}
-	
+
 	public void unregisterEvents() {
 		packetMethods.clear();
 		methodListener.clear();
@@ -68,13 +75,23 @@ public class PacketEventHandlerManager {
 		Set<Method> pClass = packetMethods.get(packet.getClass());
 		if (pClass == null)
 			return;
-		
+
 		pClass.forEach(me -> {
 			try {
 				me.invoke(methodListener.get(me), packet, peer);
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-				e.printStackTrace();
+				log("There was an error while handling event:\n\tMethod: " + me.getName() + "\n\tClass: " + me.getDeclaringClass().getName() + "\n\tPacket: " + packet.getClass().getSimpleName()
+						+ "\n\tStacktrace: ");
+				Logger.log(e);
 			}
 		});
+	}
+
+	public void log(String str) {
+		connection.log(LOGGER_PREFIX + str);
+	}
+
+	public void log(String str, VerboseLevel level) {
+		connection.log(LOGGER_PREFIX + str, level);
 	}
 }

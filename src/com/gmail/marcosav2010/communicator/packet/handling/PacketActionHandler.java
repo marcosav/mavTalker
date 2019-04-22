@@ -4,6 +4,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import com.gmail.marcosav2010.communicator.packet.Packet;
+import com.gmail.marcosav2010.connection.Connection;
+import com.gmail.marcosav2010.logger.Logger;
+import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.tasker.TaskOwner;
 
@@ -16,10 +20,13 @@ import com.gmail.marcosav2010.tasker.TaskOwner;
 public class PacketActionHandler {
 
 	private static final long MAX_TIMEOUT = 10L;
+	private static final String LOGGER_PREFIX = "[PacketActionHandler] ";
 
+	private final Connection connection;
 	private Map<Long, PacketAction> pendingActions;
 
-	public PacketActionHandler() {
+	public PacketActionHandler(Connection c) {
+		this.connection = c;
 		pendingActions = new ConcurrentHashMap<>();
 	}
 
@@ -32,23 +39,35 @@ public class PacketActionHandler {
 			return;
 		
 		PacketAction action = pendingActions.remove(id);
+		
 		try {
 			action.onReceive();
 		} catch (Exception e) {
-			Main.handleException(e, "PacketActionHandler");
+			log("There was an error while handling action:\n\tID: " + id + "\n\tPacket: " + action.getType().getName() + "\n\tStacktrace: ");
+			Logger.log(e);
 		}
 	}
 
-	public void handleSend(TaskOwner owner, long id, PacketAction action, long expireTimeout, TimeUnit timeUnit) {
+	public void handleSend(TaskOwner owner, long id, Packet packet, PacketAction action, long expireTimeout, TimeUnit timeUnit) {
+		action.setType(packet.getClass());
 		pendingActions.put(id, action);
 		if (timeUnit == null || expireTimeout < 0) {
 			expireTimeout = MAX_TIMEOUT;
 			timeUnit = TimeUnit.SECONDS;
 		}
+		
 		Main.getInstance().getTasker().schedule(owner, () -> onExpire(id), expireTimeout, timeUnit);
 	}
 
 	public void onExpire(long id) {
 		pendingActions.remove(id);
+	}
+	
+	public void log(String str) {
+		connection.log(LOGGER_PREFIX + str);
+	}
+
+	public void log(String str, VerboseLevel level) {
+		connection.log(LOGGER_PREFIX + str, level);
 	}
 }

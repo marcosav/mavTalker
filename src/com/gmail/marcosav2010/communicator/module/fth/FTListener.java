@@ -16,16 +16,20 @@ import com.gmail.marcosav2010.peer.ConnectedPeer;
 
 public class FTListener implements PacketListener {
 
+	private FileTransferHandler fth;
+	
+	public void setFTH(FileTransferHandler fth) {
+		this.fth = fth;
+	}
+	
 	@PacketEventHandler
 	public void onFileRequest(PacketFileRequest pf, ConnectedPeer peer) {
-		FileTransferHandler fth = peer.getConnection().getModuleManager().getFTH();
 		fth.log("File request: #" + pf.getID() + " \"" + pf.getName() + "\" (" + Utils.formatSize(pf.getSize()) + "), accept download? Use download command");
 		fth.handleRequest(pf);
 	}
 
 	@PacketEventHandler
 	public void onFileReceive(PacketFileSend p, ConnectedPeer peer) {
-		FileTransferHandler fth = peer.getConnection().getModuleManager().getFTH();
 		FileDownloadResult result = fth.handleReceiveFile(p);
 		if (result != FileDownloadResult.SUCCESS)
 			fth.log("File #" + p.getFileId() + " could not be downloaded: " + result.toString());
@@ -34,8 +38,8 @@ public class FTListener implements PacketListener {
 	@PacketEventHandler
 	public void onFileAcceptRespose(PacketFileAccept p, ConnectedPeer peer) {
 		Connection connection = peer.getConnection();
-		FileTransferHandler fth = connection.getModuleManager().getFTH();
 		FileSendResult result = fth.handleAcceptRespose(p);
+		
 		if (result != FileSendResult.SUCCESS) {
 			fth.log("File #" + p.getFileId() + " could not be sent because: " + result.toString());
 			if (connection.isConnected())
@@ -50,7 +54,6 @@ public class FTListener implements PacketListener {
 
 	@PacketEventHandler
 	public void onFileRemoteSendFailed(PacketFileSendFailed p, ConnectedPeer peer) {
-		FileTransferHandler fth = peer.getConnection().getModuleManager().getFTH();
 		FileSendResult result = p.getCause();
 		fth.log("File #" + p.getFileId() + " could not be sent because: " + result.toString());
 	}

@@ -38,7 +38,7 @@ import com.gmail.marcosav2010.tasker.Task;
 public class FileTransferHandler {
 
 	public static final String DOWNLOAD_FOLDER = "FilesTransferred/";
-
+	
 	public static final short HASH_BITS = 256;
 	public static final byte HASH_SIZE = 256 / Byte.SIZE;
 	private static final String HASH_ALGORITHM = "SHA-" + HASH_BITS;

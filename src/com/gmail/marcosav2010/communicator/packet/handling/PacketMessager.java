@@ -25,6 +25,8 @@ import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
  */
 public class PacketMessager {
 
+	private static final String LOGGER_PREFIX = "[PM] ";
+	
 	private AtomicInteger lastPacket;
 
 	private final Connection connection;
@@ -38,8 +40,8 @@ public class PacketMessager {
 		this.communicator = communicator;
 		this.connection = connection;
 		writter = new PacketWritter();
-		eventHandlerManager = new PacketEventHandlerManager();
-		actionHandler = new PacketActionHandler();
+		eventHandlerManager = new PacketEventHandlerManager(connection);
+		actionHandler = new PacketActionHandler(connection);
 		lastPacket = new AtomicInteger();
 	}
 
@@ -71,6 +73,7 @@ public class PacketMessager {
 		int id = packet.getID();
 		log("Received packet #" + id + ".", VerboseLevel.HIGH);
 		eventHandlerManager.handlePacket(packet, connection.getConnectedPeer());
+		
 		if (packet.shouldSendRespose())
 			sendStandardPacket(new PacketRespose(id));
 	}
@@ -79,8 +82,9 @@ public class PacketMessager {
 		int id = lastPacket.incrementAndGet();
 		log("Sending packet #" + id + ".", VerboseLevel.HIGH);
 		communicator.write(writter.write(packet.setID(id)));
+		
 		if (action != null)
-			actionHandler.handleSend(connection.getPeer(), id, action, timeout, timeUnit);
+			actionHandler.handleSend(connection.getPeer(), id, packet, action, timeout, timeUnit);
 
 		return lastPacket.get();
 	}
@@ -102,10 +106,10 @@ public class PacketMessager {
 	}
 
 	public void log(String str) {
-		connection.log("[PM] " + str);
+		connection.log(LOGGER_PREFIX + str);
 	}
 
 	public void log(String str, VerboseLevel level) {
-		connection.log("[PM] " + str, level);
+		connection.log(LOGGER_PREFIX + str, level);
 	}
 }

@@ -67,13 +67,13 @@ public class FTCommandRegistry extends CommandRegistry {
 	private static class DownloadCMD extends Command {
 
 		DownloadCMD() {
-			super("download", new String[] { "d", "dw" }, "<host peer> <remote peer> <file id> <yes/no>");
+			super("download", new String[] { "d", "dw" }, "<host peer> <remote peer> <file id> <yes/no> (empty = yes)");
 		}
 
 		@Override
 		public void execute(String[] arg, int args) {
-			if (args < 4) {
-				Logger.log("ERROR: Needed host and remote peer, file id and yes/no option.");
+			if (args < 3) {
+				Logger.log("ERROR: Needed host and remote peer, file id and yes/no option (yes by default).");
 				return;
 			}
 
@@ -114,9 +114,14 @@ public class FTCommandRegistry extends CommandRegistry {
 				return;
 			}
 			FileReceiveInfo info = fth.getRequest(id);
-
-			String o = arg[3].toLowerCase();
-			boolean yes = o.equals("yes") || o.equals("y");
+			
+			boolean yes = args < 4;
+			
+			if (!yes) {
+				String o = arg[3].toLowerCase();
+				yes |= o.equals("yes") || o.equals("y");
+			}
+			
 			if (yes) {
 				Logger.log("Accepted file #" + id + " (" + info.getFileName() + ") transfer request.");
 				fth.acceptRequest(id);

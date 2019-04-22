@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import org.atteo.classindex.ClassIndex;
 
@@ -52,7 +51,15 @@ public class ModuleManager {
 	public void initializeModules() {
 		loadedModules.forEach(m -> {
 			try {
-				Module module = m.getConstructor(ModuleManager.class).newInstance(this);
+				Module module = m.getConstructor().newInstance();
+				
+				var manager = m.getSuperclass().getDeclaredField("manager");
+				manager.setAccessible(true);
+				manager.set(module, this);
+				
+				module.registerListeners();
+				
+				manager.setAccessible(false);
 				
 				names.put(module.getName(), module);
 				modules.add(module);
@@ -60,7 +67,7 @@ public class ModuleManager {
 				log("Successfully loaded module " + module.getName() + ".", VerboseLevel.HIGH);
 				
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
-					| SecurityException e) {
+					| SecurityException | NoSuchFieldException e) {
 				
 				log("There was an error while initializing module \"" + m.getName() + "\".");
 				Logger.log(e);
@@ -86,8 +93,8 @@ public class ModuleManager {
 		return ((FTModule) get("FTH")).getFTH();
 	}
 
-	void registerListeners(PacketListener... l) {
-		Stream.of(l).forEach(listeners::add);
+	void registerListeners(Collection<PacketListener> l) {
+		listeners.addAll(l);
 	}
 
 	static void addCommands(Class<? extends CommandRegistry> cmds) {
@@ -140,11 +147,11 @@ public class ModuleManager {
 	
 				addCommands(registryClass);
 				
-				Logger.log(STATIC_LOGGER_PREFIX + " Found module in class \"" + c.getName() + "\".", VerboseLevel.HIGH);
+				Logger.log(STATIC_LOGGER_PREFIX + "Found module in class \"" + c.getName() + "\".", VerboseLevel.HIGH);
 				
 			} catch (Exception e) {
 				
-				Logger.log(STATIC_LOGGER_PREFIX + " There was an error while loading class \"" + clazz.getName() + "\"");
+				Logger.log(STATIC_LOGGER_PREFIX + "There was an error while loading class \"" + clazz.getName() + "\"");
 				Logger.log(e);
 			}
 		}
