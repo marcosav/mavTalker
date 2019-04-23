@@ -35,6 +35,10 @@ public class Logger {
 	public static void setVerboseLevel(VerboseLevel level) {
 		VERBOSE_LEVEL = level;
 	}
+	
+	public static void setVerboseLevel(String level) {
+		VERBOSE_LEVEL = VerboseLevel.valueOf(level);
+	}
 
 	public static VerboseLevel getVerboseLevel() {
 		return VERBOSE_LEVEL;

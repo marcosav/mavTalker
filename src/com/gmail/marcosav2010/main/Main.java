@@ -1,6 +1,7 @@
 package com.gmail.marcosav2010.main;
 
 import com.gmail.marcosav2010.command.CommandManager;
+import com.gmail.marcosav2010.config.GeneralConfiguration;
 import com.gmail.marcosav2010.logger.Logger;
 import com.gmail.marcosav2010.peer.Peer;
 import com.gmail.marcosav2010.peer.PeerManager;
@@ -13,17 +14,20 @@ public class Main {
 	private static Main mainInstance;
 
 	private final CommandManager commandManager;
+	private GeneralConfiguration generalConfig;
 	private PeerManager peerManager;
 	private Tasker tasker;
 
 	protected Main() {
+		generalConfig = new GeneralConfiguration();
+		Logger.setVerboseLevel(generalConfig.getVerboseLevel());
 		commandManager = new CommandManager();
 		peerManager = new PeerManager();
 		tasker = new Tasker();
 	}
 
 	public void main(String[] args) {
-		Logger.log("\nStarting application...");
+		Logger.log("\nStarting application, with verbose level set to " + Logger.getVerboseLevel() + "...");
 		
 		try {
 			if (args.length == 2)
