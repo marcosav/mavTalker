@@ -28,13 +28,9 @@ public class Main {
 
 	public void main(String[] args) {
 		Logger.log("\nStarting application, with verbose level set to " + Logger.getVerboseLevel() + "...");
-		
-		try {
-			if (args.length == 2)
-				run(args[0], Integer.parseInt(args[1]));
-		} catch (Exception ex) {
-			handleException(ex, "");
-		}
+
+		if (args.length == 2)
+			run(args[0], Integer.parseInt(args[1]));
 	}
 
 	private void run(String name, int port) {
@@ -59,20 +55,16 @@ public class Main {
 	public static void setInstance(Main instance) {
 		mainInstance = instance;
 	}
-	
+
 	public void shutdown() {
 		Logger.log("Exiting application...");
 		if (getPeerManager() != null)
 			getPeerManager().shutdown();
-		
+
 		Logger.log("Bye");
 	}
 
 	public static Main getInstance() {
 		return mainInstance;
-	}
-
-	public static void handleException(Throwable ex, String name) {
-		Logger.log(ex, name + ": There was a problem while running: " + ex.getMessage());
 	}
 }

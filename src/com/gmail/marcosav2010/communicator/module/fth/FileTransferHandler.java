@@ -154,7 +154,8 @@ public class FileTransferHandler {
 			}
 
 		} catch (Exception ex) {
-			Main.handleException(ex, "FileTransferHandler");
+			log("There was an exception writing the file #" + id + ".");
+			Logger.log(ex);
 			return FileDownloadResult.WRITE_EXCEPTION;
 		}
 

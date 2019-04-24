@@ -9,4 +9,8 @@ public class PacketWriteException extends IOException {
 	public PacketWriteException(Exception exception) {
         super(exception);
     }
+	
+	public PacketWriteException(String msg) {
+        super(msg);
+    }
 }

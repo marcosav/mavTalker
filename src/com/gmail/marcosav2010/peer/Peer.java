@@ -78,7 +78,7 @@ public class Peer extends KnownPeer implements TaskOwner {
 			log("Server created and finding a someone to connect...");
 
 		} catch (Exception ex) {
-			Main.handleException(ex, getName());
+			Logger.log(ex, "There was an exception while starting peer " + getName() + ".");
 			stop(true);
 		}
 	}
@@ -97,7 +97,7 @@ public class Peer extends KnownPeer implements TaskOwner {
 
 				} catch (SocketException e) {
 				} catch (Exception e) {
-					Main.handleException(e, getName());
+					Logger.log(e, "There was an exception while starting listening task in peer " + getName() + ".");
 					stop(true);
 				}
 			}

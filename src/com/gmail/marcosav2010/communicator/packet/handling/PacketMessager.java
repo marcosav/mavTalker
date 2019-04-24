@@ -1,6 +1,5 @@
 package com.gmail.marcosav2010.communicator.packet.handling;
 
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -15,6 +14,7 @@ import com.gmail.marcosav2010.communicator.packet.packets.PacketShutdown;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWritter;
 import com.gmail.marcosav2010.connection.Connection;
+import com.gmail.marcosav2010.logger.Logger;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 
 /**
@@ -39,23 +39,25 @@ public class PacketMessager {
 	public PacketMessager(Connection connection, CipheredCommunicator communicator) {
 		this.communicator = communicator;
 		this.connection = connection;
+		
 		writter = new PacketWritter();
 		eventHandlerManager = new PacketEventHandlerManager(connection);
 		actionHandler = new PacketActionHandler(connection);
 		lastPacket = new AtomicInteger();
 	}
 
-	public void onReceive(AbstractPacket p) throws IOException {
+	public void onReceive(AbstractPacket p) {
 		if (p instanceof StandardPacket)
 			handleStandardPacket((StandardPacket) p);
 		else
 			handlePacket((Packet) p);
 	}
 
-	private void handleStandardPacket(StandardPacket sp) throws IOException {
+	private void handleStandardPacket(StandardPacket sp) {
 		if (sp instanceof PacketRespose) {
 			PacketRespose pr = (PacketRespose) sp;
 			long id = pr.getResposePacketId();
+			
 			actionHandler.handleRespose(id);
 			log("Sucessfully sent packet #" + id + ".", VerboseLevel.HIGH);
 
@@ -69,13 +71,18 @@ public class PacketMessager {
 		}
 	}
 
-	private void handlePacket(Packet packet) throws PacketWriteException {
+	private void handlePacket(Packet packet) {
 		int id = packet.getID();
 		log("Received packet #" + id + ".", VerboseLevel.HIGH);
 		eventHandlerManager.handlePacket(packet, connection.getConnectedPeer());
 		
 		if (packet.shouldSendRespose())
-			sendStandardPacket(new PacketRespose(id));
+			try {
+				sendStandardPacket(new PacketRespose(id));
+			} catch (PacketWriteException ex) {
+				log("There was an exception sending receive respose in packet #" + id + ".");
+				Logger.log(ex);
+			}
 	}
 
 	public int sendPacket(Packet packet, PacketAction action, long timeout, TimeUnit timeUnit) throws PacketWriteException {

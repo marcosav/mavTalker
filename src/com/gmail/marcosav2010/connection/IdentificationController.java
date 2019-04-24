@@ -8,6 +8,7 @@ import com.gmail.marcosav2010.common.Utils;
 import com.gmail.marcosav2010.communicator.packet.handling.PacketMessager;
 import com.gmail.marcosav2010.communicator.packet.packets.PacketIdentify;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
+import com.gmail.marcosav2010.logger.Logger;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.peer.ConnectedPeer;
@@ -94,7 +95,7 @@ public class IdentificationController {
 		}, IDENTIFICATION_TIMEOUT, TimeUnit.SECONDS);
 	}
 
-	public ConnectedPeer identifyConnection(PacketIdentify info) throws PacketWriteException {
+	public ConnectedPeer identifyConnection(PacketIdentify info) {
 		ConnectionManager cManager = connection.getPeer().getConnectionManager();
 		
 		if (info.providesUUID()) {
@@ -107,8 +108,12 @@ public class IdentificationController {
 			UUID newUUID = info.getNewUUID();
 
 			if (!setUUID(newUUID)) {
-				log("Identification failure, UUID could not be renewed because it was already identified, sending respose...", VerboseLevel.LOW);
-				sendIdentifyRespose(PacketIdentify.INVALID_UUID);
+				log("Identification failure, UUID could not be renewed because it was already identified, sending respose and disconnecting...", VerboseLevel.LOW);
+				try {
+					sendIdentifyRespose(PacketIdentify.INVALID_UUID);
+				} catch (PacketWriteException e) {
+					log("There was an exception sending identification respose, disconnecting anyway.");
+				}
 				connection.disconnect(true);
 				return null;
 			}
@@ -116,7 +121,13 @@ public class IdentificationController {
 			cManager.registerConnection(connection);
 
 			log("Identification successfully, sending respose...", VerboseLevel.MEDIUM);
-			sendIdentifyRespose(PacketIdentify.SUCCESS);
+			
+			try {
+				sendIdentifyRespose(PacketIdentify.SUCCESS);
+			} catch (PacketWriteException e) {
+				log("There was an exception sending identification respose.");
+				Logger.log(e);
+			}
 
 		} else {
 			log("Received identification respose from peer \"" + info.getName() + "\".", VerboseLevel.HIGH);

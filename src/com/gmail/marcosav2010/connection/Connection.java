@@ -1,7 +1,6 @@
 package com.gmail.marcosav2010.connection;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -18,10 +17,12 @@ import com.gmail.marcosav2010.cipher.SessionCipher;
 import com.gmail.marcosav2010.common.Utils;
 import com.gmail.marcosav2010.communicator.BaseCommunicator;
 import com.gmail.marcosav2010.communicator.module.ModuleManager;
+import com.gmail.marcosav2010.communicator.packet.AbstractPacket;
 import com.gmail.marcosav2010.communicator.packet.Packet;
 import com.gmail.marcosav2010.communicator.packet.handling.PacketAction;
 import com.gmail.marcosav2010.communicator.packet.handling.PacketMessager;
 import com.gmail.marcosav2010.communicator.packet.packets.PacketShutdown;
+import com.gmail.marcosav2010.communicator.packet.wrapper.PacketReadException;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketReader;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
 import com.gmail.marcosav2010.logger.Logger;
@@ -97,7 +98,9 @@ public class Connection extends NetworkConnection {
 			listenForAuth();
 			listenForPort();
 		} catch (Exception e) {
-			onException(e);
+			log("There was an exception while starting connection: " + e.getMessage());
+			Logger.log(e);
+			disconnect(true);
 			return;
 		}
 
@@ -118,13 +121,15 @@ public class Connection extends NetworkConnection {
 				} catch (IOException e) {
 					if (!connected.get())
 						return;
+					
 					log("Connection lost unexpectedly: " + e.getMessage());
 					Logger.log(e);
 					disconnect(true);
 					return;
 
 				} catch (Exception e) {
-					Main.handleException(e, peer.getName());
+					log("An unknown exception has ocurred: " + e.getMessage());
+					Logger.log(e);
 					continue;
 				}
 			}
@@ -136,10 +141,10 @@ public class Connection extends NetworkConnection {
 			throw new IllegalArgumentException("Address cannot be null.");
 
 		if (!(hostSocket == null || hostSocket.isBound()))
-			throw new IllegalStateException("Already connected");
+			throw new IllegalStateException("Already connected.");
 
 		if (address.getPort() == peer.getPort())
-			throw new IllegalStateException("Cannon connect to itself");
+			throw new IllegalStateException("Cannon connect to itself.");
 
 		log("Connecting to " + address.toString() + "...");
 
@@ -226,12 +231,18 @@ public class Connection extends NetworkConnection {
 		if (!isConnected())
 			return;
 
+		AbstractPacket p;
+		
 		try {
-			messager.onReceive(reader.read(bytes));
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
-				| SecurityException | IOException e) {
-			Main.handleException(e, peer.getName());
+			p = reader.read(bytes);
+			
+		} catch (PacketReadException e) {
+			log("There was an error while reading bytes.");
+			Logger.log(e);
+			return;
 		}
+		
+		messager.onReceive(p);
 	}
 
 	public void onAuth() throws PacketWriteException {
@@ -288,7 +299,7 @@ public class Connection extends NetworkConnection {
 	 */
 	public void setConnectedPeer(ConnectedPeer cPeer) {
 		if (connectedPeer != null)
-			throw new ConnectionIdentificationException("ConnectedPeer instance is already set");
+			throw new ConnectionIdentificationException("ConnectedPeer instance is already set.");
 
 		connectedPeer = cPeer;
 		LOGGER_PREFIX = LOGGER_PREFIX.replaceFirst("-", connectedPeer.getName());
@@ -320,11 +331,6 @@ public class Connection extends NetworkConnection {
 
 	public ModuleManager getModuleManager() {
 		return moduleManager;
-	}
-
-	private void onException(Exception ex) throws IOException {
-		Main.handleException(ex, peer.getName());
-		disconnect(true);
 	}
 
 	public void disconnect(boolean silent) {

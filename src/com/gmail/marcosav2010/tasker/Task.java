@@ -3,7 +3,7 @@ package com.gmail.marcosav2010.tasker;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.gmail.marcosav2010.main.Main;
+import com.gmail.marcosav2010.logger.Logger;
 
 public class Task implements Runnable {
 
@@ -65,7 +65,7 @@ public class Task implements Runnable {
 			try {
 				task.run();
 			} catch (Throwable t) {
-				Main.handleException(t, "Task " + id + " encountered an exception");
+				Logger.log(t, "Task " + id + " encountered an exception");
 			}
 
 			if (period <= 0)

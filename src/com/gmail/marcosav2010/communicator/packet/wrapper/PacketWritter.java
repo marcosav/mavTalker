@@ -13,7 +13,7 @@ public class PacketWritter {
 
 			Byte packetType = PacketRegistry.getByClass(packet.getClass());
 			if (packetType == null)
-				throw new IOException("Packet type not recognized");
+				throw new PacketWriteException("Packet type not recognized");
 
 			encoder.write(packetType);
 			packet.encode(encoder);
