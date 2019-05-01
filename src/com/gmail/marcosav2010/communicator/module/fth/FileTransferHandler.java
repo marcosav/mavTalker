@@ -41,7 +41,7 @@ public class FileTransferHandler {
 	
 	public static final short HASH_BITS = 256;
 	public static final byte HASH_SIZE = 256 / Byte.SIZE;
-	private static final String HASH_ALGORITHM = "SHA-" + HASH_BITS;
+	private static final String HASH_ALGORITHM = "SHA3-" + HASH_BITS;
 
 	private static final long ACCEPT_TIMEOUT = 20L;
 	private static final long RECEIVE_TIMEOUT = 10L;
