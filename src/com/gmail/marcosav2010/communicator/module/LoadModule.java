@@ -17,4 +17,6 @@ import com.gmail.marcosav2010.command.CommandRegistry;
 public @interface LoadModule {
 	
 	Class<? extends CommandRegistry> registry();
+	
+	boolean load() default true;
 }

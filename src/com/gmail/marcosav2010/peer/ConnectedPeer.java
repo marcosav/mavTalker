@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import com.gmail.marcosav2010.common.Utils;
 import com.gmail.marcosav2010.communicator.packet.Packet;
 import com.gmail.marcosav2010.communicator.packet.handling.PacketAction;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
@@ -29,6 +30,10 @@ public class ConnectedPeer extends KnownPeer {
 
 	public UUID getConnectionUUID() {
 		return connection.getUUID();
+	}
+	
+	public String getDisplayID() {
+		return Utils.toBase64(getConnectionUUID());
 	}
 
 	public Connection getConnection() {

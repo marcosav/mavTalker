@@ -21,9 +21,8 @@ public class BaseCommunicator extends Communicator {
 
 		return read;
 	}
-	
-	public byte[] read(int bytes, TaskOwner taskOwner, long timeout, TimeUnit unit)
-			throws InterruptedException, ExecutionException, TimeoutException {
+
+	public byte[] read(int bytes, TaskOwner taskOwner, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
 		return taskOwner.getExecutorService().submit(() -> read(bytes)).get(timeout, unit);
 	}
 
@@ -36,11 +35,11 @@ public class BaseCommunicator extends Communicator {
 	public void close() throws IOException {
 		if (getIn() != null)
 			getIn().close();
-		
+
 		if (getOut() != null)
 			getOut().close();
 	}
-	
+
 	@Override
 	public void closeQuietly() {
 		try {

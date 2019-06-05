@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import com.gmail.marcosav2010.config.GeneralConfiguration;
 import com.gmail.marcosav2010.logger.Logger;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 
@@ -23,7 +24,8 @@ public class PeerManager {
 
 	private final Map<String, Peer> peers;
 
-	public PeerManager() {
+	public PeerManager(GeneralConfiguration config) {
+		HandshakeAuthentificator.setHandshakeRequirementLevel(config.getHandshakeRequirementLevel());
 		peersCreated = 0;
 		parentPeerThreadGroup = new ThreadGroup("parentPeerThreadGroup");
 		peers = new ConcurrentHashMap<>();
@@ -71,6 +73,9 @@ public class PeerManager {
 	}
 
 	public void shutdown() {
+		if (peers.isEmpty())
+			return;
+		
 		log("Shutting down all peers...");
 		var iterator = peers.entrySet().iterator();
 		while (iterator.hasNext()) {
@@ -106,7 +111,7 @@ public class PeerManager {
 		return peers.size();
 	}
 
-	public Peer getPeer() {
+	public Peer getFirstPeer() {
 		return peers.values().iterator().next();
 	}
 

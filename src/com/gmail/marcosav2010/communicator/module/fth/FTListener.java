@@ -24,7 +24,8 @@ public class FTListener implements PacketListener {
 	
 	@PacketEventHandler
 	public void onFileRequest(PacketFileRequest pf, ConnectedPeer peer) {
-		fth.log("File request: #" + pf.getID() + " \"" + pf.getName() + "\" (" + Utils.formatSize(pf.getSize()) + "), accept download? Use download command");
+		fth.log("File request: #" + pf.getID() + " \"" + pf.getName() + "\" (" + Utils.formatSize(pf.getSize()) + "), accept download? Use /d "
+				+ peer.getConnection().getPeer().getName() + " " + peer.getName() + " " + pf.getID());
 		fth.handleRequest(pf);
 	}
 

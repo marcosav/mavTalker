@@ -14,15 +14,16 @@ public class PacketIdentify extends StandardPacket {
 	public static final byte TIMED_OUT = 2;
 	
 	private String name;
-	private UUID newUUID;
+	private UUID newUUID, peerUUID;
 	private byte result;
 
 	public PacketIdentify() {
 	}
 
-	public PacketIdentify(String name, UUID newUUID, byte result) {
+	public PacketIdentify(String name, UUID newUUID, UUID peerUUID, byte result) {
 		this.name = name;
 		this.newUUID = newUUID;
+		this.peerUUID = peerUUID;
 		this.result = result;
 	}
 
@@ -30,6 +31,10 @@ public class PacketIdentify extends StandardPacket {
 		return name;
 	}
 
+	public UUID getPeerUUID() {
+		return peerUUID;
+	}
+	
 	public UUID getNewUUID() {
 		return newUUID;
 	}
@@ -49,10 +54,12 @@ public class PacketIdentify extends StandardPacket {
 	@Override
 	protected void encodeContent(PacketEncoder out) throws IOException {
 		out.write(providesName());
-		out.write(name);
+		if (providesName())
+			out.write(name);
 		out.write(providesUUID());
 		if (providesUUID())
 			out.write(newUUID);
+		out.write(peerUUID);
 		out.write(result);
 	}
 
@@ -62,6 +69,7 @@ public class PacketIdentify extends StandardPacket {
 			name = in.readString();
 		if (in.readBoolean())
 			newUUID = in.readUUID();
+		peerUUID = in.readUUID();
 		result = in.readByte();
 	}
 }

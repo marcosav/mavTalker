@@ -7,6 +7,9 @@ import com.gmail.marcosav2010.logger.Logger;
 public class CommandHandler {
 
     public static void handleCommand(String command) {
+    	if (command == null || command.isBlank())
+    		return;
+    	
         String[] args = command.split(" ");
         int argsLength = args.length;
         

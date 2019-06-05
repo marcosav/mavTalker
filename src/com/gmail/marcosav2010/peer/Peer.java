@@ -6,6 +6,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.security.GeneralSecurityException;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
@@ -14,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import com.gmail.marcosav2010.common.Utils;
 import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.connection.ConnectionIdentificator;
 import com.gmail.marcosav2010.connection.ConnectionManager;
@@ -32,6 +34,7 @@ public class Peer extends KnownPeer implements TaskOwner {
 	private ServerSocket server;
 
 	private boolean started;
+	private UUID uuid;
 
 	private ConnectionManager connectionManager;
 
@@ -42,6 +45,7 @@ public class Peer extends KnownPeer implements TaskOwner {
 		connectionManager = new ConnectionManager(this);
 		executorService = new ThreadPoolExecutor(1, Integer.MAX_VALUE, 10L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), new PeerThreadFactory());
 		started = false;
+		uuid = UUID.randomUUID();
 	}
 
 	private class PeerThreadFactory implements ThreadFactory {
@@ -73,7 +77,7 @@ public class Peer extends KnownPeer implements TaskOwner {
 
 			started = true;
 
-			Main.getInstance().getTasker().run(this, findClient());
+			Main.getInstance().getTasker().run(this, findClient()).setName(getName() + " Find Client");
 
 			log("Server created and finding a someone to connect...");
 
@@ -97,7 +101,7 @@ public class Peer extends KnownPeer implements TaskOwner {
 
 				} catch (SocketException e) {
 				} catch (Exception e) {
-					Logger.log(e, "There was an exception while starting listening task in peer " + getName() + ".");
+					Logger.log(e, "There was an exception in client find task in peer " + getName() + ".");
 					stop(true);
 				}
 			}
@@ -113,6 +117,14 @@ public class Peer extends KnownPeer implements TaskOwner {
 
 	public boolean isStarted() {
 		return started;
+	}
+
+	public UUID getUUID() {
+		return uuid;
+	}
+
+	public String getDisplayID() {
+		return Utils.toBase64(uuid);
 	}
 
 	public ConnectionManager getConnectionManager() {

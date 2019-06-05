@@ -57,7 +57,7 @@ public class CipheredCommunicator extends Communicator {
 	private final SessionCipher sessionCipher;
 
 	private final TaskOwner taskOwner;
-	
+
 	private Task writeTask;
 	private WritePool writePool;
 
@@ -78,8 +78,11 @@ public class CipheredCommunicator extends Communicator {
 	public synchronized EncryptedMessage read() throws IOException {
 		// Leer tamaño del mensaje cifrado en complemento
 		byte[] lengthBytes = baseCommunicator.read(LENGTH_BYTES);
-		int length = ~Utils.bytesToInt(lengthBytes);
+		if (lengthBytes.length < 0)
+			return null;
 		
+		int length = ~Utils.bytesToInt(lengthBytes);
+
 		if (length < 0)
 			return null;
 
@@ -114,7 +117,7 @@ public class CipheredCommunicator extends Communicator {
 				GCMParameterSpec gcmPS = getGCMParameterSpec(decryptedSimmetricKeyIV);
 
 				onDecrypt.accept(getCipher(Cipher.DECRYPT_MODE, symmetricKey, gcmPS).doFinal(encryptedMessage.getEncryptedData()));
-				
+
 			} catch (GeneralSecurityException | InterruptedException e) {
 				Logger.log(e);
 			}
@@ -234,7 +237,7 @@ public class CipheredCommunicator extends Communicator {
 		beforeClose();
 		baseCommunicator.close();
 	}
-	
+
 	@Override
 	public void closeQuietly() {
 		beforeClose();

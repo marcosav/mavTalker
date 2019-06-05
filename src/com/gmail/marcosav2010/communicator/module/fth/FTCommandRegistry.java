@@ -67,7 +67,7 @@ public class FTCommandRegistry extends CommandRegistry {
 	private static class DownloadCMD extends Command {
 
 		DownloadCMD() {
-			super("download", new String[] { "d", "dw" }, "<host peer> <remote peer> <file id> <yes/no> (empty = yes)");
+			super("download", new String[] { "d", "dw" }, "<host peer> <remote peer> <file id> <yes/no> (default = yes)");
 		}
 
 		@Override

@@ -9,6 +9,7 @@ public class Task implements Runnable {
 
 	private final Tasker tasker;
 	private final int id;
+	private String name;
 	private final TaskOwner owner;
 	private final Runnable task;
 	private Thread thread;
@@ -26,6 +27,17 @@ public class Task implements Runnable {
 		this.period = unit.toMillis(period);
 	}
 
+	public String getName() {
+		return name;
+	}
+	
+	public Task setName(String name) {
+		if (name == null)
+			throw new IllegalStateException("This task is already named.");
+		this.name = name;
+		return this;
+	}
+	
 	public int getId() {
 		return id;
 	}
@@ -65,7 +77,7 @@ public class Task implements Runnable {
 			try {
 				task.run();
 			} catch (Throwable t) {
-				Logger.log(t, "Task " + id + " encountered an exception");
+				Logger.log(t, "Task " + (name == null ? "" : name + " ") + "#" + id + " encountered an exception");
 			}
 
 			if (period <= 0)

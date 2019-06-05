@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -15,6 +14,9 @@ import java.util.concurrent.TimeoutException;
 
 import com.gmail.marcosav2010.common.Utils;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
+import com.gmail.marcosav2010.peer.HandshakeAuthentificator;
+import com.gmail.marcosav2010.peer.HandshakeAuthentificator.ConnectionToken;
+import com.gmail.marcosav2010.peer.HandshakeAuthentificator.InvalidHandshakeKey;
 import com.gmail.marcosav2010.peer.Peer;
 
 /**
@@ -31,12 +33,18 @@ public class ConnectionManager {
 	private Peer peer;
 	private Map<UUID, Connection> connections;
 
+	private HandshakeAuthentificator handshakeAuthentificator;
 	private ConnectionIdentificator connectionIdentificador;
 
 	public ConnectionManager(Peer peer) {
 		this.peer = peer;
+		handshakeAuthentificator = new HandshakeAuthentificator(peer);
 		connectionIdentificador = new ConnectionIdentificator();
 		connections = new ConcurrentHashMap<>();
+	}
+
+	public HandshakeAuthentificator getHandshakeAuthentificator() {
+		return handshakeAuthentificator;
 	}
 
 	public ConnectionIdentificator getIdentificator() {
@@ -53,16 +61,8 @@ public class ConnectionManager {
 		return c;
 	}
 
-	public Set<Connection> getConnections() {
-		return Collections.unmodifiableSet(new HashSet<>(connections.values()));
-	}
-	
 	public Set<Map.Entry<UUID, Connection>> getConnectionUUIDs() {
 		return Collections.unmodifiableSet(connections.entrySet());
-	}
-
-	public Connection registerConnection(Connection con) {
-		return registerConnection(con.getUUID(), con);
 	}
 
 	public boolean isConnectedTo(InetSocketAddress address) {
@@ -76,18 +76,51 @@ public class ConnectionManager {
 				.findFirst().orElseGet(null);
 	}
 
-	private Connection registerConnection(UUID uuid, Connection con) {
+	public Connection registerConnection(Connection c) {
+		UUID u = c.getUUID();
+		if (u == null)
+			throw new ConnectionRegistryException("Connection UUID cannot be null.");
+
+		if (!connections.containsKey(u)) {
+			connections.put(u, c);
+			return c;
+
+		} else
+			return connections.get(u);
+	}
+	
+	private Connection registerConnection(Peer peer, UUID uuid) {
 		if (uuid == null)
 			throw new ConnectionRegistryException("Connection UUID cannot be null.");
 
-		if (!connections.containsKey(uuid))
-			connections.put(uuid, con);
+		if (!connections.containsKey(uuid)) {
+			Connection c = new Connection(peer, uuid);
+			connections.put(uuid, c);
+			return c;
 
-		return con;
+		} else
+			return connections.get(uuid);
 	}
 
 	public void manageSocketConnection(Socket remoteSocket) throws IOException {
 		log("Accepted " + remoteSocket.getRemoteSocketAddress().toString());
+
+		ConnectionToken ct;
+
+		try {
+			ct = peer.getConnectionManager().getHandshakeAuthentificator().handleHandshake(remoteSocket);
+
+		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			log("Remote peer didn't send handshake at time, closing remote socket...");
+			remoteSocket.close();
+			return;
+
+		} catch (InvalidHandshakeKey e) {
+			log(e.getMessage() + ", closing remote socket.");
+			remoteSocket.close();
+			return;
+		}
+
 		log("Reading temporary remote connection UUID, timeout set to " + UUID_TIMEOUT + "s...", VerboseLevel.MEDIUM);
 
 		UUID uuid;
@@ -100,8 +133,8 @@ public class ConnectionManager {
 		}
 
 		log("Finding and registering remote connection from temporary UUID...", VerboseLevel.MEDIUM);
-		registerConnection(new Connection(peer, uuid));
-		getConnection(uuid).connect(remoteSocket);
+
+		registerConnection(peer, uuid).connect(remoteSocket, ct);
 	}
 
 	private UUID readUUID(Socket remoteSocket) throws InterruptedException, ExecutionException, TimeoutException {

@@ -38,7 +38,7 @@ import com.gmail.marcosav2010.tasker.Task;
 public class FileTransferHandler {
 
 	public static final String DOWNLOAD_FOLDER = "FilesTransferred/";
-	
+
 	public static final short HASH_BITS = 256;
 	public static final byte HASH_SIZE = 256 / Byte.SIZE;
 	private static final String HASH_ALGORITHM = "SHA3-" + HASH_BITS;
@@ -65,7 +65,7 @@ public class FileTransferHandler {
 	public FileTransferHandler(FTModule module, Connection connection) {
 		this.module = module;
 		this.connection = connection;
-		
+
 		pendingFileRequests = new ConcurrentHashMap<>();
 		pendingForAcceptFiles = new ConcurrentHashMap<>();
 		pendingReceiveFiles = new ConcurrentHashMap<>();
@@ -279,8 +279,6 @@ public class FileTransferHandler {
 		};
 	}
 
-	
-	
 	public static FileSendInfo createRequest(File file) {
 		int size = (int) file.length();
 		int upSizeThreshold = Short.MAX_VALUE * 32 * 200;

@@ -14,7 +14,6 @@ public class Logger {
 	public static void log(Object o, VerboseLevel level) {
 		if (level.ordinal() <= VERBOSE_LEVEL.ordinal())
 			synchronized (lock) {
-				//System.out.printf("[%d] %s\n", System.currentTimeMillis(), o);
 				System.out.printf("%s\n", o);
 			}
 	}
@@ -34,10 +33,11 @@ public class Logger {
 
 	public static void setVerboseLevel(VerboseLevel level) {
 		VERBOSE_LEVEL = level;
+		log("Verbose level set to " + VERBOSE_LEVEL + ".");
 	}
 	
 	public static void setVerboseLevel(String level) {
-		VERBOSE_LEVEL = VerboseLevel.valueOf(level);
+		setVerboseLevel(VerboseLevel.valueOf(level));
 	}
 
 	public static VerboseLevel getVerboseLevel() {

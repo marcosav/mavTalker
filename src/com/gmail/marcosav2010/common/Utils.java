@@ -1,12 +1,19 @@
 package com.gmail.marcosav2010.common;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.InetAddress;
+import java.net.URL;
 import java.nio.ByteBuffer;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 public class Utils {
 
@@ -44,6 +51,18 @@ public class Utils {
 
 		return out;
 	}
+	
+	public static byte[] concat(byte[]... arrays) {
+		byte[] out = new byte[Stream.of(arrays).mapToInt(ba -> ba.length).sum()];
+
+		int pos = 0;
+		for (byte[] ba : arrays) {
+			System.arraycopy(ba, 0, out, pos, ba.length);
+			pos += ba.length;
+		}
+		
+		return out;
+	}
 
 	public static byte[][] split(byte[] ba, int pos) {
 		byte[] ba1 = new byte[pos];
@@ -56,7 +75,7 @@ public class Utils {
 	}
 
 	public static byte[] getBytesFromUUID(UUID uuid) {
-		ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
+		ByteBuffer bb = ByteBuffer.allocate(16);
 		bb.putLong(uuid.getMostSignificantBits());
 		bb.putLong(uuid.getLeastSignificantBits());
 
@@ -65,8 +84,8 @@ public class Utils {
 
 	public static UUID getUUIDFromBytes(byte[] bytes) {
 		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
-		Long high = byteBuffer.getLong();
-		Long low = byteBuffer.getLong();
+		long high = byteBuffer.getLong();
+		long low = byteBuffer.getLong();
 
 		return new UUID(high, low);
 	}
@@ -82,5 +101,24 @@ public class Utils {
 
 	public static <K, V> void remove(Map<K, Set<V>> map, V value) {
 		map.forEach((k, v) -> v.remove(value));
+	}
+
+	public static InetAddress obtainExternalAddress() throws IOException {
+		URL ipUrl = new URL("http://checkip.amazonaws.com");
+		try (BufferedReader in = new BufferedReader(new InputStreamReader(ipUrl.openStream()))) {
+			return InetAddress.getByName(in.readLine());
+		}
+	}
+	
+	public static String encode(byte[] array) {
+		return Base64.getUrlEncoder().withoutPadding().encodeToString(array).replaceAll("_", "ñ").replaceAll("-", "Ñ");
+	}
+
+	public static byte[] decode(String str) {
+		return Base64.getUrlDecoder().decode(str.replaceAll("ñ", "_").replaceAll("Ñ", "-"));
+	}
+	
+	public static String toBase64(UUID uuid) {
+		return encode(getBytesFromUUID(uuid));
 	}
 }

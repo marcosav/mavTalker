@@ -1,8 +1,8 @@
 package com.gmail.marcosav2010.main;
 
+import java.io.Console;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.Scanner;
 
 import com.gmail.marcosav2010.command.CommandHandler;
 import com.gmail.marcosav2010.logger.Logger;
@@ -23,14 +23,15 @@ public class Launcher {
 	}
 
 	private static void listenForCommands() {
-		Scanner scn = new Scanner(System.in);
-
-		while (scn.hasNextLine()) {
-			String in = scn.nextLine();
-			CommandHandler.handleCommand(in);
+		Console console = System.console();
+		
+		if (console == null) {
+			Logger.log("No console found, shutting down...");
+			System.exit(0);
 		}
-
-		scn.close();
+		
+		while (true)
+			CommandHandler.handleCommand(console.readLine());
 	}
 	
 	private static void addSignalHook() {
