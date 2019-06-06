@@ -17,7 +17,6 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 import com.gmail.marcosav2010.config.GeneralConfiguration;
-import com.gmail.marcosav2010.config.GeneralConfiguration.PropertyCategory;
 import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.connection.ConnectionIdentificator;
 import com.gmail.marcosav2010.connection.ConnectionManager;
@@ -49,19 +48,19 @@ public class BaseCommandRegistry extends CommandRegistry {
 	private static class PeerPropertyCMD extends Command {
 
 		PeerPropertyCMD() {
-			super("peerproperty", new String[] { "pp", "pprop" }, "[peer] <property name> <value>");
+			super("peerproperty", new String[] { "pp", "pprop" }, "[peer (if one leave)] <property name> <value>");
 		}
 
 		@Override
 		public void execute(String[] arg, int args) {
 			int pCount = Main.getInstance().getPeerManager().count();
 
-			if (pCount > 1 && args < 3 || pCount <= 1 && args < 2) {
+			if (pCount > 1 && args < 1 || pCount == 0) {
 				Logger.log("ERROR: Specify peer, property and value.");
 				return;
 			}
 
-			boolean autoPeer = pCount == 1 && args == 2;
+			boolean autoPeer = pCount == 1 && (args == 2 || args == 0);
 			
 			Peer peer;
 
@@ -77,17 +76,28 @@ public class BaseCommandRegistry extends CommandRegistry {
 			} else
 				peer = Main.getInstance().getPeerManager().getFirstPeer();
 
+			var props = peer.getProperties();
+			
+			if (pCount > 1 && args < 3 || pCount <= 1 && args < 2) {
+				Logger.log("Showing peer " + peer.getName() + " properties:");
+				Logger.log(props.toString());
+				return;
+			}
+			
 			String prop = arg[autoPeer ? 0 : 1], value = arg[autoPeer ? 1 : 2];
 			
-			var c = Main.getInstance().getGeneralConfig();
+			if (props.exist(prop)) {
+				if (props.set(prop, value)) {
+					Logger.log("Property \"" + prop + "\" set to: " + value);
+					return;
+					
+				} else
+					Logger.log("There was an error while setting the property \"" + prop + "\" in " + peer.getName() + ":");
+				
+			} else
+				Logger.log("Unrecognized property \"" + prop + "\", current properties in " + peer.getName() + ":");
 			
-			if (GeneralConfiguration.isCategory(prop, PropertyCategory.PEER)) {
-				
-				
-			} else {
-				Logger.log("Unrecognized property, try with the following ones:");
-				Logger.log(GeneralConfiguration.propsToString(PropertyCategory.PEER, c));
-			}
+			Logger.log(props.toString());
 		}
 	}
 	
@@ -135,7 +145,7 @@ public class BaseCommandRegistry extends CommandRegistry {
 	private static class GenerateAddressCMD extends Command {
 
 		GenerateAddressCMD() {
-			super("generate", new String[] { "g", "gen" }, "[peer]");
+			super("generate", new String[] { "g", "gen" }, "[peer] [-p (public)]");
 		}
 
 		@Override
@@ -147,8 +157,9 @@ public class BaseCommandRegistry extends CommandRegistry {
 				return;
 			}
 
-			boolean autoPeer = pCount == 1 && args == 0;
-			boolean generatePublic = args >= 1 && arg[autoPeer ? 1 : 2].equalsIgnoreCase("-p");
+			boolean generatePublic = args == 1 && arg[0].equalsIgnoreCase("-p");
+			boolean autoPeer = pCount == 1 && (args == 0 || generatePublic);
+			generatePublic |= args == 2 && arg[1].equalsIgnoreCase("-p");
 			
 			Peer peer;
 

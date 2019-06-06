@@ -38,8 +38,6 @@ public class HandshakeAuthentificator {
 
 	private static final long HANDSHAKE_TIMEOUT = 10L;
 	
-	private static HandshakeRequirementLevel DEFAULT_REQUIREMENT_LEVEL;
-	
 	private static final int C_KEY_MARK = 3;
 
 	public static final int B_KEY_LENGTH = 128 / 8;
@@ -63,10 +61,10 @@ public class HandshakeAuthentificator {
 	private Map<InetSocketAddress, ConnectionToken> remoteStorage;
 	
 	private ConnectionToken publicConnectionToken;
-	private HandshakeRequirementLevel level = DEFAULT_REQUIREMENT_LEVEL;
 
 	public HandshakeAuthentificator(Peer peer) {
 		this.peer = peer;
+		
 		localTempStorage = new ConcurrentHashMap<>();
 		localStorage = new ConcurrentHashMap<>();
 		remoteStorage = new ConcurrentHashMap<>();
@@ -252,6 +250,10 @@ public class HandshakeAuthentificator {
 	public void storeHandshakeKey(InetSocketAddress address, byte[] handshakeKeyBytes, byte[] baseKeyBytes) {
 		registerHandshakeKey(address, new ConnectionToken(handshakeKeyBytes, baseKeyBytes));
 	}
+	
+	public HandshakeRequirementLevel getHRL() {
+		return peer.getProperties().getHRL();
+	}
 
 	public static class ConnectionToken {
 
@@ -303,10 +305,6 @@ public class HandshakeAuthentificator {
 	public static enum HandshakeRequirementLevel {
 		
 		NONE, PUBLIC, PRIVATE;
-	}
-	
-	static void setHandshakeRequirementLevel(String level) {
-		DEFAULT_REQUIREMENT_LEVEL = HandshakeRequirementLevel.valueOf(level);
 	}
 
 	public void log(String str) {

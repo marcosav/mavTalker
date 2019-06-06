@@ -25,7 +25,6 @@ public class PeerManager {
 	private final Map<String, Peer> peers;
 
 	public PeerManager(GeneralConfiguration config) {
-		HandshakeAuthentificator.setHandshakeRequirementLevel(config.getHandshakeRequirementLevel());
 		peersCreated = 0;
 		parentPeerThreadGroup = new ThreadGroup("parentPeerThreadGroup");
 		peers = new ConcurrentHashMap<>();

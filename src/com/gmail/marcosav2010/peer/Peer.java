@@ -16,12 +16,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import com.gmail.marcosav2010.common.Utils;
+import com.gmail.marcosav2010.config.GeneralConfiguration;
+import com.gmail.marcosav2010.config.GeneralConfiguration.Properties;
+import com.gmail.marcosav2010.config.GeneralConfiguration.PropertyCategory;
 import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.connection.ConnectionIdentificator;
 import com.gmail.marcosav2010.connection.ConnectionManager;
 import com.gmail.marcosav2010.logger.Logger;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.main.Main;
+import com.gmail.marcosav2010.peer.HandshakeAuthentificator.HandshakeRequirementLevel;
 import com.gmail.marcosav2010.tasker.TaskOwner;
 
 /**
@@ -37,11 +41,13 @@ public class Peer extends KnownPeer implements TaskOwner {
 	private UUID uuid;
 
 	private ConnectionManager connectionManager;
+	private PeerProperties properties;
 
 	private ExecutorService executorService;
 
 	public Peer(String name, int port) {
 		super(name, port);
+		properties = new PeerProperties();
 		connectionManager = new ConnectionManager(this);
 		executorService = new ThreadPoolExecutor(1, Integer.MAX_VALUE, 10L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), new PeerThreadFactory());
 		started = false;
@@ -140,6 +146,10 @@ public class Peer extends KnownPeer implements TaskOwner {
 	public ExecutorService getExecutorService() {
 		return executorService;
 	}
+	
+	public PeerProperties getProperties() {
+		return properties;
+	}
 
 	public void printInfo() {
 		var ci = connectionManager.getIdentificator();
@@ -175,6 +185,21 @@ public class Peer extends KnownPeer implements TaskOwner {
 		log("Shutdown done successfully.", VerboseLevel.LOW);
 	}
 
+	public static class PeerProperties extends Properties {
+
+		public PeerProperties() {
+			super(PropertyCategory.PEER, Main.getInstance().getGeneralConfig());
+		}
+		
+		public HandshakeRequirementLevel getHRL() {
+			return super.get(GeneralConfiguration.HANDSHAKE_REQUIREMENT_LEVEL);
+		}
+		
+		public void setHRL(HandshakeRequirementLevel level) {
+			super.set(GeneralConfiguration.HANDSHAKE_REQUIREMENT_LEVEL, level);
+		}
+	}
+	
 	public void log(String str) {
 		Logger.log(getName() + ": " + str);
 	}
