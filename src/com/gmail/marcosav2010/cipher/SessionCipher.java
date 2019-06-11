@@ -56,7 +56,7 @@ public class SessionCipher {
 		checkDone();
 	}
 
-	public void loadAuthenticationRespose(byte[] bytes) throws GeneralSecurityException, PacketWriteException {
+	public void loadAuthenticationRespose(byte[] bytes) throws GeneralSecurityException, PacketWriteException {		
 		PublicKey remotePublicKey = getPublicKey(bytes, RSA_KEY_ALGORITHM);
 
 		out = new CipherPool(Cipher.PUBLIC_KEY, remotePublicKey, 1, 10);

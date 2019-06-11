@@ -79,7 +79,7 @@ public class HandshakeCommunicator extends BaseCommunicator {
 
 		try {
 			byte[] lengthBytes = super.read(LENGTH_BYTES);
-			if (lengthBytes.length < 0)
+			if (lengthBytes.length <= 0)
 				return null;
 			
 			int length = Utils.bytesToInt(lengthBytes);

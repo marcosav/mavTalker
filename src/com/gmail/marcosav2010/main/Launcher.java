@@ -11,9 +11,9 @@ public class Launcher {
 
 	public static void main(String[] args) throws NumberFormatException, IOException, GeneralSecurityException {
 		Logger.log("Loading...");
-		
+
 		addSignalHook();
-		
+
 		Main main = new Main();
 		Main.setInstance(main);
 
@@ -24,19 +24,20 @@ public class Launcher {
 
 	private static void listenForCommands() {
 		Console console = System.console();
-		
+
 		if (console == null) {
 			Logger.log("No console found, shutting down...");
 			System.exit(0);
 		}
-		
-		while (true)
+
+		while (!Main.getInstance().isShuttingDown())
 			CommandHandler.handleCommand(console.readLine());
 	}
-	
+
 	private static void addSignalHook() {
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			Main.getInstance().shutdown();
+			if (Main.getInstance() != null)
+				Main.getInstance().shutdown();
 		}));
 	}
 }

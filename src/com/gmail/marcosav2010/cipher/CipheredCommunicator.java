@@ -52,8 +52,6 @@ public class CipheredCommunicator extends Communicator {
 	private static final int AES_DATA_SIZE = AES_KEY_BYTES + IV_SIZE/* + LENGTH_BYTES */; // Para AES256: 32 + 96 + 4 = 132
 	private static final int RSA_MSG_SIZE = SessionCipher.RSA_KEY_SIZE / Byte.SIZE;
 
-	private final BaseCommunicator baseCommunicator;
-
 	private final SessionCipher sessionCipher;
 
 	private final TaskOwner taskOwner;
@@ -62,9 +60,8 @@ public class CipheredCommunicator extends Communicator {
 	private WritePool writePool;
 
 	public CipheredCommunicator(BaseCommunicator baseCommunicator, SessionCipher sessionCipher, TaskOwner taskOwner) {
-		this.baseCommunicator = baseCommunicator;
-		baseCommunicator.setIn(new BufferedInputStream(baseCommunicator.getIn()));
-		baseCommunicator.setOut(new BufferedOutputStream(baseCommunicator.getOut()));
+		setIn(new BufferedInputStream(baseCommunicator.getIn()));
+		setOut(new BufferedOutputStream(baseCommunicator.getOut()));
 
 		this.sessionCipher = sessionCipher;
 		this.taskOwner = taskOwner;
@@ -77,20 +74,20 @@ public class CipheredCommunicator extends Communicator {
 
 	public synchronized EncryptedMessage read() throws IOException {
 		// Leer tamaño del mensaje cifrado en complemento
-		byte[] lengthBytes = baseCommunicator.read(LENGTH_BYTES);
-		if (lengthBytes.length < 0)
+		
+		byte[] lengthBytes = getIn().readNBytes(LENGTH_BYTES);
+		if (lengthBytes.length <= 0)
 			return null;
 		
 		int length = ~Utils.bytesToInt(lengthBytes);
-
 		if (length < 0)
 			return null;
 
 		// Leer parte RSA donde esta la llave AES
-		byte[] encryptedAESData = baseCommunicator.read(RSA_MSG_SIZE);
+		byte[] encryptedAESData = getIn().readNBytes(RSA_MSG_SIZE);
 
 		// Leer mensaje encriptado con AES de longitud dada antes
-		byte[] encryptedData = baseCommunicator.read(length);
+		byte[] encryptedData = getIn().readNBytes(length);
 
 		return new EncryptedMessage(encryptedAESData, encryptedData);
 	}
@@ -144,10 +141,10 @@ public class CipheredCommunicator extends Communicator {
 		}
 
 		private void write(EncryptedMessage msg) throws IOException {
-			baseCommunicator.write(msg.byteLength());
-			baseCommunicator.write(msg.getEncryptedSimmetricKeyBytes());
-			baseCommunicator.write(msg.getEncryptedData());
-			baseCommunicator.getOut().flush();
+			getOut().write(msg.byteLength());
+			getOut().write(msg.getEncryptedSimmetricKeyBytes());
+			getOut().write(msg.getEncryptedData());
+			getOut().flush();
 		}
 
 		public void cancel() {
@@ -235,12 +232,19 @@ public class CipheredCommunicator extends Communicator {
 	@Override
 	public void close() throws IOException {
 		beforeClose();
-		baseCommunicator.close();
+		if (getIn() != null)
+			getIn().close();
+
+		if (getOut() != null)
+			getOut().close();
 	}
 
 	@Override
 	public void closeQuietly() {
 		beforeClose();
-		baseCommunicator.closeQuietly();
+		try {
+			close();
+		} catch (IOException ex) {
+		}
 	}
 }

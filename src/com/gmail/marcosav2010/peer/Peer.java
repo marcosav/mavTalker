@@ -15,7 +15,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import com.gmail.marcosav2010.common.Utils;
 import com.gmail.marcosav2010.config.GeneralConfiguration;
 import com.gmail.marcosav2010.config.GeneralConfiguration.Properties;
 import com.gmail.marcosav2010.config.GeneralConfiguration.PropertyCategory;
@@ -38,7 +37,6 @@ public class Peer extends KnownPeer implements TaskOwner {
 	private ServerSocket server;
 
 	private boolean started;
-	private UUID uuid;
 
 	private ConnectionManager connectionManager;
 	private PeerProperties properties;
@@ -46,12 +44,11 @@ public class Peer extends KnownPeer implements TaskOwner {
 	private ExecutorService executorService;
 
 	public Peer(String name, int port) {
-		super(name, port);
+		super(name, port, UUID.randomUUID());
 		properties = new PeerProperties();
 		connectionManager = new ConnectionManager(this);
 		executorService = new ThreadPoolExecutor(1, Integer.MAX_VALUE, 10L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), new PeerThreadFactory());
 		started = false;
-		uuid = UUID.randomUUID();
 	}
 
 	private class PeerThreadFactory implements ThreadFactory {
@@ -85,7 +82,7 @@ public class Peer extends KnownPeer implements TaskOwner {
 
 			Main.getInstance().getTasker().run(this, findClient()).setName(getName() + " Find Client");
 
-			log("Server created and finding a someone to connect...");
+			log("Server created and waiting for someone to connect...");
 
 		} catch (Exception ex) {
 			Logger.log(ex, "There was an exception while starting peer " + getName() + ".");
@@ -98,7 +95,7 @@ public class Peer extends KnownPeer implements TaskOwner {
 		return () -> {
 			while (started) {
 				try {
-					log("Waiting for connection...", VerboseLevel.MEDIUM);
+					log("Waiting for connection...", VerboseLevel.HIGH);
 
 					Socket remoteSocket = server.accept();
 					log("Someone connected, accepting...", VerboseLevel.MEDIUM);
@@ -125,14 +122,6 @@ public class Peer extends KnownPeer implements TaskOwner {
 		return started;
 	}
 
-	public UUID getUUID() {
-		return uuid;
-	}
-
-	public String getDisplayID() {
-		return Utils.toBase64(uuid);
-	}
-
 	public ConnectionManager getConnectionManager() {
 		return connectionManager;
 	}
@@ -146,7 +135,7 @@ public class Peer extends KnownPeer implements TaskOwner {
 	public ExecutorService getExecutorService() {
 		return executorService;
 	}
-	
+
 	public PeerProperties getProperties() {
 		return properties;
 	}
@@ -154,7 +143,8 @@ public class Peer extends KnownPeer implements TaskOwner {
 	public void printInfo() {
 		var ci = connectionManager.getIdentificator();
 		var peers = ci.getConnectedPeers();
-		log("Currently " + peers.size() + " peers connected: " + peers.stream().map(ConnectedPeer::getName).collect(Collectors.joining(", ")));
+		log("Name: " + getName() + "\n" + "Display ID: " + getDisplayID() + "\n" + "Currently " + peers.size() + " peers connected: " + peers.stream()
+				.map(cp -> "\n - " + cp.getName() + " #" + cp.getDisplayID() + " CUUID: " + cp.getConnection().getUUID()).collect(Collectors.joining(", ")));
 	}
 
 	public void stop(boolean silent) {
@@ -190,16 +180,16 @@ public class Peer extends KnownPeer implements TaskOwner {
 		public PeerProperties() {
 			super(PropertyCategory.PEER, Main.getInstance().getGeneralConfig());
 		}
-		
+
 		public HandshakeRequirementLevel getHRL() {
 			return super.get(GeneralConfiguration.HANDSHAKE_REQUIREMENT_LEVEL);
 		}
-		
+
 		public void setHRL(HandshakeRequirementLevel level) {
 			super.set(GeneralConfiguration.HANDSHAKE_REQUIREMENT_LEVEL, level);
 		}
 	}
-	
+
 	public void log(String str) {
 		Logger.log(getName() + ": " + str);
 	}

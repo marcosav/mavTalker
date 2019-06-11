@@ -103,12 +103,20 @@ public class Connection extends NetworkConnection {
 
 		log("Setting Input stream...", VerboseLevel.MEDIUM);
 
-		HandshakeCommunicator hCommunicator = new HandshakeCommunicator(baseCommunicator);
-		hCommunicator.setIn(ct.getBaseKey(), ct.getHandshakeKey());
-		hCommunicator.setIn(remoteSocket.getInputStream());
+		if (ct != null) {
+			HandshakeCommunicator hCommunicator;
+			if (baseCommunicator instanceof HandshakeCommunicator)
+				hCommunicator = (HandshakeCommunicator) baseCommunicator;
+			else
+				hCommunicator = new HandshakeCommunicator(baseCommunicator);
+	
+			hCommunicator.setIn(ct.getBaseKey(), ct.getHandshakeKey());
+	
+			baseCommunicator = hCommunicator;
+		}
 
-		baseCommunicator = hCommunicator;
-
+		baseCommunicator.setIn(remoteSocket.getInputStream());
+		
 		try {
 			listenForAuth();
 			listenForHandshakeKeyPortAndConnect();
@@ -131,7 +139,7 @@ public class Connection extends NetworkConnection {
 				try {
 					read = cipheredCommunicator.read();
 
-					cipheredCommunicator.decrypt(read, bytes -> onRead(bytes));
+					cipheredCommunicator.decrypt(read, this::onRead);
 
 				} catch (IOException e) {
 					if (!connected.get())
@@ -180,9 +188,16 @@ public class Connection extends NetworkConnection {
 
 		idController.sendTemporaryUUID();
 
-		HandshakeCommunicator hCommunicator = new HandshakeCommunicator(baseCommunicator);
-		hCommunicator.setOut(ct.getBaseKey(), ct.getHandshakeKey());
-		baseCommunicator = hCommunicator;
+		if (ct != null) {
+			HandshakeCommunicator hCommunicator;
+			if (baseCommunicator instanceof HandshakeCommunicator)
+				hCommunicator = (HandshakeCommunicator) baseCommunicator;
+			else
+				hCommunicator = new HandshakeCommunicator(baseCommunicator);
+	
+			hCommunicator.setOut(ct.getBaseKey(), ct.getHandshakeKey());
+			baseCommunicator = hCommunicator;
+		}
 
 		log("Generating session input cipher using " + SessionCipher.RSA_KEY_ALGORITHM + "-" + SessionCipher.RSA_KEY_SIZE + "...", VerboseLevel.MEDIUM);
 		sessionCipher.generate();
@@ -266,6 +281,10 @@ public class Connection extends NetworkConnection {
 	private void cancelConnectBackTimeout() {
 		if (remoteConnectBackTimeout != null) {
 			remoteConnectBackTimeout.cancel();
+			try {
+				writeRawBytes(new byte[DISCONNECT_REQUEST_BYTES.length]); // With that we avoid a comunicator asynchronization
+			} catch (IOException e) {
+			}
 		}
 	}
 
@@ -441,6 +460,10 @@ public class Connection extends NetworkConnection {
 		if (cipheredCommunicator != null) {
 			log("Stopping communicator pool and closing I/O streams...", VerboseLevel.MEDIUM);
 			cipheredCommunicator.closeQuietly();
+		}
+
+		if (baseCommunicator != null) {
+			baseCommunicator.closeQuietly();
 		}
 
 		if (hostSocket != null) {

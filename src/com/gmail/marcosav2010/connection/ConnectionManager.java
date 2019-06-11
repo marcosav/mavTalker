@@ -108,7 +108,7 @@ public class ConnectionManager {
 		ConnectionToken ct;
 
 		try {
-			ct = peer.getConnectionManager().getHandshakeAuthentificator().handleHandshake(remoteSocket);
+			ct = peer.getConnectionManager().getHandshakeAuthentificator().readHandshake(remoteSocket);
 
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			log("Remote peer didn't send handshake at time, closing remote socket...");

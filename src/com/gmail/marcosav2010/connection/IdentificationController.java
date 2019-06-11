@@ -16,7 +16,7 @@ import com.gmail.marcosav2010.tasker.Task;
 
 public class IdentificationController {
 
-	private static final long IDENTIFICATION_TIMEOUT = 5L;
+	private static final long IDENTIFICATION_TIMEOUT = 10L;
 
 	private Connection connection;
 	private PacketMessager messager;

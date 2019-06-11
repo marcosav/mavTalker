@@ -24,6 +24,7 @@ import com.gmail.marcosav2010.logger.Logger;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.peer.ConnectedPeer;
+import com.gmail.marcosav2010.peer.HandshakeAuthentificator.HandshakeRequirementLevel;
 import com.gmail.marcosav2010.peer.Peer;
 
 public class BaseCommandRegistry extends CommandRegistry {
@@ -61,7 +62,7 @@ public class BaseCommandRegistry extends CommandRegistry {
 			}
 
 			boolean autoPeer = pCount == 1 && (args == 2 || args == 0);
-			
+
 			Peer peer;
 
 			if (!autoPeer) {
@@ -77,30 +78,30 @@ public class BaseCommandRegistry extends CommandRegistry {
 				peer = Main.getInstance().getPeerManager().getFirstPeer();
 
 			var props = peer.getProperties();
-			
+
 			if (pCount > 1 && args < 3 || pCount <= 1 && args < 2) {
 				Logger.log("Showing peer " + peer.getName() + " properties:");
 				Logger.log(props.toString());
 				return;
 			}
-			
+
 			String prop = arg[autoPeer ? 0 : 1], value = arg[autoPeer ? 1 : 2];
-			
+
 			if (props.exist(prop)) {
 				if (props.set(prop, value)) {
 					Logger.log("Property \"" + prop + "\" set to: " + value);
 					return;
-					
+
 				} else
 					Logger.log("There was an error while setting the property \"" + prop + "\" in " + peer.getName() + ":");
-				
+
 			} else
 				Logger.log("Unrecognized property \"" + prop + "\", current properties in " + peer.getName() + ":");
-			
+
 			Logger.log(props.toString());
 		}
 	}
-	
+
 	private static class ConnectionKeyCMD extends Command {
 
 		ConnectionKeyCMD() {
@@ -160,7 +161,7 @@ public class BaseCommandRegistry extends CommandRegistry {
 			boolean generatePublic = args == 1 && arg[0].equalsIgnoreCase("-p");
 			boolean autoPeer = pCount == 1 && (args == 0 || generatePublic);
 			generatePublic |= args == 2 && arg[1].equalsIgnoreCase("-p");
-			
+
 			Peer peer;
 
 			if (!autoPeer) {
@@ -175,36 +176,47 @@ public class BaseCommandRegistry extends CommandRegistry {
 			} else
 				peer = Main.getInstance().getPeerManager().getFirstPeer();
 
-			
 			String addressKey;
-			
+
 			if (generatePublic) {
-				
-				addressKey = peer.getConnectionManager().getHandshakeAuthentificator().generatePublicAddressKey();
-				
-			} else {
-			
-				Logger.log("Enter requester Connection Key: ");
-	
-				var requesterConnectionKey = System.console().readPassword();
-				if (requesterConnectionKey == null)
+				if (peer.getProperties().getHRL().compareTo(HandshakeRequirementLevel.PRIVATE) >= 0) {
+					Logger.log("Peer \"" + peer.getName() + "\" does only allow private keys, you can change this in peer configuration.");
 					return;
-	
+					
+				} else
+					try {
+						addressKey = peer.getConnectionManager().getHandshakeAuthentificator().generatePublicAddressKey();
+						
+					} catch (BadPaddingException | InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException e) {
+						Logger.log("There was an error generating the public address key, " + e.getMessage() + ".");
+						return;
+					}
+
+			} else {
+
+				Logger.log("Enter requester Connection Key: ");
+
+				var requesterConnectionKey = System.console().readPassword();
+				if (requesterConnectionKey == null || requesterConnectionKey.length == 0) {
+					Logger.log("Please enter a Connection Key.");
+					return;
+				}
+
 				try {
 					addressKey = peer.getConnectionManager().getHandshakeAuthentificator().generatePrivateAddressKey(requesterConnectionKey);
-	
+
 				} catch (IllegalArgumentException e) {
 					Logger.log(e.getMessage());
 					return;
 				} catch (BadPaddingException | InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException e) {
-					Logger.log("There was an error reading the provided address key.");
+					Logger.log("There was an error reading the provided address key, " + e.getMessage() + ".");
 					return;
 				}
 			}
 
-			System.out.println("-----------------------------------------------------");
+			System.out.println("--------------------------------------------------------");
 			System.out.println("\tAddress Key => " + addressKey);
-			System.out.println("-----------------------------------------------------");
+			System.out.println("--------------------------------------------------------");
 		}
 	}
 
@@ -410,8 +422,10 @@ public class BaseCommandRegistry extends CommandRegistry {
 						Logger.log("Enter remote Address Key: ");
 
 						var read = System.console().readPassword();
-						if (read == null)
+						if (read == null || read.length == 0) {
+							Logger.log("Please enter an Address Key.");
 							return;
+						}
 
 						InetSocketAddress address;
 
@@ -425,7 +439,7 @@ public class BaseCommandRegistry extends CommandRegistry {
 							Logger.log("This address key references an unknown host.");
 							return;
 						} catch (BadPaddingException | InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException e) {
-							Logger.log("There was an error reading the provided address key.");
+							Logger.log("There was an error reading the provided address key: " + e.getMessage() + ".");
 							return;
 						} catch (Exception e) {
 							Logger.log(e, "There was an unknown error reading the provided address key.");

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import com.gmail.marcosav2010.common.Utils;
 import com.gmail.marcosav2010.communicator.packet.Packet;
 import com.gmail.marcosav2010.communicator.packet.handling.PacketAction;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
@@ -22,18 +21,10 @@ public class ConnectedPeer extends KnownPeer {
 	private Connection connection;
 	private NetworkIdentificator<NetworkPeer> networkManager;
 
-	public ConnectedPeer(String name, Connection connection) {
-		super(name, connection.getPort());
+	public ConnectedPeer(String name, UUID uuid, Connection connection) {
+		super(name, connection.getPort(), uuid);
 		networkManager = new NetworkIdentificator<>();
 		this.connection = connection;
-	}
-
-	public UUID getConnectionUUID() {
-		return connection.getUUID();
-	}
-	
-	public String getDisplayID() {
-		return Utils.toBase64(getConnectionUUID());
 	}
 
 	public Connection getConnection() {

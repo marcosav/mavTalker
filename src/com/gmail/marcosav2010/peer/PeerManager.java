@@ -120,7 +120,7 @@ public class PeerManager {
 
 	public void printInfo() {
 		log("Peers Running -> " + peers.values().stream().map(p -> p.getName() + " (" + p.getConnectionManager().getIdentificator().getConnectedPeers().stream()
-				.map(c -> c.getName() + " " + c.getConnectionUUID()).collect(Collectors.joining(" ")) + ")").collect(Collectors.joining(", ")));
+				.map(c -> c.getName() + " " + c.getDisplayID()).collect(Collectors.joining(" ")) + ")").collect(Collectors.joining(", ")));
 	}
 
 	public void log(String str) {

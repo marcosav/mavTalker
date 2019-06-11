@@ -16,8 +16,7 @@ import com.gmail.marcosav2010.tasker.TaskOwner;
 public class BaseCommunicator extends Communicator {
 
 	public synchronized byte[] read(int bytes) throws IOException {
-		byte[] read = new byte[bytes];
-		getIn().readNBytes(read, 0, bytes);
+		byte[] read = getIn().readNBytes(bytes);
 
 		return read;
 	}

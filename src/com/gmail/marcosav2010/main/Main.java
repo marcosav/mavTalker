@@ -24,8 +24,11 @@ public class Main {
 	private Tasker tasker;
 	
 	private InetAddress publicAddress;
+	
+	private boolean shuttingDown;
 
 	protected Main() {
+		shuttingDown = false;
 		generalConfig = new GeneralConfiguration();
 		
 		Logger.setVerboseLevel(generalConfig.getVerboseLevel());
@@ -88,8 +91,17 @@ public class Main {
 	public static void setInstance(Main instance) {
 		mainInstance = instance;
 	}
+	
+	public boolean isShuttingDown() {
+		return shuttingDown;
+	}
 
 	public void shutdown() {
+		if (shuttingDown)
+			return;
+		
+		shuttingDown = true;
+		
 		Logger.log("Exiting application...");
 		if (getPeerManager() != null)
 			getPeerManager().shutdown();

@@ -22,7 +22,7 @@ public class ConnectionIdentificator extends NetworkIdentificator<ConnectedPeer>
 
 	protected ConnectedPeer identifyConnection(Connection connection, PacketIdentify info) {
 		String name = getSuitableName(info.getName());
-		ConnectedPeer c = new ConnectedPeer(name, connection);
+		ConnectedPeer c = new ConnectedPeer(name, info.getPeerUUID(), connection);
 		namePeer.put(name, c);
 		peers.put(connection.getUUID(), c);
 		return c;
@@ -53,6 +53,6 @@ public class ConnectionIdentificator extends NetworkIdentificator<ConnectedPeer>
 		ConnectedPeer c = namePeer.remove(name);
 		if (c == null)
 			return null;
-		return peers.remove(c.getConnectionUUID());
+		return peers.remove(c.getConnection().getUUID());
 	}
 }
