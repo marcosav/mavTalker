@@ -25,7 +25,7 @@ public class FTListener implements PacketListener {
 	@PacketEventHandler
 	public void onFileRequest(PacketFileRequest pf, ConnectedPeer peer) {
 		fth.log("File request: #" + pf.getID() + " \"" + pf.getName() + "\" (" + Utils.formatSize(pf.getSize()) + "), accept download? Use /d "
-				+ peer.getConnection().getPeer().getName() + " " + peer.getName() + " " + pf.getID());
+				+ peer.getConnection().getPeer().getName() + " " + peer.getName() + " " + pf.getFileID());
 		fth.handleRequest(pf);
 	}
 
@@ -33,7 +33,7 @@ public class FTListener implements PacketListener {
 	public void onFileReceive(PacketFileSend p, ConnectedPeer peer) {
 		FileDownloadResult result = fth.handleReceiveFile(p);
 		if (result != FileDownloadResult.SUCCESS)
-			fth.log("File #" + p.getFileId() + " could not be downloaded: " + result.toString());
+			fth.log("File #" + p.getFileID() + " could not be downloaded: " + result.toString());
 	}
 
 	@PacketEventHandler
@@ -42,12 +42,12 @@ public class FTListener implements PacketListener {
 		FileSendResult result = fth.handleAcceptRespose(p);
 		
 		if (result != FileSendResult.SUCCESS) {
-			fth.log("File #" + p.getFileId() + " could not be sent because: " + result.toString());
+			fth.log("File #" + p.getFileID() + " could not be sent because: " + result.toString());
 			if (connection.isConnected())
 				try {
-					connection.sendPacket(new PacketFileSendFailed(p.getFileId(), result));
+					connection.sendPacket(new PacketFileSendFailed(p.getFileID(), result));
 				} catch (PacketWriteException e) {
-					fth.log("Couldn't send result of File #" + p.getFileId() + ".");
+					fth.log("Couldn't send result of File #" + p.getFileID() + ".");
 					Logger.log(e);
 				}
 		}

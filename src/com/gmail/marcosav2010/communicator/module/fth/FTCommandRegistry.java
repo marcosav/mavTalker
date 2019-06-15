@@ -17,7 +17,6 @@ import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.connection.ConnectionIdentificator;
 import com.gmail.marcosav2010.connection.ConnectionManager;
 import com.gmail.marcosav2010.logger.Logger;
-import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.peer.ConnectedPeer;
 import com.gmail.marcosav2010.peer.Peer;
@@ -27,7 +26,7 @@ public class FTCommandRegistry extends CommandRegistry {
 	public FTCommandRegistry() {
 		super(Set.of(new FileCMD(), new ClearDownloadsCMD(), new DownloadCMD()));
 	}
-	
+
 	private static class FileCMD extends Command {
 
 		FileCMD() {
@@ -60,7 +59,7 @@ public class FTCommandRegistry extends CommandRegistry {
 			to.forEach(c -> c.getConnection().getModuleManager().getFTH().sendRequest(info));
 
 			Logger.log("INFO: File \"" + info.getFileName() + "\" transfer request has been sent to "
-					+ to.stream().map(t -> t.getName()).collect(Collectors.joining(",")) + ".", VerboseLevel.MEDIUM);
+					+ to.stream().map(t -> t.getName()).collect(Collectors.joining(",")) + ".");
 		}
 	}
 
@@ -114,14 +113,14 @@ public class FTCommandRegistry extends CommandRegistry {
 				return;
 			}
 			FileReceiveInfo info = fth.getRequest(id);
-			
+
 			boolean yes = args < 4;
-			
+
 			if (!yes) {
 				String o = arg[3].toLowerCase();
 				yes |= o.equals("yes") || o.equals("y");
 			}
-			
+
 			if (yes) {
 				Logger.log("Accepted file #" + id + " (" + info.getFileName() + ") transfer request.");
 				fth.acceptRequest(id);

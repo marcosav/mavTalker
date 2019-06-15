@@ -9,6 +9,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -16,22 +17,70 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import com.gmail.marcosav2010.communicator.packet.packets.PacketPing;
+import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
 import com.gmail.marcosav2010.config.GeneralConfiguration;
 import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.connection.ConnectionIdentificator;
 import com.gmail.marcosav2010.connection.ConnectionManager;
+import com.gmail.marcosav2010.handshake.HandshakeAuthentificator.HandshakeRequirementLevel;
 import com.gmail.marcosav2010.logger.Logger;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.peer.ConnectedPeer;
-import com.gmail.marcosav2010.peer.HandshakeAuthentificator.HandshakeRequirementLevel;
 import com.gmail.marcosav2010.peer.Peer;
 
 public class BaseCommandRegistry extends CommandRegistry {
 
 	public BaseCommandRegistry() {
 		super(Set.of(new ExitCMD(), new VerboseCMD(), new InfoCMD(), new StopCMD(), new NewCMD(), new HelpCMD(), new DisconnectCMD(), new GenerateAddressCMD(),
-				new ConnectionKeyCMD(), new PeerPropertyCMD()));
+				new ConnectionKeyCMD(), new PeerPropertyCMD(), new PingCMD()));
+	}
+
+	private static class PingCMD extends Command {
+
+		PingCMD() {
+			super("ping");
+		}
+
+		@Override
+		public void execute(String[] arg, int args) {
+			if (args < 2) {
+				Logger.log("ERROR: Needed transmitter and target.");
+				return;
+			}
+
+			String peerName = arg[0], remoteName = arg[1];
+			Peer peer;
+
+			if (Main.getInstance().getPeerManager().exists(peerName)) {
+				peer = Main.getInstance().getPeerManager().get(peerName);
+			} else {
+				Logger.log("ERROR: Peer \"" + peerName + "\" doesn't exists.");
+				return;
+			}
+
+			ConnectionManager cManager = peer.getConnectionManager();
+			ConnectionIdentificator cIdentificator = cManager.getIdentificator();
+
+			Connection connection;
+
+			if (!cIdentificator.hasPeer(remoteName)) {
+				Logger.log("ERROR: " + peerName + " peer is not connected to that " + remoteName + ".");
+				return;
+			}
+
+			connection = cIdentificator.getPeer(remoteName).getConnection();
+
+			long l = System.currentTimeMillis();
+
+			try {
+				connection.sendPacket(new PacketPing(), () -> Logger.log((System.currentTimeMillis() - l) / 2 + "ms"), () -> Logger.log("Ping timed out."), 10L,
+						TimeUnit.SECONDS);
+			} catch (PacketWriteException e) {
+				Logger.log(e);
+			}
+		}
 	}
 
 	private static class ExitCMD extends Command {
@@ -182,11 +231,11 @@ public class BaseCommandRegistry extends CommandRegistry {
 				if (peer.getProperties().getHRL().compareTo(HandshakeRequirementLevel.PRIVATE) >= 0) {
 					Logger.log("Peer \"" + peer.getName() + "\" does only allow private keys, you can change this in peer configuration.");
 					return;
-					
+
 				} else
 					try {
 						addressKey = peer.getConnectionManager().getHandshakeAuthentificator().generatePublicAddressKey();
-						
+
 					} catch (BadPaddingException | InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException e) {
 						Logger.log("There was an error generating the public address key, " + e.getMessage() + ".");
 						return;

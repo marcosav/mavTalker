@@ -21,10 +21,10 @@ import com.gmail.marcosav2010.config.GeneralConfiguration.PropertyCategory;
 import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.connection.ConnectionIdentificator;
 import com.gmail.marcosav2010.connection.ConnectionManager;
+import com.gmail.marcosav2010.handshake.HandshakeAuthentificator.HandshakeRequirementLevel;
 import com.gmail.marcosav2010.logger.Logger;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.main.Main;
-import com.gmail.marcosav2010.peer.HandshakeAuthentificator.HandshakeRequirementLevel;
 import com.gmail.marcosav2010.tasker.TaskOwner;
 
 /**
@@ -68,6 +68,7 @@ public class Peer extends KnownPeer implements TaskOwner {
 				t.setDaemon(false);
 			if (t.getPriority() != Thread.NORM_PRIORITY)
 				t.setPriority(Thread.NORM_PRIORITY);
+
 			return t;
 		}
 	}

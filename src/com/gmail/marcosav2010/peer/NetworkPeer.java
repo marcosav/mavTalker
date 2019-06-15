@@ -1,5 +1,7 @@
 package com.gmail.marcosav2010.peer;
 
+import java.util.UUID;
+
 import com.gmail.marcosav2010.connection.NetworkIdentificator;
 
 /**
@@ -11,4 +13,6 @@ import com.gmail.marcosav2010.connection.NetworkIdentificator;
 public interface NetworkPeer {
 
 	public NetworkIdentificator<? extends NetworkPeer> getNetworkIdentificator();
+	
+	public UUID getUUID();
 }

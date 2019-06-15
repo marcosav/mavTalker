@@ -16,33 +16,45 @@ import com.gmail.marcosav2010.peer.NetworkPeer;
  */
 public class NetworkIdentificator<T extends NetworkPeer> {
 
-	protected Map<UUID, T> peers;
+	private Map<UUID, T> connectionPeer;
+	private Map<UUID, UUID> connectionPeerUUID;
 
 	public NetworkIdentificator() {
-		peers = new ConcurrentHashMap<>();
+		connectionPeer = new ConcurrentHashMap<>();
+		connectionPeerUUID = new ConcurrentHashMap<>();
 	}
 
 	public T getPeer(UUID uuid) {
-		return peers.get(uuid);
+		return connectionPeer.get(uuid);
 	}
 	
 	public UUID getConnection(NetworkPeer peer) {
-		return peers.entrySet().stream().filter(e -> e.getValue().equals(peer)).map(e -> e.getKey()).findFirst().orElseGet(null);
+		return connectionPeer.entrySet().stream().filter(e -> e.getValue().equals(peer)).map(e -> e.getKey()).findFirst().orElseGet(null);
 	}
 
 	public boolean hasPeer(UUID uuid) {
-		return peers.containsKey(uuid);
+		return connectionPeer.containsKey(uuid);
 	}
 
 	public boolean hasPeer(NetworkPeer peer) {
-		return peers.containsValue(peer);
+		return connectionPeerUUID.containsKey(peer.getUUID());
+	}
+	
+	protected void put(UUID connectionUUID, T peer) {
+		connectionPeerUUID.put(connectionUUID, peer.getUUID());
+		connectionPeer.put(connectionUUID, peer);
+	}
+	
+	protected T remove(UUID connectionUUID) {
+		connectionPeerUUID.remove(connectionUUID);
+		return connectionPeer.remove(connectionUUID);
 	}
 	
 	public Set<T> getConnectedPeers() {
-		return Collections.unmodifiableSet(new HashSet<>(peers.values()));
+		return Collections.unmodifiableSet(new HashSet<>(connectionPeer.values()));
 	}
 	
 	public int size() {
-		return peers.size();
+		return connectionPeer.size();
 	}
 }

@@ -17,6 +17,8 @@ public class PacketRegistry {
 		register((byte) 0, PacketIdentify.class);
 		register((byte) 1, PacketRespose.class);
 		register((byte) 2, PacketShutdown.class);
+		
+		register((byte) -1, PacketPing.class);
 	}
 
 	public static void register(byte id, Class<? extends AbstractPacket> packet) {

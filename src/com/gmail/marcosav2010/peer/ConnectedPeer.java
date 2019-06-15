@@ -5,7 +5,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import com.gmail.marcosav2010.communicator.packet.Packet;
-import com.gmail.marcosav2010.communicator.packet.handling.PacketAction;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
 import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.connection.NetworkIdentificator;
@@ -22,7 +21,7 @@ public class ConnectedPeer extends KnownPeer {
 	private NetworkIdentificator<NetworkPeer> networkManager;
 
 	public ConnectedPeer(String name, UUID uuid, Connection connection) {
-		super(name, connection.getPort(), uuid);
+		super(name, connection.getRemoteAddress(), connection.getPort(), uuid);
 		networkManager = new NetworkIdentificator<>();
 		this.connection = connection;
 	}
@@ -44,11 +43,11 @@ public class ConnectedPeer extends KnownPeer {
 		connection.sendPacket(packet);
 	}
 
-	public void sendPacket(Packet packet, PacketAction action) throws PacketWriteException {
+	public void sendPacket(Packet packet, Runnable action) throws PacketWriteException {
 		connection.sendPacket(packet, action);
 	}
 
-	public void sendPacket(Packet packet, PacketAction action, long timeout, TimeUnit timeUnit) throws PacketWriteException {
-		connection.sendPacket(packet, action, timeout, timeUnit);
+	public void sendPacket(Packet packet, Runnable action, Runnable onTimeOut, long timeout, TimeUnit timeUnit) throws PacketWriteException {
+		connection.sendPacket(packet, action, onTimeOut, timeout, timeUnit);
 	}
 }

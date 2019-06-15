@@ -33,7 +33,7 @@ public class PacketFileSend extends Packet {
 		this.hash = hash;
 	}
 
-	public int getFileId() {
+	public int getFileID() {
 		return fileId;
 	}
 

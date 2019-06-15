@@ -1,4 +1,4 @@
-package com.gmail.marcosav2010.cipher;
+package com.gmail.marcosav2010.handshake;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;

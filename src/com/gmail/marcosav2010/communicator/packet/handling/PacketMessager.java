@@ -68,6 +68,7 @@ public class PacketMessager {
 
 		} else if (sp instanceof PacketShutdown) {
 			connection.disconnect(true);
+			
 		}
 	}
 
@@ -85,13 +86,13 @@ public class PacketMessager {
 			}
 	}
 
-	public int sendPacket(Packet packet, PacketAction action, long timeout, TimeUnit timeUnit) throws PacketWriteException {
+	public int sendPacket(Packet packet, Runnable action, Runnable onTimeOut, long timeout, TimeUnit timeUnit) throws PacketWriteException {
 		int id = lastPacket.incrementAndGet();
 		log("Sending packet #" + id + ".", VerboseLevel.HIGH);
 		communicator.write(writter.write(packet.setID(id)));
 		
 		if (action != null)
-			actionHandler.handleSend(connection.getPeer(), id, packet, action, timeout, timeUnit);
+			actionHandler.handleSend(connection.getPeer(), id, packet, action, onTimeOut, timeout, timeUnit);
 
 		return lastPacket.get();
 	}

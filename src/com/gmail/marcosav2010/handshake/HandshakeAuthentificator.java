@@ -1,4 +1,4 @@
-package com.gmail.marcosav2010.peer;
+package com.gmail.marcosav2010.handshake;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -28,6 +28,7 @@ import com.gmail.marcosav2010.common.Utils;
 import com.gmail.marcosav2010.communicator.BaseCommunicator;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.main.Main;
+import com.gmail.marcosav2010.peer.Peer;
 
 /**
  * This clase manages the handshake of a starting @Connection

@@ -16,17 +16,16 @@ public class Configuration {
 
 	private boolean save;
 
-	private Properties defaultProperties;
 	private Properties properties;
-
+	
 	public Configuration(String configName) {
 		this.configName = configName + ".properties";
 		save = false;
-
-		properties = new Properties(defaultProperties);
 	}
 
-	public void load() {
+	public void load(Properties defaultProperties) {
+		properties = defaultProperties;
+		
 		File f = new File(configName);
 		path = f.toPath();
 		if (f.exists()) {
@@ -40,6 +39,7 @@ public class Configuration {
 		} else {
 			try {
 				f.createNewFile();
+				_store();
 			} catch (IOException e) {
 				Logger.log(e);
 			}
@@ -65,8 +65,12 @@ public class Configuration {
 
 	public void store() throws IOException {
 		if (save)
-			try (OutputStream out = Files.newOutputStream(path)) {
-				properties.store(out, null);
-			}
+			_store();
+	}
+	
+	private void _store() throws IOException {
+		try (OutputStream out = Files.newOutputStream(path)) {
+			properties.store(out, null);
+		}
 	}
 }

@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.gmail.marcosav2010.handshake.HandshakeAuthentificator.HandshakeRequirementLevel;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
-import com.gmail.marcosav2010.peer.HandshakeAuthentificator.HandshakeRequirementLevel;
 
 public class GeneralConfiguration extends Configuration {
 
@@ -24,7 +24,11 @@ public class GeneralConfiguration extends Configuration {
 
 	public GeneralConfiguration() {
 		super(GENERAL_CONFIG_NAME);
-		load();
+		
+		var dp = new java.util.Properties();
+		propCategory.forEach((s, p) -> dp.setProperty(s, p.getDefault().toString()));
+		
+		load(dp);
 	}
 
 	public String get(String key) {

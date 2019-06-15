@@ -24,7 +24,7 @@ public class ConnectionIdentificator extends NetworkIdentificator<ConnectedPeer>
 		String name = getSuitableName(info.getName());
 		ConnectedPeer c = new ConnectedPeer(name, info.getPeerUUID(), connection);
 		namePeer.put(name, c);
-		peers.put(connection.getUUID(), c);
+		put(connection.getUUID(), c);
 		return c;
 	}
 
@@ -43,9 +43,10 @@ public class ConnectionIdentificator extends NetworkIdentificator<ConnectedPeer>
 	}
 
 	protected ConnectedPeer removePeer(UUID uuid) {
-		ConnectedPeer c = peers.remove(uuid);
+		ConnectedPeer c = remove(uuid);
 		if (c == null)
 			return null;
+
 		return namePeer.remove(c.getName());
 	}
 
@@ -53,6 +54,7 @@ public class ConnectionIdentificator extends NetworkIdentificator<ConnectedPeer>
 		ConnectedPeer c = namePeer.remove(name);
 		if (c == null)
 			return null;
-		return peers.remove(c.getConnection().getUUID());
+
+		return remove(c.getConnection().getUUID());
 	}
 }

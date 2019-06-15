@@ -17,7 +17,7 @@ public class PacketFileAccept extends Packet {
         this.fileId = fileId;
     }
     
-    public int getFileId() {
+    public int getFileID() {
     	return fileId;
     }
     

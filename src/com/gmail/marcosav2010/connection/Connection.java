@@ -14,25 +14,24 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.gmail.marcosav2010.cipher.CipheredCommunicator;
 import com.gmail.marcosav2010.cipher.EncryptedMessage;
-import com.gmail.marcosav2010.cipher.HandshakeCommunicator;
 import com.gmail.marcosav2010.cipher.SessionCipher;
 import com.gmail.marcosav2010.common.Utils;
 import com.gmail.marcosav2010.communicator.BaseCommunicator;
 import com.gmail.marcosav2010.communicator.module.ModuleManager;
 import com.gmail.marcosav2010.communicator.packet.AbstractPacket;
 import com.gmail.marcosav2010.communicator.packet.Packet;
-import com.gmail.marcosav2010.communicator.packet.handling.PacketAction;
 import com.gmail.marcosav2010.communicator.packet.handling.PacketMessager;
 import com.gmail.marcosav2010.communicator.packet.packets.PacketShutdown;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketReadException;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketReader;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
+import com.gmail.marcosav2010.handshake.HandshakeAuthentificator;
+import com.gmail.marcosav2010.handshake.HandshakeCommunicator;
+import com.gmail.marcosav2010.handshake.HandshakeAuthentificator.ConnectionToken;
 import com.gmail.marcosav2010.logger.Logger;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.peer.ConnectedPeer;
-import com.gmail.marcosav2010.peer.HandshakeAuthentificator;
-import com.gmail.marcosav2010.peer.HandshakeAuthentificator.ConnectionToken;
 import com.gmail.marcosav2010.peer.Peer;
 import com.gmail.marcosav2010.tasker.Task;
 
@@ -367,12 +366,12 @@ public class Connection extends NetworkConnection {
 		return sendPacket(packet, null);
 	}
 
-	public int sendPacket(Packet packet, PacketAction action) throws PacketWriteException {
-		return sendPacket(packet, action, -1L, null);
+	public int sendPacket(Packet packet, Runnable action) throws PacketWriteException {
+		return sendPacket(packet, action, null, -1L, null);
 	}
 
-	public int sendPacket(Packet packet, PacketAction action, long timeout, TimeUnit timeUnit) throws PacketWriteException {
-		return messager.sendPacket(packet, action, timeout, timeUnit);
+	public int sendPacket(Packet packet, Runnable action, Runnable onTimeOut, long timeout, TimeUnit timeUnit) throws PacketWriteException {
+		return messager.sendPacket(packet, action, onTimeOut, timeout, timeUnit);
 	}
 
 	public void writeRawBytes(byte[] bytes) throws IOException {

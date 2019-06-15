@@ -1,5 +1,7 @@
 package com.gmail.marcosav2010.peer;
 
+import java.util.UUID;
+
 import com.gmail.marcosav2010.connection.NetworkIdentificator;
 
 /**
@@ -11,13 +13,19 @@ import com.gmail.marcosav2010.connection.NetworkIdentificator;
 public class UnpairedPeer implements NetworkPeer {
 
 	private NetworkIdentificator<NetworkPeer> networkManager;
+	private UUID uuid;
 
-	public UnpairedPeer() {
+	public UnpairedPeer(UUID uuid) {
+		this.uuid = uuid;
 		networkManager = new NetworkIdentificator<>();
 	}
 
 	@Override
 	public NetworkIdentificator<NetworkPeer> getNetworkIdentificator() {
 		return networkManager;
+	}
+	
+	public UUID getUUID() {
+		return uuid;
 	}
 }

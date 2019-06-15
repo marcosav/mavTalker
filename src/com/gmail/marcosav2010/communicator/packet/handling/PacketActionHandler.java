@@ -38,19 +38,20 @@ public class PacketActionHandler {
 		if (!isPending(id))
 			return;
 		
-		PacketAction action = pendingActions.remove(id);
+		PacketAction pa = pendingActions.remove(id);
 		
 		try {
-			action.onReceive();
+			pa.onReceive();
 		} catch (Exception e) {
-			log("There was an error while handling action:\n\tID: " + id + "\n\tPacket: " + action.getType().getName() + "\n\tStacktrace: ");
+			log("There was an error while handling action:\n\tID: " + id + "\n\tPacket: " + pa.getType().getName() + "\n\tStacktrace: ");
 			Logger.log(e);
 		}
 	}
 
-	public void handleSend(TaskOwner owner, long id, Packet packet, PacketAction action, long expireTimeout, TimeUnit timeUnit) {
-		action.setType(packet.getClass());
-		pendingActions.put(id, action);
+	public void handleSend(TaskOwner owner, long id, Packet packet, Runnable action, Runnable onTimeOut, long expireTimeout, TimeUnit timeUnit) {
+		PacketAction pa = new PacketAction(action, onTimeOut); 
+		pa.setType(packet.getClass());
+		pendingActions.put(id, pa);
 		if (timeUnit == null || expireTimeout < 0) {
 			expireTimeout = MAX_TIMEOUT;
 			timeUnit = TimeUnit.SECONDS;
@@ -60,7 +61,17 @@ public class PacketActionHandler {
 	}
 
 	public void onExpire(long id) {
-		pendingActions.remove(id);
+		if (!isPending(id))
+			return;
+		
+		PacketAction pa = pendingActions.remove(id);
+		
+		try {
+			pa.onTimeOut();
+		} catch (Exception e) {
+			log("There was an error while handling time out action:\n\tID: " + id + "\n\tPacket: " + pa.getType().getName() + "\n\tStacktrace: ");
+			Logger.log(e);
+		}
 	}
 	
 	public void log(String str) {

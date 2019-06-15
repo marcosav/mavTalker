@@ -12,6 +12,7 @@ public class PacketFileRequest extends Packet {
 	private String name;
 	private int size;
 	private int blocks;
+	private int fileId;
 
 	public PacketFileRequest() {
 	}
@@ -20,10 +21,15 @@ public class PacketFileRequest extends Packet {
 		this.name = info.getPath().getFileName().toString();
 		this.size = info.getSize();
 		this.blocks = info.getBlocks();
+		this.fileId = info.getID();
 	}
 
 	public String getName() {
 		return name;
+	}
+	
+	public int getFileID() {
+		return fileId;
 	}
 
 	public int getSize() {
@@ -43,6 +49,7 @@ public class PacketFileRequest extends Packet {
 		out.write(name);
 		out.write(size);
 		out.write(blocks);
+		out.write(fileId);
 	}
 
 	@Override
@@ -50,5 +57,6 @@ public class PacketFileRequest extends Packet {
 		name = in.readString();
 		size = in.readInt();
 		blocks = in.readInt();
+		fileId = in.readInt();
 	}
 }

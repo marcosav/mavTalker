@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.gmail.marcosav2010.common.Utils;
@@ -39,11 +40,11 @@ public class FileTransferHandler {
 
 	public static final String DOWNLOAD_FOLDER = "FilesTransferred/";
 
-	public static final short HASH_BITS = 256;
-	public static final byte HASH_SIZE = 256 / Byte.SIZE;
+	public static final short HASH_BITS = 224;
+	public static final byte HASH_SIZE = 224 / Byte.SIZE;
 	private static final String HASH_ALGORITHM = "SHA3-" + HASH_BITS;
 
-	private static final long ACCEPT_TIMEOUT = 20L;
+	private static final long ACCEPT_TIMEOUT = 30L;
 	private static final long RECEIVE_TIMEOUT = 10L;
 
 	public static final int MAX_FILE_SIZE = Integer.MAX_VALUE; // 4 GB
@@ -61,6 +62,8 @@ public class FileTransferHandler {
 	private Map<Integer, Integer> downloading;
 
 	private Map<Integer, Task> pendingTasks;
+	
+	private AtomicInteger nextId;
 
 	public FileTransferHandler(FTModule module, Connection connection) {
 		this.module = module;
@@ -72,6 +75,8 @@ public class FileTransferHandler {
 		downloading = new ConcurrentHashMap<>();
 
 		pendingTasks = new HashMap<>();
+		
+		nextId = new AtomicInteger(1);
 	}
 
 	public boolean isPendingRequest(int id) {
@@ -95,7 +100,7 @@ public class FileTransferHandler {
 	}
 
 	public void handleRequest(PacketFileRequest pf) {
-		int id = pf.getID();
+		int id = pf.getFileID();
 		if (isPendingRequest(id))
 			return;
 
@@ -103,7 +108,7 @@ public class FileTransferHandler {
 	}
 
 	public FileDownloadResult handleReceiveFile(PacketFileSend p) {
-		int id = p.getFileId();
+		int id = p.getFileID();
 
 		removeTask(id);
 
@@ -166,7 +171,7 @@ public class FileTransferHandler {
 	}
 
 	public FileSendResult handleAcceptRespose(PacketFileAccept p) {
-		int id = p.getFileId();
+		int id = p.getFileID();
 
 		removeTask(id);
 
@@ -309,12 +314,13 @@ public class FileTransferHandler {
 	}
 
 	public void sendRequest(FileSendInfo info, long expireTimeout, TimeUnit timeUnit) {
+		int id = nextId.getAndIncrement();
+		info.setID(id);
+		
 		PacketFileRequest p = new PacketFileRequest(info);
 
-		int id;
-
 		try {
-			id = connection.sendPacket(p);
+			connection.sendPacket(p);
 		} catch (PacketWriteException e) {
 			Logger.log(e);
 			return;
