@@ -100,9 +100,9 @@ public class Connection extends NetworkConnection {
 
 		remoteAddress = remoteSocket.getInetAddress();
 
-		log("Setting Input stream...", VerboseLevel.MEDIUM);
-
 		if (ct != null) {
+			log("Setting handshake ciphered communicator input key...", VerboseLevel.HIGH);
+			
 			HandshakeCommunicator hCommunicator;
 			if (baseCommunicator instanceof HandshakeCommunicator)
 				hCommunicator = (HandshakeCommunicator) baseCommunicator;
@@ -114,6 +114,7 @@ public class Connection extends NetworkConnection {
 			baseCommunicator = hCommunicator;
 		}
 
+		log("Setting input stream...", VerboseLevel.MEDIUM);
 		baseCommunicator.setIn(remoteSocket.getInputStream());
 		
 		try {
@@ -179,7 +180,7 @@ public class Connection extends NetworkConnection {
 		hostSocket = connectingSocket;
 		remotePort = address.getPort();
 
-		log("Setting Output stream...", VerboseLevel.MEDIUM);
+		log("Setting output stream...", VerboseLevel.MEDIUM);
 		baseCommunicator.setOut(hostSocket.getOutputStream());
 
 		HandshakeAuthentificator ha = peer.getConnectionManager().getHandshakeAuthentificator();
@@ -188,6 +189,8 @@ public class Connection extends NetworkConnection {
 		idController.sendTemporaryUUID();
 
 		if (ct != null) {
+			log("Setting handshake ciphered communicator output key...", VerboseLevel.HIGH);
+			
 			HandshakeCommunicator hCommunicator;
 			if (baseCommunicator instanceof HandshakeCommunicator)
 				hCommunicator = (HandshakeCommunicator) baseCommunicator;
@@ -281,7 +284,7 @@ public class Connection extends NetworkConnection {
 		if (remoteConnectBackTimeout != null) {
 			remoteConnectBackTimeout.cancel();
 			try {
-				writeRawBytes(new byte[DISCONNECT_REQUEST_BYTES.length]); // With that we avoid a comunicator asynchronization
+				writeRawBytes(new byte[DISCONNECT_REQUEST_BYTES.length]); // With this we avoid a comunicator asynchronization
 			} catch (IOException e) {
 			}
 		}
@@ -356,6 +359,8 @@ public class Connection extends NetworkConnection {
 		messager.setupEventHandler();
 
 		moduleManager.enable();
+		
+		log("Connection completed.");
 	}
 
 	private void startAuthentication() throws IOException, GeneralSecurityException {

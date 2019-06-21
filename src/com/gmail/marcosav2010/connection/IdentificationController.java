@@ -151,7 +151,7 @@ public class IdentificationController {
 
 		ConnectedPeer cp = cManager.getIdentificator().identifyConnection(connection, info);
 		connection.setConnectedPeer(cp);
-		log("Identification completed, peers paired successfully.");
+		log("Identification completed, peers paired successfully.", VerboseLevel.MEDIUM);
 		connection.onPairCompleted();
 
 		return cp;

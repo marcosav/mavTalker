@@ -38,6 +38,8 @@ import com.gmail.marcosav2010.tasker.Task;
  */
 public class FileTransferHandler {
 
+	private static final long DOWNLOAD_STATUS_INFO_WAIT = 2000;
+	
 	public static final String DOWNLOAD_FOLDER = "FilesTransferred/";
 
 	public static final short HASH_BITS = 224;
@@ -116,6 +118,7 @@ public class FileTransferHandler {
 			return FileDownloadResult.NOT_PENDING_OR_TIMED_OUT;
 
 		FileReceiveInfo info = pendingReceiveFiles.get(id);
+		info.setFirstArrivalTime();
 		boolean single = info.isSingle();
 		int blocks = info.getBlocks();
 		int remaining = 0;
@@ -151,12 +154,13 @@ public class FileTransferHandler {
 			}
 
 			double dw = 100D - ((double) remaining / blocks) * 100D;
-			if (last)
-				log("File #" + id + " \"" + info.getFileName() + "\" has been downloaded successfully.");
-
-			else if (dw % 10 == 0) {
+			if (last) {
+				long elapsed = System.currentTimeMillis() - info.getFirstArrivalTime();
+				long speed = file.length() / elapsed * 1000;
+				log("File #" + id + " \"" + info.getFileName() + "\" has been downloaded successfully (" + elapsed + "ms | " + Utils.formatSize(speed) + "/s).");
+				
+			} else if (info.updateLastArrivalTime(DOWNLOAD_STATUS_INFO_WAIT))
 				log(String.format("File #%s \"%s\" %.2f%% downloaded.", id, info.getFileName(), dw));
-			}
 
 		} catch (Exception ex) {
 			log("There was an exception writing the file #" + id + ".");
