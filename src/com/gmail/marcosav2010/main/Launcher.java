@@ -10,7 +10,8 @@ import com.gmail.marcosav2010.logger.Logger;
 public class Launcher {
 
 	public static void main(String[] args) throws NumberFormatException, IOException, GeneralSecurityException {
-		Logger.log("Loading...");
+		var pkg = Launcher.class.getPackage();
+		Logger.log("Loading " + pkg.getImplementationTitle() + " v" + pkg.getImplementationVersion() + " by marcosav...");
 
 		addSignalHook();
 
