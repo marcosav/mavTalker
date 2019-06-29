@@ -7,6 +7,10 @@ import com.gmail.marcosav2010.communicator.packet.Packet;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketDecoder;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketEncoder;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
 public class PacketFileSend extends Packet {
 
 	/**
@@ -14,39 +18,24 @@ public class PacketFileSend extends Packet {
 	 */
 	public static final int MAX_BLOCK_SIZE = Packet.MAX_SIZE - 2 * Integer.BYTES - FileTransferHandler.HASH_SIZE - 2 * Integer.BYTES;
 
-	private int fileId;
+	@Getter
+	private int fileID;
+	@Getter
 	private int pointer;
-	private byte[] file;
+	@Getter
+	private byte[] bytes;
+	@Getter
 	private byte[] hash;
 
-	public PacketFileSend() {
-	}
-
-	public PacketFileSend(int fileId, int pointer, byte[] file, byte[] hash) {
-		this.fileId = fileId;
+	public PacketFileSend(int fileID, int pointer, byte[] bytes, byte[] hash) {
+		this.fileID = fileID;
 		this.pointer = pointer;
-		if (file.length > MAX_BLOCK_SIZE)
+		if (bytes.length > MAX_BLOCK_SIZE)
 			throw new IllegalArgumentException("Byte block size cannot exceed " + MAX_BLOCK_SIZE + " bytes");
 		if (hash.length > FileTransferHandler.HASH_SIZE)
 			throw new IllegalArgumentException("Hash size cannot exceed " + FileTransferHandler.HASH_SIZE + " bytes");
-		this.file = file;
+		this.bytes = bytes;
 		this.hash = hash;
-	}
-
-	public int getFileID() {
-		return fileId;
-	}
-
-	public int getPointer() {
-		return pointer;
-	}
-
-	public byte[] getBytes() {
-		return file;
-	}
-
-	public byte[] getHash() {
-		return hash;
 	}
 
 	@Override
@@ -56,17 +45,17 @@ public class PacketFileSend extends Packet {
 
 	@Override
 	protected void encodeContent(PacketEncoder out) throws IOException {
-		out.write(fileId);
+		out.write(fileID);
 		out.write(pointer);
-		out.write(file);
+		out.write(bytes);
 		out.write(hash);
 	}
 
 	@Override
 	protected void decodeContent(PacketDecoder in) throws IOException {
-		fileId = in.readInt();
+		fileID = in.readInt();
 		pointer = in.readInt();
-		file = in.readBytes();
+		bytes = in.readBytes();
 		hash = in.readBytes();
 	}
 }

@@ -7,37 +7,26 @@ import com.gmail.marcosav2010.communicator.packet.Packet;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketDecoder;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketEncoder;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
 public class PacketFileRequest extends Packet {
 
+	@Getter
 	private String name;
+	@Getter
 	private int size;
+	@Getter
 	private int blocks;
-	private int fileId;
-
-	public PacketFileRequest() {
-	}
+	@Getter
+	private int fileID;
 
 	public PacketFileRequest(FileSendInfo info) {
 		this.name = info.getPath().getFileName().toString();
 		this.size = info.getSize();
 		this.blocks = info.getBlocks();
-		this.fileId = info.getID();
-	}
-
-	public String getName() {
-		return name;
-	}
-	
-	public int getFileID() {
-		return fileId;
-	}
-
-	public int getSize() {
-		return size;
-	}
-
-	public int getBlocks() {
-		return blocks;
+		this.fileID = info.getFileID();
 	}
 
 	public boolean isSingle() {
@@ -49,7 +38,7 @@ public class PacketFileRequest extends Packet {
 		out.write(name);
 		out.write(size);
 		out.write(blocks);
-		out.write(fileId);
+		out.write(fileID);
 	}
 
 	@Override
@@ -57,6 +46,6 @@ public class PacketFileRequest extends Packet {
 		name = in.readString();
 		size = in.readInt();
 		blocks = in.readInt();
-		fileId = in.readInt();
+		fileID = in.readInt();
 	}
 }

@@ -14,8 +14,6 @@ import java.util.Set;
 import org.atteo.classindex.ClassIndex;
 
 import com.gmail.marcosav2010.command.CommandRegistry;
-import com.gmail.marcosav2010.communicator.module.fth.FTModule;
-import com.gmail.marcosav2010.communicator.module.fth.FileTransferHandler;
 import com.gmail.marcosav2010.communicator.packet.handling.listener.PacketListener;
 import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.logger.Logger;
@@ -83,12 +81,8 @@ public class ModuleManager {
 		modules.forEach(m -> m.onDisable());
 	}
 
-	public Module get(String name) {
+	public Module getModule(String name) {
 		return names.get(name);
-	}
-
-	public FileTransferHandler getFTH() {
-		return ((FTModule) get("FTH")).getFTH();
 	}
 
 	void registerListeners(Collection<PacketListener> l) {

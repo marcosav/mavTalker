@@ -5,26 +5,25 @@ import java.io.IOException;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketDecoder;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketEncoder;
 
+import lombok.Getter;
+
 public abstract class Packet extends AbstractPacket {
 
 	public static int MAX_SIZE = AbstractPacket.MAX_SIZE - Integer.BYTES;
 	
-	private int packetId = 0;
+	@Getter
+	private int packetID = 0;
 
-	public Packet setID(int packetId) {
-		if (hasID())
+	public Packet setPacketID(int packetID) {
+		if (hasPacketID())
 			throw new RuntimeException("This packet already has an ID set");
 		
-		this.packetId = packetId;
+		this.packetID = packetID;
 		return this;
 	}
 
-	private boolean hasID() {
-		return packetId != 0;
-	}
-
-	public int getID() {
-		return packetId;
+	private boolean hasPacketID() {
+		return packetID != 0;
 	}
 	
 	public boolean shouldSendRespose() {
@@ -33,10 +32,10 @@ public abstract class Packet extends AbstractPacket {
 
 	@Override
 	public void encode(PacketEncoder out) throws IOException {
-		if (!hasID())
+		if (!hasPacketID())
 			throw new RuntimeException("Cannot encode without ID set");
 		
-		out.write(packetId);
+		out.write(packetID);
 		encodeContent(out);
 	}
 	
@@ -44,7 +43,7 @@ public abstract class Packet extends AbstractPacket {
 
 	@Override
 	public void decode(PacketDecoder in) throws IOException {
-		packetId = in.readInt();
+		packetID = in.readInt();
 		decodeContent(in);
 	}
 	

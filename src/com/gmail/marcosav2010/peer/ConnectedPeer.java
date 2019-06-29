@@ -9,6 +9,8 @@ import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
 import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.connection.NetworkIdentificator;
 
+import lombok.Getter;
+
 /**
  * Represents a connected @NetworkPeer which is at the other side of the @Connection (with a @Peer),
  * acting like a node.
@@ -17,22 +19,15 @@ import com.gmail.marcosav2010.connection.NetworkIdentificator;
  */
 public class ConnectedPeer extends KnownPeer {
 
+	@Getter
 	private Connection connection;
-	private NetworkIdentificator<NetworkPeer> networkManager;
+	@Getter
+	private NetworkIdentificator<NetworkPeer> networkIdentificator;
 
 	public ConnectedPeer(String name, UUID uuid, Connection connection) {
-		super(name, connection.getRemoteAddress(), connection.getPort(), uuid);
-		networkManager = new NetworkIdentificator<>();
+		super(name, connection.getRemoteAddress(), connection.getRemotePort(), uuid);
+		networkIdentificator = new NetworkIdentificator<>();
 		this.connection = connection;
-	}
-
-	public Connection getConnection() {
-		return connection;
-	}
-
-	@Override
-	public NetworkIdentificator<NetworkPeer> getNetworkIdentificator() {
-		return networkManager;
 	}
 
 	public void disconnect(boolean silent) throws IOException {

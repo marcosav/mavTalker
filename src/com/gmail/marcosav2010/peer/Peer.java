@@ -27,6 +27,8 @@ import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.tasker.TaskOwner;
 
+import lombok.Getter;
+
 /**
  * Represents a local hosted peer.
  * 
@@ -36,11 +38,13 @@ public class Peer extends KnownPeer implements TaskOwner {
 
 	private ServerSocket server;
 
+	@Getter
 	private boolean started;
-
+	@Getter
 	private ConnectionManager connectionManager;
+	@Getter
 	private PeerProperties properties;
-
+	@Getter
 	private ExecutorService executorService;
 
 	public Peer(String name, int port) {
@@ -119,26 +123,9 @@ public class Peer extends KnownPeer implements TaskOwner {
 		return connectionManager.registerConnection(connection);
 	}
 
-	public boolean isStarted() {
-		return started;
-	}
-
-	public ConnectionManager getConnectionManager() {
-		return connectionManager;
-	}
-
 	@Override
 	public ConnectionIdentificator getNetworkIdentificator() {
 		return connectionManager.getIdentificator();
-	}
-
-	@Override
-	public ExecutorService getExecutorService() {
-		return executorService;
-	}
-
-	public PeerProperties getProperties() {
-		return properties;
 	}
 
 	public void printInfo() {

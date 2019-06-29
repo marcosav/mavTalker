@@ -6,20 +6,16 @@ import com.gmail.marcosav2010.communicator.packet.Packet;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketDecoder;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketEncoder;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@AllArgsConstructor
+@NoArgsConstructor
 public class PacketMessage extends Packet {
     
+	@Getter
     private String message;
-    
-    public PacketMessage() {
-	}
-    
-    public PacketMessage(String message) {
-        this.message = message;
-    }
-    
-    public String getMessage() {
-        return message;
-    }
     
     @Override
     protected void encodeContent(PacketEncoder out) throws IOException {

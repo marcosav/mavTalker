@@ -2,23 +2,19 @@ package com.gmail.marcosav2010.command;
 
 import com.gmail.marcosav2010.main.Main;
 
+import lombok.Getter;
+
 public class ExecutedCommand extends CommandBase {
 
+	@Getter
     private final String[] args;
+	@Getter
     private final int length;
     
     public ExecutedCommand(String label, String[] args) {
         super(label);
         this.args = args;
         this.length = args.length;
-    }
-    
-    public String[] getArgs() {
-        return args;
-    }
-    
-    public int getLength() {
-        return length;
     }
     
     public void tryExecute() {

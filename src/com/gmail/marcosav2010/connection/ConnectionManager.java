@@ -67,12 +67,12 @@ public class ConnectionManager {
 
 	public boolean isConnectedTo(InetSocketAddress address) {
 		return connections.values().stream()
-				.anyMatch(c -> c.getPort() == address.getPort() && c.getRemoteAddress().getHostAddress().equals(address.getAddress().getHostAddress()));
+				.anyMatch(c -> c.getRemotePort() == address.getPort() && c.getRemoteAddress().getHostAddress().equals(address.getAddress().getHostAddress()));
 	}
 
 	public Connection getConnection(InetSocketAddress address) {
 		return connections.values().stream()
-				.filter(c -> c.getPort() == address.getPort() && c.getRemoteAddress().getHostAddress().equals(address.getAddress().getHostAddress()))
+				.filter(c -> c.getRemotePort() == address.getPort() && c.getRemoteAddress().getHostAddress().equals(address.getAddress().getHostAddress()))
 				.findFirst().orElseGet(null);
 	}
 

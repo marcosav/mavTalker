@@ -13,6 +13,8 @@ import com.gmail.marcosav2010.connection.Connection;
 )
 public class FTModule extends Module {
 
+	public static final String FTH = "FTH";
+	
 	static {
 		registerPacket(3, PacketFileAccept.class);
 		registerPacket(4, PacketFileRequest.class);
@@ -24,7 +26,7 @@ public class FTModule extends Module {
 	private FTListener listener;
 	
 	public FTModule() {
-		super("FTH");
+		super(FTH);
 		
 		registerListeners(listener = new FTListener());
 	}

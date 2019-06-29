@@ -12,19 +12,28 @@ import com.gmail.marcosav2010.peer.Peer;
 import com.gmail.marcosav2010.peer.PeerManager;
 import com.gmail.marcosav2010.tasker.Tasker;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class Main {
 
 	private static boolean STARTER_PEER = true;
 
-	private static Main mainInstance;
+	@Getter
+	@Setter
+	private static Main instance;
 
+	@Getter
 	private final CommandManager commandManager;
+	@Getter
 	private GeneralConfiguration generalConfig;
+	@Getter
 	private PeerManager peerManager;
+	@Getter
 	private Tasker tasker;
-	
+	@Getter
 	private InetAddress publicAddress;
-	
+	@Getter
 	private boolean shuttingDown;
 
 	protected Main() {
@@ -68,34 +77,6 @@ public class Main {
 		}
 	}
 
-	public CommandManager getCommandManager() {
-		return commandManager;
-	}
-
-	public PeerManager getPeerManager() {
-		return peerManager;
-	}
-	
-	public GeneralConfiguration getGeneralConfig() {
-		return generalConfig;
-	}
-
-	public Tasker getTasker() {
-		return tasker;
-	}
-	
-	public InetAddress getPublicAddress() {
-		return publicAddress;
-	}
-
-	public static void setInstance(Main instance) {
-		mainInstance = instance;
-	}
-	
-	public boolean isShuttingDown() {
-		return shuttingDown;
-	}
-
 	public void shutdown() {
 		if (shuttingDown)
 			return;
@@ -114,9 +95,5 @@ public class Main {
 			}
 		
 		Logger.log("Bye");
-	}
-
-	public static Main getInstance() {
-		return mainInstance;
 	}
 }

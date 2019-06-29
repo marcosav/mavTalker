@@ -24,7 +24,7 @@ public class FTListener implements PacketListener {
 	
 	@PacketEventHandler
 	public void onFileRequest(PacketFileRequest pf, ConnectedPeer peer) {
-		fth.log("File request: #" + pf.getID() + " \"" + pf.getName() + "\" (" + Utils.formatSize(pf.getSize()) + "), accept download? Use /d "
+		fth.log("File request: #" + pf.getPacketID() + " \"" + pf.getName() + "\" (" + Utils.formatSize(pf.getSize()) + "), accept download? Use /d "
 				+ peer.getConnection().getPeer().getName() + " " + peer.getName() + " " + pf.getFileID());
 		fth.handleRequest(pf);
 	}
@@ -56,6 +56,6 @@ public class FTListener implements PacketListener {
 	@PacketEventHandler
 	public void onFileRemoteSendFailed(PacketFileSendFailed p, ConnectedPeer peer) {
 		FileSendResult result = p.getCause();
-		fth.log("File #" + p.getFileId() + " could not be sent because: " + result.toString());
+		fth.log("File #" + p.getFileID() + " could not be sent because: " + result.toString());
 	}
 }

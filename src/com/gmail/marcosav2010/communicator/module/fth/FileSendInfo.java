@@ -2,46 +2,29 @@ package com.gmail.marcosav2010.communicator.module.fth;
 
 import java.nio.file.Path;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class FileSendInfo {
 
-	private int size;
-	private Path path;
-	private int blocks;
-	private int blockSize;
-	private int id = -1;
+	@Getter
+	private final Path path;
+	@Getter
+	private final int size;
+	@Getter
+	private final int blocks;
+	@Getter
+	private final int blockSize;
+	@Getter
+	private int fileID = -1;
 
-	FileSendInfo(Path path, int size, int blocks, int blockSize) {
-		this.size = size;
-		this.path = path;
-		this.blocks = blocks;
-		this.blockSize = blockSize;
-	}
-
-	public int getID() {
-		return id;
-	}
-
-	public void setID(int id) {
-		if (this.id == -1)
-			this.id = id;
+	public void setFileID(int fileID) {
+		if (this.fileID == -1)
+			this.fileID = fileID;
 		else
 			throw new IllegalStateException("ID is already set.");
-	}
-
-	public int getSize() {
-		return size;
-	}
-
-	public Path getPath() {
-		return path;
-	}
-
-	public int getBlocks() {
-		return blocks;
-	}
-
-	public int getBlockSize() {
-		return blockSize;
 	}
 
 	public String getFileName() {

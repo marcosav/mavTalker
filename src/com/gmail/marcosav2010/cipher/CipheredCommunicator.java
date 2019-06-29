@@ -141,7 +141,7 @@ public class CipheredCommunicator extends Communicator {
 		}
 
 		private void write(EncryptedMessage msg) throws IOException {
-			getOut().write(msg.byteLength());
+			getOut().write(msg.getByteLength());
 			getOut().write(msg.getEncryptedSimmetricKeyBytes());
 			getOut().write(msg.getEncryptedData());
 			getOut().flush();

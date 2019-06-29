@@ -10,9 +10,13 @@ import com.gmail.marcosav2010.communicator.packet.handling.listener.PacketListen
 import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 
+import lombok.Getter;
+
 public abstract class Module implements Comparable<Module> {
 
+	@Getter
 	private final String name;
+	@Getter
 	private final int priority;
 	private List<PacketListener> listeners;
 
@@ -26,14 +30,6 @@ public abstract class Module implements Comparable<Module> {
 		this.name = name;
 		this.priority = priority;
 		listeners = new LinkedList<>();
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public int getPriority() {
-		return priority;
 	}
 
 	void registerListeners() {

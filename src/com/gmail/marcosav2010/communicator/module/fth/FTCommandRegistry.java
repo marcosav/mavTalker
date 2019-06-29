@@ -26,6 +26,10 @@ public class FTCommandRegistry extends CommandRegistry {
 	public FTCommandRegistry() {
 		super(Set.of(new FileCMD(), new ClearDownloadsCMD(), new DownloadCMD()));
 	}
+	
+	private static FileTransferHandler getFTH(Connection c) {
+		return ((FTModule) c.getModuleManager().getModule(FTModule.FTH)).getFTH();
+	}
 
 	private static class FileCMD extends Command {
 
@@ -56,7 +60,7 @@ public class FTCommandRegistry extends CommandRegistry {
 				return;
 			}
 
-			to.forEach(c -> c.getConnection().getModuleManager().getFTH().sendRequest(info));
+			to.forEach(c -> getFTH(c.getConnection()).sendRequest(info));
 
 			Logger.log("INFO: File \"" + info.getFileName() + "\" transfer request has been sent to "
 					+ to.stream().map(t -> t.getName()).collect(Collectors.joining(",")) + ".");
@@ -98,7 +102,7 @@ public class FTCommandRegistry extends CommandRegistry {
 			}
 			connection = cIdentificator.getPeer(remoteName).getConnection();
 
-			FileTransferHandler fth = connection.getModuleManager().getFTH();
+			FileTransferHandler fth = getFTH(connection);
 
 			int id;
 			try {

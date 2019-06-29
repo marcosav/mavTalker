@@ -7,18 +7,26 @@ import java.util.UUID;
 import com.gmail.marcosav2010.common.Utils;
 import com.gmail.marcosav2010.logger.Logger;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 /**
  * Represents the base class of a known peer, whose name and host port are known, it can be a @Peer
  * or a @ConnectedPeer.
  * 
  * @author Marcos
  */
+@AllArgsConstructor
 public abstract class KnownPeer implements NetworkPeer {
 
+	@Getter
 	private String name;
-	private int port;
+	@Getter
 	private InetAddress address;
-	private UUID uuid;
+	@Getter
+	private int port;
+	@Getter
+	private UUID UUID;
 
 	public KnownPeer(String name, int port, UUID uuid) {
 		this(name, null, port, uuid);
@@ -30,30 +38,7 @@ public abstract class KnownPeer implements NetworkPeer {
 		}
 	}
 	
-	public KnownPeer(String name, InetAddress address, int port, UUID uuid) {
-		this.name = name;
-		this.port = port;
-		this.uuid = uuid;
-		this.address = address;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public int getPort() {
-		return port;
-	}
-	
-	public InetAddress getAddress() {
-		return address;
-	}
-	
-	public UUID getUUID() {
-		return uuid;
-	}
-	
 	public String getDisplayID() {
-		return Utils.toBase64(uuid);
+		return Utils.toBase64(UUID);
 	}
 }

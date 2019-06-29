@@ -2,9 +2,13 @@ package com.gmail.marcosav2010.command;
 
 import java.util.Objects;
 
+import lombok.Getter;
+
 public abstract class Command extends CommandBase {
     
+	@Getter
     private String[] aliases;
+	@Getter
     private String usage;
     
     public Command(String label) {
@@ -27,14 +31,6 @@ public abstract class Command extends CommandBase {
     public Command(String label, String[] aliases, String usage) {
         this(label, usage);
         this.aliases = aliases;
-    }
-    
-    public String[] getAliases() {
-        return aliases;
-    }
-    
-    public String getUsage() {
-        return usage;
     }
     
     public abstract void execute(String[] arg, int length);

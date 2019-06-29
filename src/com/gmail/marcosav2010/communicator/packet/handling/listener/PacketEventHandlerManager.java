@@ -15,25 +15,22 @@ import com.gmail.marcosav2010.logger.Logger;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.peer.ConnectedPeer;
 
+import lombok.RequiredArgsConstructor;
+
 /**
  * This class handles packets when are received.
  * 
  * @author Marcos
  *
  */
+@RequiredArgsConstructor
 public class PacketEventHandlerManager {
 
 	private static final String LOGGER_PREFIX = "[PEH] ";
 
 	private final Connection connection;
-	private final Map<Method, ? extends PacketListener> methodListener;
-	private final Map<Class<? extends Packet>, Set<Method>> packetMethods;
-
-	public PacketEventHandlerManager(Connection connection) {
-		this.connection = connection;
-		methodListener = new HashMap<>();
-		packetMethods = new HashMap<>();
-	}
+	private final Map<Method, ? extends PacketListener> methodListener = new HashMap<>();
+	private final Map<Class<? extends Packet>, Set<Method>> packetMethods = new HashMap<>();
 
 	public int getListenerCount() {
 		return new HashSet<>(methodListener.values()).size();

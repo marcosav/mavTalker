@@ -5,17 +5,23 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.gmail.marcosav2010.logger.Logger;
 
+import lombok.Getter;
+
 public class Task implements Runnable {
 
 	private final Tasker tasker;
-	private final int id;
-	private String name;
+	@Getter
 	private final TaskOwner owner;
+	@Getter
+	private final int id;
 	private final Runnable task;
-	private Thread thread;
-
 	private final long delay;
 	private final long period;
+	@Getter
+	private String name;
+	@Getter
+	private Thread thread;
+
 	private final AtomicBoolean running = new AtomicBoolean(true);
 
 	public Task(Tasker tasker, TaskOwner owner, int id, Runnable task, long delay, long period, TimeUnit unit) {
@@ -26,28 +32,12 @@ public class Task implements Runnable {
 		this.delay = unit.toMillis(delay);
 		this.period = unit.toMillis(period);
 	}
-
-	public String getName() {
-		return name;
-	}
 	
 	public Task setName(String name) {
 		if (name == null)
 			throw new IllegalStateException("This task is already named.");
 		this.name = name;
 		return this;
-	}
-	
-	public int getId() {
-		return id;
-	}
-
-	public TaskOwner getOwner() {
-		return owner;
-	}
-	
-	public Thread getThread() {
-		return thread;
 	}
 
 	public void cancel() {

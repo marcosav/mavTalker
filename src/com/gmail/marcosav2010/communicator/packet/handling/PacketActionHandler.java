@@ -11,24 +11,22 @@ import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.tasker.TaskOwner;
 
+import lombok.RequiredArgsConstructor;
+
 /**
  * This class handles the action is done when a packet is received by remote peer.
  * 
  * @author Marcos
  *
  */
+@RequiredArgsConstructor
 public class PacketActionHandler {
 
 	private static final long MAX_TIMEOUT = 10L;
 	private static final String LOGGER_PREFIX = "[PacketActionHandler] ";
 
 	private final Connection connection;
-	private Map<Long, PacketAction> pendingActions;
-
-	public PacketActionHandler(Connection c) {
-		this.connection = c;
-		pendingActions = new ConcurrentHashMap<>();
-	}
+	private Map<Long, PacketAction> pendingActions = new ConcurrentHashMap<>();
 
 	public boolean isPending(long id) {
 		return pendingActions.containsKey(id);

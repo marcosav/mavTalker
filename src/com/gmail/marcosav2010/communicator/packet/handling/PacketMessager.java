@@ -73,7 +73,7 @@ public class PacketMessager {
 	}
 
 	private void handlePacket(Packet packet) {
-		int id = packet.getID();
+		int id = packet.getPacketID();
 		log("Received packet #" + id + ".", VerboseLevel.HIGH);
 		eventHandlerManager.handlePacket(packet, connection.getConnectedPeer());
 		
@@ -89,7 +89,7 @@ public class PacketMessager {
 	public int sendPacket(Packet packet, Runnable action, Runnable onTimeOut, long timeout, TimeUnit timeUnit) throws PacketWriteException {
 		int id = lastPacket.incrementAndGet();
 		log("Sending packet #" + id + ".", VerboseLevel.HIGH);
-		communicator.write(writter.write(packet.setID(id)));
+		communicator.write(writter.write(packet.setPacketID(id)));
 		
 		if (action != null)
 			actionHandler.handleSend(connection.getPeer(), id, packet, action, onTimeOut, timeout, timeUnit);

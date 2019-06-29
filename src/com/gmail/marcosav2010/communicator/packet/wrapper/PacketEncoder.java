@@ -7,18 +7,15 @@ import java.util.UUID;
 
 import com.gmail.marcosav2010.communicator.packet.AbstractPacket;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 public class PacketEncoder implements Closeable, AutoCloseable {
 
-	private OutputStream out;
+	@Getter
+	private final OutputStream out;
 	private int length;
-
-	public PacketEncoder(OutputStream out) {
-		this.out = out;
-	}
-
-	public OutputStream getOut() {
-		return out;
-	}
 
 	public void write(boolean b) throws IOException {
 		write((byte) (b ? 1 : 0));

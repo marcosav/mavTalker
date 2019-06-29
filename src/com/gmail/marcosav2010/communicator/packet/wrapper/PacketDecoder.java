@@ -8,18 +8,15 @@ import java.util.UUID;
 
 import com.gmail.marcosav2010.communicator.packet.AbstractPacket;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 public class PacketDecoder implements Closeable, AutoCloseable {
 
-	private InputStream in;
+	@Getter
+	private final InputStream in;
 	private int length;
-
-	public PacketDecoder(InputStream in) {
-		this.in = in;
-	}
-
-	public InputStream getIn() {
-		return in;
-	}
 
 	public boolean readBoolean() throws IOException {
 		return readByte() == 1;

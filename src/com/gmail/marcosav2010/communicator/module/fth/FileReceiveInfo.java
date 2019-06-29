@@ -1,30 +1,21 @@
 package com.gmail.marcosav2010.communicator.module.fth;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class FileReceiveInfo {
 
-	private String filename;
-	private int blocks;
+	@Getter
+	private final String fileName;
+	@Getter
+	private final int blocks;
+	@Getter(AccessLevel.PACKAGE)
 	private long firstArrivalTime = -1, lastArrivalTime = -1;
-
-	FileReceiveInfo(String filename, int blocks) {
-		this.filename = filename;
-		this.blocks = blocks;
-	}
-
-	public String getFileName() {
-		return filename;
-	}
-
-	public int getBlocks() {
-		return blocks;
-	}
 
 	public boolean isSingle() {
 		return blocks == 1;
-	}
-
-	long getFirstArrivalTime() {
-		return firstArrivalTime;
 	}
 
 	synchronized void setFirstArrivalTime() {

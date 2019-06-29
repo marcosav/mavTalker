@@ -30,11 +30,15 @@ import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.peer.Peer;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 /**
  * This clase manages the handshake of a starting @Connection
  * 
  * @author Marcos
  */
+@RequiredArgsConstructor
 public class HandshakeAuthentificator {
 
 	private static final long HANDSHAKE_TIMEOUT = 10L;
@@ -59,27 +63,18 @@ public class HandshakeAuthentificator {
 
 	private static final int RAW_ADDRESSKEY_LENGTH = HOST_LENGTH + PORT_LENGTH + B_KEY_LENGTH + H_KEY_LENGTH;
 
-	private final SecureRandom random;
+	private SecureRandom random = new SecureRandom();
 
-	private Peer peer;
+	private final Peer peer;
 
 	private byte[] connectionKey;
-	private Map<String, ConnectionToken> localStorage;
-	private Map<String, ConnectionToken> localTempStorage;
+	private Map<String, ConnectionToken> localStorage = new ConcurrentHashMap<>();
+	private Map<String, ConnectionToken> localTempStorage = new ConcurrentHashMap<>();
 
-	private Map<InetSocketAddress, ConnectionToken> remoteStorage;
+	private Map<InetSocketAddress, ConnectionToken> remoteStorage = new ConcurrentHashMap<>();
 
 	private ConnectionToken publicConnectionToken;
 	private String publicAddressKey;
-
-	public HandshakeAuthentificator(Peer peer) {
-		this.peer = peer;
-
-		localTempStorage = new ConcurrentHashMap<>();
-		localStorage = new ConcurrentHashMap<>();
-		remoteStorage = new ConcurrentHashMap<>();
-		random = new SecureRandom();
-	}
 
 	public synchronized byte[] getConnectionKey() {
 		if (connectionKey != null)
@@ -334,9 +329,12 @@ public class HandshakeAuthentificator {
 
 	public static class ConnectionToken {
 
+		@Getter
 		private byte[] handshakeKey, baseKey;
+		@Getter
 		private InetSocketAddress address;
 		private String handshakeKeyStr;
+		@Getter
 		private boolean isPublic = false;
 
 		public ConnectionToken(byte[] handshakeKey) {
@@ -354,24 +352,8 @@ public class HandshakeAuthentificator {
 			this.address = address;
 		}
 
-		public byte[] getHandshakeKey() {
-			return handshakeKey;
-		}
-
-		public byte[] getBaseKey() {
-			return baseKey;
-		}
-
 		public String getHandshakeKeyAsString() {
 			return handshakeKeyStr;
-		}
-
-		public InetSocketAddress getAddress() {
-			return address;
-		}
-
-		public boolean isPublic() {
-			return isPublic;
 		}
 
 		public ConnectionToken setPublic(boolean b) {

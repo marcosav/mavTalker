@@ -14,11 +14,15 @@ import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.peer.ConnectedPeer;
 import com.gmail.marcosav2010.tasker.Task;
 
+import lombok.AccessLevel;
+import lombok.Setter;
+
 public class IdentificationController {
 
 	private static final long IDENTIFICATION_TIMEOUT = 10L;
 
 	private Connection connection;
+	@Setter(AccessLevel.PROTECTED)
 	private PacketMessager messager;
 	private ConnectionManager cManager;
 
@@ -168,11 +172,7 @@ public class IdentificationController {
 	public UUID getUUID() {
 		return connectionUUID;
 	}
-
-	protected void setMessager(PacketMessager messager) {
-		this.messager = messager;
-	}
-
+	
 	public void log(String str) {
 		connection.log("[IC] " + str);
 	}

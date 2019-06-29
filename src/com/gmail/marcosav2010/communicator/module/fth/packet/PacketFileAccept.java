@@ -6,28 +6,24 @@ import com.gmail.marcosav2010.communicator.packet.Packet;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketDecoder;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketEncoder;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@AllArgsConstructor
+@NoArgsConstructor
 public class PacketFileAccept extends Packet {
     
-    private int fileId;
-    
-    public PacketFileAccept() {
-	}
-    
-    public PacketFileAccept(int fileId) {
-        this.fileId = fileId;
-    }
-    
-    public int getFileID() {
-    	return fileId;
-    }
+	@Getter
+    private int fileID;
     
     @Override
     protected void encodeContent(PacketEncoder out) throws IOException {
-    	out.write(fileId);
+    	out.write(fileID);
     }
     
     @Override
     protected void decodeContent(PacketDecoder in) throws IOException {
-    	fileId = in.readInt();
+    	fileID = in.readInt();
     }
 }

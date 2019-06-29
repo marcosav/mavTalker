@@ -15,30 +15,28 @@ import javax.crypto.Cipher;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
 import com.gmail.marcosav2010.connection.Connection;
 
+import lombok.RequiredArgsConstructor;
+
 /**
  * This class manages the asymmetric encryption between peers.
  * 
  * @author Marcos
  *
  */
+@RequiredArgsConstructor(staticName = "create")
 public class SessionCipher {
 
 	public static final String RSA_KEY_ALGORITHM = "RSA";
 	public static final int RSA_KEY_SIZE = 4096;
 	public static final int RSA_KEY_MSG = SessionCipher.RSA_KEY_SIZE / Byte.SIZE + 38;
 
-	private Connection connection;
+	private final Connection connection;
 
 	private PublicKey publicKey;
 
 	private CipherPool in, out;
 
-	private boolean isAuth;
-
-	private SessionCipher(Connection connection) {
-		this.connection = connection;
-		isAuth = false;
-	}
+	private boolean isAuth = false;
 
 	public void generate() throws GeneralSecurityException {
 		KeyPairGenerator kPairGen = KeyPairGenerator.getInstance(RSA_KEY_ALGORITHM);
@@ -93,9 +91,5 @@ public class SessionCipher {
 
 	private static PublicKey getPublicKey(byte[] key, String algorithm) throws InvalidKeySpecException, NoSuchAlgorithmException {
 		return KeyFactory.getInstance(algorithm).generatePublic(new X509EncodedKeySpec(key));
-	}
-
-	public static SessionCipher create(Connection connection) {
-		return new SessionCipher(connection);
 	}
 }

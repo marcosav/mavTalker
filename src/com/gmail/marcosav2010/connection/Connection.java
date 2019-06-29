@@ -35,6 +35,8 @@ import com.gmail.marcosav2010.peer.ConnectedPeer;
 import com.gmail.marcosav2010.peer.Peer;
 import com.gmail.marcosav2010.tasker.Task;
 
+import lombok.Getter;
+
 /**
  * Represents the connection between two @Peer
  * 
@@ -50,7 +52,9 @@ public class Connection extends NetworkConnection {
 
 	private String LOGGER_PREFIX = "[Connection] [-] ";
 
+	@Getter
 	private Peer peer;
+	@Getter
 	private ConnectedPeer connectedPeer;
 
 	private Socket hostSocket;
@@ -60,8 +64,10 @@ public class Connection extends NetworkConnection {
 	private Task listenTask;
 	private Task remoteConnectBackTimeout;
 
-	private IdentificationController idController;
+	@Getter
+	private IdentificationController identificationController;
 
+	@Getter
 	private int remotePort;
 	private InetAddress remoteAddress;
 
@@ -73,18 +79,19 @@ public class Connection extends NetworkConnection {
 	private PacketReader reader;
 	private PacketMessager messager;
 
+	@Getter
 	private ModuleManager moduleManager;
 
 	public Connection(Peer peer) {
 		this.peer = peer;
 		connected = new AtomicBoolean(false);
-		idController = new IdentificationController(this);
+		identificationController = new IdentificationController(this);
 		init();
 	}
 
-	public Connection(Peer peer, UUID uuid) {
+	Connection(Peer peer, UUID uuid) {
 		this(peer);
-		idController = new IdentificationController(this, uuid);
+		identificationController = new IdentificationController(this, uuid);
 		init();
 	}
 
@@ -186,7 +193,7 @@ public class Connection extends NetworkConnection {
 		HandshakeAuthentificator ha = peer.getConnectionManager().getHandshakeAuthentificator();
 		ConnectionToken ct = ha.sendHandshake(baseCommunicator, address);
 
-		idController.sendTemporaryUUID();
+		identificationController.sendTemporaryUUID();
 
 		if (ct != null) {
 			log("Setting handshake ciphered communicator output key...", VerboseLevel.HIGH);
@@ -343,7 +350,7 @@ public class Connection extends NetworkConnection {
 		cipheredCommunicator = new CipheredCommunicator(baseCommunicator, sessionCipher, peer);
 		reader = new PacketReader();
 		messager = new PacketMessager(this, cipheredCommunicator);
-		idController.setMessager(messager);
+		identificationController.setMessager(messager);
 
 		log("Initializing connection module manager and loading modules...", VerboseLevel.LOW);
 
@@ -352,7 +359,7 @@ public class Connection extends NetworkConnection {
 
 		log("Session ciphering done, communicator ciphered and packet messager set.", VerboseLevel.LOW);
 
-		idController.startIdentification();
+		identificationController.startIdentification();
 	}
 
 	public void onPairCompleted() {
@@ -398,32 +405,8 @@ public class Connection extends NetworkConnection {
 		LOGGER_PREFIX = LOGGER_PREFIX.replaceFirst("-", connectedPeer.getName());
 	}
 
-	public ConnectedPeer getConnectedPeer() {
-		return connectedPeer;
-	}
-
 	public UUID getUUID() {
-		return idController.getUUID();
-	}
-
-	public int getPort() {
-		return remotePort;
-	}
-
-	public InetAddress getRemoteAddress() {
-		return remoteAddress;
-	}
-
-	public Peer getPeer() {
-		return peer;
-	}
-
-	public IdentificationController getIdentificationController() {
-		return idController;
-	}
-
-	public ModuleManager getModuleManager() {
-		return moduleManager;
+		return identificationController.getUUID();
 	}
 
 	public void disconnect(boolean silent) {

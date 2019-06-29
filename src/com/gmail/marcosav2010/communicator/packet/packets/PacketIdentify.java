@@ -7,41 +7,24 @@ import com.gmail.marcosav2010.communicator.packet.StandardPacket;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketDecoder;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketEncoder;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@AllArgsConstructor
+@NoArgsConstructor
 public class PacketIdentify extends StandardPacket {
 
 	public static final byte SUCCESS = 0;
 	public static final byte INVALID_UUID = 1;
 	public static final byte TIMED_OUT = 2;
 	
+	@Getter
 	private String name;
+	@Getter
 	private UUID newUUID, peerUUID;
+	@Getter
 	private byte result;
-
-	public PacketIdentify() {
-	}
-
-	public PacketIdentify(String name, UUID newUUID, UUID peerUUID, byte result) {
-		this.name = name;
-		this.newUUID = newUUID;
-		this.peerUUID = peerUUID;
-		this.result = result;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public UUID getPeerUUID() {
-		return peerUUID;
-	}
-	
-	public UUID getNewUUID() {
-		return newUUID;
-	}
-	
-	public byte getResult() {
-		return result;
-	}
 
 	public boolean providesUUID() {
 		return newUUID != null;

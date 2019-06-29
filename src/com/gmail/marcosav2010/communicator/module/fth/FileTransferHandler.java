@@ -319,7 +319,7 @@ public class FileTransferHandler {
 
 	public void sendRequest(FileSendInfo info, long expireTimeout, TimeUnit timeUnit) {
 		int id = nextId.getAndIncrement();
-		info.setID(id);
+		info.setFileID(id);
 		
 		PacketFileRequest p = new PacketFileRequest(info);
 
