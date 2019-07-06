@@ -19,7 +19,12 @@ import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.logger.Logger;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.main.Launcher;
+import com.gmail.marcosav2010.peer.Peer;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 public class ModuleManager {
 
 	private static Set<Class<? extends CommandRegistry>> registries = new HashSet<>();
@@ -30,20 +35,13 @@ public class ModuleManager {
 	
 	private static boolean loaded;
 	
-	private Map<String, Module> names;
-	private PriorityQueue<Module> modules;
-	private List<PacketListener> listeners;
-
-	private Connection connection;
-
-	public ModuleManager(Connection connection) {
-		this.connection = connection;
-		
-		modules = new PriorityQueue<>();
-		names = new HashMap<>();
-		listeners = new LinkedList<>();
-	}
+	private Map<String, Module> names = new HashMap<>();
+	private PriorityQueue<Module> modules = new PriorityQueue<>();
+	@Getter
+	private List<PacketListener> listeners = new LinkedList<>();
 	
+	private final Peer peer;
+
 	public void initializeModules() {
 		loadedModules.forEach(m -> {
 			try {
@@ -73,12 +71,12 @@ public class ModuleManager {
 		log("Loaded " + modules.size() + " modules.", VerboseLevel.LOW);
 	}
 
-	public void enable() {
+	public void onConnectionEnable(Connection connection) {
 		modules.forEach(m -> m.onEnable(connection));
 	}
 
-	public void disable() {
-		modules.forEach(m -> m.onDisable());
+	public void onConnectionDisable(Connection connection) {
+		modules.forEach(m -> m.onDisable(connection));
 	}
 
 	public Module getModule(String name) {
@@ -99,24 +97,20 @@ public class ModuleManager {
 		return r;
 	}
 
-	public Collection<PacketListener> getListeners() {
-		return listeners;
-	}
-
 	private void log(String str) {
-		clog(LOGGER_PREFIX + str);
+		plog(LOGGER_PREFIX + str);
 	}
 
 	private void log(String str, VerboseLevel level) {
-		clog(LOGGER_PREFIX + str, level);
+		plog(LOGGER_PREFIX + str, level);
 	}
 	
-	void clog(String str) {
-		connection.log(str);
+	void plog(String str) {
+		peer.log(str);
 	}
 
-	void clog(String str, VerboseLevel level) {
-		connection.log(str, level);
+	void plog(String str, VerboseLevel level) {
+		peer.log(str, level);
 	}
 
 	public static void loadModules() {

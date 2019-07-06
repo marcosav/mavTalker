@@ -13,6 +13,8 @@ import com.gmail.marcosav2010.command.BaseCommandRegistry;
 import com.gmail.marcosav2010.command.Command;
 import com.gmail.marcosav2010.command.CommandRegistry;
 import com.gmail.marcosav2010.common.Utils;
+import com.gmail.marcosav2010.communicator.module.fth.packet.PacketFindFile;
+import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
 import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.connection.ConnectionIdentificator;
 import com.gmail.marcosav2010.connection.ConnectionManager;
@@ -24,11 +26,58 @@ import com.gmail.marcosav2010.peer.Peer;
 public class FTCommandRegistry extends CommandRegistry {
 
 	public FTCommandRegistry() {
-		super(Set.of(new FileCMD(), new ClearDownloadsCMD(), new DownloadCMD()));
+		super(Set.of(new FileCMD(), new ClearDownloadsCMD(), new DownloadCMD(), new FindCMD()));
 	}
 	
 	private static FileTransferHandler getFTH(Connection c) {
 		return ((FTModule) c.getModuleManager().getModule(FTModule.FTH)).getFTH();
+	}
+	
+	private static class FindCMD extends Command {
+
+		FindCMD() {
+			super("find", "[peer] <filename>");
+		}
+
+		@Override
+		public void execute(String[] arg, int args) {
+			int pCount = Main.getInstance().getPeerManager().count();
+			
+			if (args < 1 && pCount == 1 || args < 2 && pCount > 1 || pCount == 0) {
+				Logger.log("ERROR: Needed filename at least.");
+				return;
+			}
+			
+			boolean autoPeer = pCount > 1;
+			Peer peer;
+
+			if (!autoPeer) {
+				String peerName = arg[0];
+
+				if (Main.getInstance().getPeerManager().exists(peerName)) {
+					peer = Main.getInstance().getPeerManager().get(peerName);
+				} else {
+					Logger.log("ERROR: Peer \"" + peerName + "\" doesn't exists.");
+					return;
+				}
+			} else
+				peer = Main.getInstance().getPeerManager().getFirstPeer();
+			
+			String filename = arg[autoPeer ? 0 : 1];
+			
+			Logger.log("Finding file \"" + filename + "\"...");
+			
+			var connectedPeers = peer.getConnectionManager().getIdentificator().getConnectedPeers();
+			var p = new PacketFindFile(filename, 1, connectedPeers.stream().map(ConnectedPeer::getUUID).collect(Collectors.toSet()));
+			
+			connectedPeers.forEach(c -> {
+				try {
+					c.sendPacket(p);
+				} catch (PacketWriteException e) {
+					Logger.log(e, "There was a problem while sending find packet to " + c.getName() + ".");
+				}
+			});
+		}
 	}
 
 	private static class FileCMD extends Command {

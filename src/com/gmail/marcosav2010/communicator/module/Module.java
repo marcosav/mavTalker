@@ -10,26 +10,22 @@ import com.gmail.marcosav2010.communicator.packet.handling.listener.PacketListen
 import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 
+import lombok.RequiredArgsConstructor;
 import lombok.Getter;
 
+@RequiredArgsConstructor
 public abstract class Module implements Comparable<Module> {
 
 	@Getter
 	private final String name;
 	@Getter
 	private final int priority;
-	private List<PacketListener> listeners;
+	private List<PacketListener> listeners = new LinkedList<>();
 
 	private ModuleManager manager;
 
 	public Module(String name) {
 		this(name, 0);
-	}
-
-	public Module(String name, int priority) {
-		this.name = name;
-		this.priority = priority;
-		listeners = new LinkedList<>();
 	}
 
 	void registerListeners() {
@@ -50,15 +46,23 @@ public abstract class Module implements Comparable<Module> {
 	protected void onEnable(Connection connection) {
 	}
 	
-	protected void onDisable() {
+	protected void onDisable(Connection connection) {
 	}
 
 	public void log(String str) {
-		manager.clog("[" + name + "] " + str);
+		manager.plog("[" + name + "] " + str);
 	}
 
 	public void log(String str, VerboseLevel level) {
-		manager.clog("[" + name + "] " + str, level);
+		manager.plog("[" + name + "] " + str, level);
+	}
+	
+	public void log(Connection c, String str) {
+		c.log("[" + name + "] " + str);
+	}
+
+	public void log(Connection c, String str, VerboseLevel level) {
+		c.log("[" + name + "] " + str, level);
 	}
 	
 	@Override

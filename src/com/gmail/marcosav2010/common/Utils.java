@@ -63,6 +63,15 @@ public class Utils {
 
 		return out;
 	}
+	
+	public static <T> T[] concat(T[] ba1, T[] ba2) {
+		T[] out = (T[]) new Object[ba1.length + ba2.length];
+
+		System.arraycopy(ba1, 0, out, 0, ba1.length);
+		System.arraycopy(ba2, 0, out, ba1.length, ba2.length);
+
+		return out;
+	}
 
 	public static byte[] concat(byte[]... arrays) {
 		byte[] out = new byte[Stream.of(arrays).mapToInt(ba -> ba.length).sum()];

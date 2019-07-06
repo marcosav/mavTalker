@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import com.gmail.marcosav2010.communicator.module.ModuleManager;
 import com.gmail.marcosav2010.config.GeneralConfiguration;
 import com.gmail.marcosav2010.config.GeneralConfiguration.Properties;
 import com.gmail.marcosav2010.config.GeneralConfiguration.PropertyCategory;
@@ -46,6 +47,8 @@ public class Peer extends KnownPeer implements TaskOwner {
 	private PeerProperties properties;
 	@Getter
 	private ExecutorService executorService;
+	@Getter
+	private ModuleManager moduleManager;
 
 	public Peer(String name, int port) {
 		super(name, port, UUID.randomUUID());
@@ -79,6 +82,11 @@ public class Peer extends KnownPeer implements TaskOwner {
 
 	public void start() {
 		try {
+			log("Initializing module manager and loading modules...", VerboseLevel.LOW);
+
+			moduleManager = new ModuleManager(this);
+			moduleManager.initializeModules();
+			
 			log("Starting server on port " + getPort() + "...");
 
 			server = new ServerSocket(getPort());

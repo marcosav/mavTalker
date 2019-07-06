@@ -3,9 +3,9 @@ package com.gmail.marcosav2010.connection;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -61,8 +61,12 @@ public class ConnectionManager {
 		return c;
 	}
 
-	public Set<Map.Entry<UUID, Connection>> getConnectionUUIDs() {
-		return Collections.unmodifiableSet(connections.entrySet());
+	public Map<UUID, Connection> getConnectionUUIDs() {
+		return Collections.unmodifiableMap(connections);
+	}
+	
+	public Collection<Connection> getConnections() {
+		return Collections.unmodifiableCollection(connections.values());
 	}
 
 	public boolean isConnectedTo(InetSocketAddress address) {

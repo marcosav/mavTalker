@@ -79,9 +79,6 @@ public class Connection extends NetworkConnection {
 	private PacketReader reader;
 	private PacketMessager messager;
 
-	@Getter
-	private ModuleManager moduleManager;
-
 	public Connection(Peer peer) {
 		this.peer = peer;
 		connected = new AtomicBoolean(false);
@@ -352,11 +349,6 @@ public class Connection extends NetworkConnection {
 		messager = new PacketMessager(this, cipheredCommunicator);
 		identificationController.setMessager(messager);
 
-		log("Initializing connection module manager and loading modules...", VerboseLevel.LOW);
-
-		moduleManager = new ModuleManager(this);
-		moduleManager.initializeModules();
-
 		log("Session ciphering done, communicator ciphered and packet messager set.", VerboseLevel.LOW);
 
 		identificationController.startIdentification();
@@ -365,7 +357,7 @@ public class Connection extends NetworkConnection {
 	public void onPairCompleted() {
 		messager.setupEventHandler();
 
-		moduleManager.enable();
+		peer.getModuleManager().onConnectionEnable(this);
 		
 		log("Connection completed.");
 	}
@@ -417,9 +409,9 @@ public class Connection extends NetworkConnection {
 		if (!force && !isConnected())
 			return;
 
-		if (moduleManager != null) {
+		if (peer.getModuleManager() != null) {
 			log("Disabling connection modules...", VerboseLevel.MEDIUM);
-			moduleManager.disable();
+			peer.getModuleManager().onConnectionDisable(this);
 		}
 
 		log("Disconnecting from peer...", VerboseLevel.LOW);
