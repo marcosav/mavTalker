@@ -11,7 +11,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class PacketEncoder implements Closeable, AutoCloseable {
+public class PacketEncoder implements Closeable {
 
 	@Getter
 	private final OutputStream out;

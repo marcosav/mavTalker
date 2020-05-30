@@ -10,10 +10,8 @@ import com.gmail.marcosav2010.communicator.packet.handling.listener.PacketListen
 import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 
-import lombok.RequiredArgsConstructor;
 import lombok.Getter;
 
-@RequiredArgsConstructor
 public abstract class Module implements Comparable<Module> {
 
 	@Getter
@@ -24,14 +22,15 @@ public abstract class Module implements Comparable<Module> {
 
 	private ModuleManager manager;
 
-	public Module(String name) {
-		this(name, 0);
+	public Module(ModuleDescriptor moduleDescriptor) {
+		name = moduleDescriptor.name();
+		priority = moduleDescriptor.priority();
 	}
 
 	void registerListeners() {
 		manager.registerListeners(listeners);
 	}
-	
+
 	protected void registerListeners(PacketListener... l) {
 		Stream.of(l).forEach(listeners::add);
 	}
@@ -39,14 +38,14 @@ public abstract class Module implements Comparable<Module> {
 	protected static void registerPacket(int id, Class<? extends Packet> packet) {
 		if (id > Byte.MAX_VALUE)
 			throw new IllegalArgumentException("ID must be byte");
-		
+
 		PacketRegistry.register((byte) id, packet);
 	}
 
-	protected void onEnable(Connection connection) {
+	protected void onEnable(ModuleScope scope) {
 	}
-	
-	protected void onDisable(Connection connection) {
+
+	protected void onDisable(ModuleScope scope) {
 	}
 
 	public void log(String str) {
@@ -56,7 +55,7 @@ public abstract class Module implements Comparable<Module> {
 	public void log(String str, VerboseLevel level) {
 		manager.plog("[" + name + "] " + str, level);
 	}
-	
+
 	public void log(Connection c, String str) {
 		c.log("[" + name + "] " + str);
 	}
@@ -64,7 +63,7 @@ public abstract class Module implements Comparable<Module> {
 	public void log(Connection c, String str, VerboseLevel level) {
 		c.log("[" + name + "] " + str, level);
 	}
-	
+
 	@Override
 	public int compareTo(Module m) {
 		return priority - m.priority;

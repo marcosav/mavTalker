@@ -12,7 +12,7 @@ import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.peer.ConnectedPeer;
 
 public class TMCommandRegistry extends CommandRegistry {
-	
+
 	public TMCommandRegistry() {
 		super(Set.of(new MessageCMD()));
 	}
@@ -41,8 +41,8 @@ public class TMCommandRegistry extends CommandRegistry {
 
 			String finalMsg = toWrite.trim();
 
-			Logger.log("INFO: Sending to \"" + to.stream().map(t -> t.getName()).collect(Collectors.joining(",")) + "\" message \"" + finalMsg + "\".",
-					VerboseLevel.MEDIUM);
+			Logger.log("INFO: Sending to \"" + to.stream().map(t -> t.getName()).collect(Collectors.joining(","))
+					+ "\" message \"" + finalMsg + "\".", VerboseLevel.MEDIUM);
 
 			to.forEach(c -> {
 				try {

@@ -11,3 +11,6 @@
 
 # Other
 /TESTS/
+
+# VSCode
+.vscode

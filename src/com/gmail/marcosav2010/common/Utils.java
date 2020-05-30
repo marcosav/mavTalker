@@ -24,8 +24,9 @@ import java.util.stream.Stream;
 
 public class Utils {
 
-	private static final String[] IP_PROVIDERS = new String[] { "http://checkip.amazonaws.com", "http://bot.whatismyipaddress.com/", "https://ident.me/",
-			"https://ip.seeip.org/", "https://api.ipify.org" };
+	private static final String[] IP_PROVIDERS = new String[] { "http://checkip.amazonaws.com",
+			"http://bot.whatismyipaddress.com/", "https://ident.me/", "https://ip.seeip.org/",
+			"https://api.ipify.org" };
 	private static final long IP_TIMEOUT = 5L;
 	private static final ExecutorService exec = Executors.newFixedThreadPool(1);
 
@@ -63,8 +64,9 @@ public class Utils {
 
 		return out;
 	}
-	
+
 	public static <T> T[] concat(T[] ba1, T[] ba2) {
+		@SuppressWarnings("unchecked")
 		T[] out = (T[]) new Object[ba1.length + ba2.length];
 
 		System.arraycopy(ba1, 0, out, 0, ba1.length);
@@ -127,7 +129,8 @@ public class Utils {
 	public static InetAddress obtainExternalAddress() throws IOException {
 		String r;
 		try {
-			r = exec.invokeAny(Stream.of(IP_PROVIDERS).map(Utils::readRawWebsite).collect(Collectors.toList()), IP_TIMEOUT, TimeUnit.SECONDS);
+			r = exec.invokeAny(Stream.of(IP_PROVIDERS).map(Utils::readRawWebsite).collect(Collectors.toList()),
+					IP_TIMEOUT, TimeUnit.SECONDS);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			return InetAddress.getLocalHost();
 		}
@@ -147,11 +150,11 @@ public class Utils {
 	}
 
 	public static String encode(byte[] array) {
-		return Base64.getUrlEncoder().withoutPadding().encodeToString(array).replaceAll("_", "ñ").replaceAll("-", "Ñ");
+		return Base64.getUrlEncoder().withoutPadding().encodeToString(array).replaceAll("_", "Ã±").replaceAll("-", "Ã‘");
 	}
 
 	public static byte[] decode(String str) {
-		return Base64.getUrlDecoder().decode(str.replaceAll("ñ", "_").replaceAll("Ñ", "-"));
+		return Base64.getUrlDecoder().decode(str.replaceAll("Ã±", "_").replaceAll("Ã‘", "-"));
 	}
 
 	public static String toBase64(UUID uuid) {

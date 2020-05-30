@@ -40,10 +40,12 @@ public class PacketEventHandlerManager {
 		return packetMethods.values().stream().map(m -> m).count();
 	}
 
+	@SuppressWarnings("unchecked")
 	private <T extends PacketListener> void put(Map<Method, ? extends PacketListener> set, Method m, T listener) {
 		((Map<Method, T>) set).put(m, listener);
 	}
 
+	@SuppressWarnings("unchecked")
 	public void registerListeners(Collection<PacketListener> packetListeners) {
 		packetListeners.forEach(l -> {
 			Stream.of(l.getClass().getMethods()).forEach(m -> {

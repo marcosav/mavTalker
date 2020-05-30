@@ -2,9 +2,10 @@ package com.gmail.marcosav2010.main;
 
 import java.io.IOException;
 import java.net.InetAddress;
+
 import com.gmail.marcosav2010.command.CommandManager;
 import com.gmail.marcosav2010.common.Utils;
-import com.gmail.marcosav2010.communicator.module.ModuleManager;
+import com.gmail.marcosav2010.communicator.module.ModuleLoader;
 import com.gmail.marcosav2010.config.GeneralConfiguration;
 import com.gmail.marcosav2010.logger.Logger;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
@@ -40,7 +41,7 @@ public class Main {
 
 		Logger.setVerboseLevel(generalConfig.getVerboseLevel());
 
-		ModuleManager.loadModules();
+		ModuleLoader.loadModules();
 
 		commandManager = new CommandManager();
 		peerManager = new PeerManager(generalConfig);
@@ -66,7 +67,9 @@ public class Main {
 		try {
 			long m = System.currentTimeMillis();
 			publicAddress = Utils.obtainExternalAddress();
-			Logger.log("Public address got in " + (System.currentTimeMillis() - m) + "ms: " + publicAddress.getHostName(), VerboseLevel.MEDIUM);
+			Logger.log(
+					"Public address got in " + (System.currentTimeMillis() - m) + "ms: " + publicAddress.getHostName(),
+					VerboseLevel.MEDIUM);
 		} catch (IOException e) {
 			Logger.log("There was an error while obtaining public address, shutting down...");
 			Logger.log(e);

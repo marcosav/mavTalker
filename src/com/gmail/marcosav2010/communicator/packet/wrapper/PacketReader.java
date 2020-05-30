@@ -21,7 +21,7 @@ public class PacketReader {
 			packet = packetClass.getConstructor().newInstance();
 
 			packet.decode(decoder);
-			
+
 		} catch (Exception ex) {
 			throw new PacketReadException(ex);
 		}

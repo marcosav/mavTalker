@@ -68,6 +68,7 @@ public class GeneralConfiguration extends Configuration {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public static class Properties {
 
 		private PropertyCategory category;

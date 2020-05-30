@@ -12,7 +12,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class PacketDecoder implements Closeable, AutoCloseable {
+public class PacketDecoder implements Closeable {
 
 	@Getter
 	private final InputStream in;

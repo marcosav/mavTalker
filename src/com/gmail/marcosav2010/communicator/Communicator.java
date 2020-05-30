@@ -16,7 +16,7 @@ import lombok.Setter;
  *
  */
 @NoArgsConstructor
-public abstract class Communicator implements Closeable, AutoCloseable {
+public abstract class Communicator implements Closeable {
 
 	@Getter
 	@Setter

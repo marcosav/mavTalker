@@ -28,11 +28,11 @@ public class FTCommandRegistry extends CommandRegistry {
 	public FTCommandRegistry() {
 		super(Set.of(new FileCMD(), new ClearDownloadsCMD(), new DownloadCMD(), new FindCMD()));
 	}
-	
+
 	private static FileTransferHandler getFTH(Connection c) {
-		return ((FTModule) c.getModuleManager().getModule(FTModule.FTH)).getFTH();
+		return ((FTModule) c.getModuleManager().getModule("FTH")).getFTH();
 	}
-	
+
 	private static class FindCMD extends Command {
 
 		FindCMD() {
@@ -42,12 +42,12 @@ public class FTCommandRegistry extends CommandRegistry {
 		@Override
 		public void execute(String[] arg, int args) {
 			int pCount = Main.getInstance().getPeerManager().count();
-			
+
 			if (args < 1 && pCount == 1 || args < 2 && pCount > 1 || pCount == 0) {
 				Logger.log("ERROR: Needed filename at least.");
 				return;
 			}
-			
+
 			boolean autoPeer = pCount > 1;
 			Peer peer;
 
@@ -62,14 +62,15 @@ public class FTCommandRegistry extends CommandRegistry {
 				}
 			} else
 				peer = Main.getInstance().getPeerManager().getFirstPeer();
-			
+
 			String filename = arg[autoPeer ? 0 : 1];
-			
+
 			Logger.log("Finding file \"" + filename + "\"...");
-			
+
 			var connectedPeers = peer.getConnectionManager().getIdentificator().getConnectedPeers();
-			var p = new PacketFindFile(filename, 1, connectedPeers.stream().map(ConnectedPeer::getUUID).collect(Collectors.toSet()));
-			
+			var p = new PacketFindFile(filename, 1,
+					connectedPeers.stream().map(ConnectedPeer::getUUID).collect(Collectors.toSet()));
+
 			connectedPeers.forEach(c -> {
 				try {
 					c.sendPacket(p);
@@ -119,7 +120,8 @@ public class FTCommandRegistry extends CommandRegistry {
 	private static class DownloadCMD extends Command {
 
 		DownloadCMD() {
-			super("download", new String[] { "d", "dw" }, "<host peer> <remote peer> <file id> <yes/no> (default = yes)");
+			super("download", new String[] { "d", "dw" },
+					"<host peer> <remote peer> <file id> <yes/no> (default = yes)");
 		}
 
 		@Override
@@ -195,7 +197,8 @@ public class FTCommandRegistry extends CommandRegistry {
 			Path p = Paths.get(FileTransferHandler.DOWNLOAD_FOLDER);
 			if (p.toFile().exists())
 				try {
-					long totalSize = Files.walk(p).sorted(Collections.reverseOrder()).mapToLong(sp -> sp.toFile().length()).sum();
+					long totalSize = Files.walk(p).sorted(Collections.reverseOrder())
+							.mapToLong(sp -> sp.toFile().length()).sum();
 					Files.walk(p).sorted(Collections.reverseOrder()).map(Path::toFile).forEach(File::delete);
 					Logger.log("INFO: Successfully removed " + Utils.formatSize(totalSize) + " of downloaded files.");
 

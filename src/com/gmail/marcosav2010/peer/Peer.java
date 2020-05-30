@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import com.gmail.marcosav2010.communicator.module.ModuleScope;
 import com.gmail.marcosav2010.communicator.module.ModuleManager;
 import com.gmail.marcosav2010.config.GeneralConfiguration;
 import com.gmail.marcosav2010.config.GeneralConfiguration.Properties;
@@ -35,7 +36,7 @@ import lombok.Getter;
  * 
  * @author Marcos
  */
-public class Peer extends KnownPeer implements TaskOwner {
+public class Peer extends KnownPeer implements TaskOwner, ModuleScope {
 
 	private ServerSocket server;
 
@@ -54,7 +55,8 @@ public class Peer extends KnownPeer implements TaskOwner {
 		super(name, port, UUID.randomUUID());
 		properties = new PeerProperties();
 		connectionManager = new ConnectionManager(this);
-		executorService = new ThreadPoolExecutor(1, Integer.MAX_VALUE, 10L, TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), new PeerThreadFactory());
+		executorService = new ThreadPoolExecutor(1, Integer.MAX_VALUE, 10L, TimeUnit.SECONDS,
+				new SynchronousQueue<Runnable>(), new PeerThreadFactory());
 		started = false;
 	}
 
@@ -64,7 +66,8 @@ public class Peer extends KnownPeer implements TaskOwner {
 		private final String namePrefix;
 
 		PeerThreadFactory() {
-			group = new ThreadGroup(Main.getInstance().getPeerManager().getPeerThreadGroup(), "peerThreadGroup-" + getName());
+			group = new ThreadGroup(Main.getInstance().getPeerManager().getPeerThreadGroup(),
+					"peerThreadGroup-" + getName());
 			namePrefix = "peerPool-" + getName() + "-thread-";
 		}
 
@@ -86,7 +89,8 @@ public class Peer extends KnownPeer implements TaskOwner {
 
 			moduleManager = new ModuleManager(this);
 			moduleManager.initializeModules();
-			
+			moduleManager.onEnable(this);
+
 			log("Starting server on port " + getPort() + "...");
 
 			server = new ServerSocket(getPort());
@@ -139,13 +143,16 @@ public class Peer extends KnownPeer implements TaskOwner {
 	public void printInfo() {
 		var ci = connectionManager.getIdentificator();
 		var peers = ci.getConnectedPeers();
-		log("Name: " + getName() + "\n" + "Display ID: " + getDisplayID() + "\n" + "Currently " + peers.size() + " peers connected: " + peers.stream()
-				.map(cp -> "\n - " + cp.getName() + " #" + cp.getDisplayID() + " CUUID: " + cp.getConnection().getUUID()).collect(Collectors.joining(", ")));
+		log("Name: " + getName() + "\n" + "Display ID: " + getDisplayID() + "\n" + "Currently " + peers.size()
+				+ " peers connected: " + peers.stream().map(cp -> "\n - " + cp.getName() + " #" + cp.getDisplayID()
+						+ " CUUID: " + cp.getConnection().getUUID()).collect(Collectors.joining(", ")));
 	}
 
 	public void stop(boolean silent) {
 		log("Shutting down peer...", VerboseLevel.MEDIUM);
 		started = false;
+
+		moduleManager.onDisable(this);
 
 		connectionManager.disconnectAll(silent);
 

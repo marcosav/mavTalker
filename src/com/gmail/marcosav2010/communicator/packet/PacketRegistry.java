@@ -23,7 +23,9 @@ public class PacketRegistry {
 
 	public static void register(byte id, Class<? extends AbstractPacket> packet) {
 		if (packetsById.containsKey(id) || packetsByClass.containsKey(packet))
-			throw new IllegalArgumentException("Duplicated id or packet type");
+			// TODO: Only one package registration.
+			// throw new IllegalArgumentException("Duplicated id or packet type");
+			return;
 		
 		packetsById.put(id, packet);
 		packetsByClass.put(packet, id);

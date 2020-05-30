@@ -1,6 +1,7 @@
 package com.gmail.marcosav2010.communicator.module.fth;
 
-import com.gmail.marcosav2010.communicator.module.LoadModule;
+import com.gmail.marcosav2010.communicator.module.ModuleDescriptor;
+import com.gmail.marcosav2010.communicator.module.ModuleScope;
 import com.gmail.marcosav2010.communicator.module.Module;
 import com.gmail.marcosav2010.communicator.module.fth.packet.PacketFileAccept;
 import com.gmail.marcosav2010.communicator.module.fth.packet.PacketFileRequest;
@@ -10,13 +11,9 @@ import com.gmail.marcosav2010.communicator.module.fth.packet.PacketFindFile;
 import com.gmail.marcosav2010.communicator.module.fth.packet.PacketGotFile;
 import com.gmail.marcosav2010.connection.Connection;
 
-@LoadModule(
-		registry = FTCommandRegistry.class
-)
+@ModuleDescriptor(name = "FTH", scope = Connection.class, registry = FTCommandRegistry.class)
 public class FTModule extends Module {
 
-	public static final String FTH = "FTH";
-	
 	static {
 		registerPacket(3, PacketFileAccept.class);
 		registerPacket(4, PacketFileRequest.class);
@@ -25,21 +22,21 @@ public class FTModule extends Module {
 		registerPacket(7, PacketFindFile.class);
 		registerPacket(8, PacketGotFile.class);
 	}
-	
+
 	private FileTransferHandler fth;
 	private FTListener listener;
-	
-	public FTModule() {
-		super(FTH);
-		
+
+	public FTModule(ModuleDescriptor moduleDescriptor) {
+		super(moduleDescriptor);
+
 		registerListeners(listener = new FTListener());
 	}
 
 	@Override
-	protected void onEnable(Connection connection) {
-		listener.setFTH(fth = new FileTransferHandler(this, connection));
+	protected void onEnable(ModuleScope connection) {
+		listener.setFTH(fth = new FileTransferHandler(this, (Connection) connection));
 	}
-	
+
 	public FileTransferHandler getFTH() {
 		return fth;
 	}

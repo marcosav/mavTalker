@@ -56,7 +56,8 @@ public class HandshakeAuthentificator {
 	private static final int HOST_LENGTH = Byte.BYTES * 4;
 	private static final int PORT_LENGTH = Integer.BYTES;
 
-	private static final byte[] PUBLIC_CONNECTION_KEY = markBytes(new String(new char[C_KEY_LENGTH]).getBytes(), C_KEY_MARK);
+	private static final byte[] PUBLIC_CONNECTION_KEY = markBytes(new String(new char[C_KEY_LENGTH]).getBytes(),
+			C_KEY_MARK);
 	private static final byte[] EMPTY_HANDSHAKE_KEY = new byte[H_KEY_LENGTH];
 
 	private static final String PASSWORD_HASH_ALGORITHM = "SHA3-256";
@@ -96,8 +97,8 @@ public class HandshakeAuthentificator {
 		return type;
 	}
 
-	public String generatePublicAddressKey()
-			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+	public String generatePublicAddressKey() throws InvalidKeyException, NoSuchAlgorithmException,
+			NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
 
 		if (publicAddressKey != null)
 			return publicAddressKey;
@@ -107,8 +108,8 @@ public class HandshakeAuthentificator {
 		return publicAddressKey = generateAddressKey(PUBLIC_CONNECTION_KEY, publicConnectionToken, getMark(PUBLIC_KEY));
 	}
 
-	public String generatePrivateAddressKey(char[] requesterConnectionKeyC)
-			throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
+	public String generatePrivateAddressKey(char[] requesterConnectionKeyC) throws NoSuchAlgorithmException,
+			NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
 
 		String requesterConnectionKey = new String(requesterConnectionKeyC);
 
@@ -123,7 +124,8 @@ public class HandshakeAuthentificator {
 	}
 
 	private String generateAddressKey(byte[] requesterConnectionKeyBytes, ConnectionToken ct, byte mark)
-			throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
+			throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException,
+			InvalidKeyException {
 
 		if (requesterConnectionKeyBytes.length != C_KEY_LENGTH)
 			throw new IllegalArgumentException("Invalid connection key format.");
@@ -137,7 +139,8 @@ public class HandshakeAuthentificator {
 
 		var baseKey = ct.getBaseKey();
 
-		var addressKeyBytes = ByteBuffer.allocate(RAW_ADDRESSKEY_LENGTH).put(ipBytes).putInt(peer.getPort()).put(baseKey).put(handshakeKey).array();
+		var addressKeyBytes = ByteBuffer.allocate(RAW_ADDRESSKEY_LENGTH).put(ipBytes).putInt(peer.getPort())
+				.put(baseKey).put(handshakeKey).array();
 
 		Cipher c = Cipher.getInstance("AES");
 
@@ -159,13 +162,15 @@ public class HandshakeAuthentificator {
 	}
 
 	public ConnectionToken parseAddressKey(char[] remoteAddressKey)
-			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnknownHostException {
+			throws InvalidKeyException, NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException,
+			BadPaddingException, UnknownHostException {
 
 		var remoteAddressKeyBytes = Utils.decode(new String(remoteAddressKey));
 
 		var unmarkedBytes = new byte[remoteAddressKeyBytes.length - 1];
 		System.arraycopy(remoteAddressKeyBytes, 0, unmarkedBytes, 0, AK_KEY_MARK);
-		System.arraycopy(remoteAddressKeyBytes, AK_KEY_MARK + 1, unmarkedBytes, AK_KEY_MARK, unmarkedBytes.length - AK_KEY_MARK);
+		System.arraycopy(remoteAddressKeyBytes, AK_KEY_MARK + 1, unmarkedBytes, AK_KEY_MARK,
+				unmarkedBytes.length - AK_KEY_MARK);
 		byte mark = remoteAddressKeyBytes[AK_KEY_MARK];
 		byte type = (byte) (mark & KEY_TYPE_BITMASK);
 
@@ -173,25 +178,26 @@ public class HandshakeAuthentificator {
 	}
 
 	public ConnectionToken parseAddressKey(byte[] remoteAddressKeyBytes, byte type)
-			throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, UnknownHostException, InvalidKeyException {
+			throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException,
+			UnknownHostException, InvalidKeyException {
 
 		byte[] connectionKey;
 		boolean isPublic = false;
 
 		switch (type) {
-		case PRIVATE_KEY:
-			connectionKey = getConnectionKey();
-			break;
-		case PUBLIC_KEY:
-			connectionKey = PUBLIC_CONNECTION_KEY;
-			isPublic = true;
-			break;
-		default:
-			throw new IllegalArgumentException("Invalid address key type.");
+			case PRIVATE_KEY:
+				connectionKey = getConnectionKey();
+				break;
+			case PUBLIC_KEY:
+				connectionKey = PUBLIC_CONNECTION_KEY;
+				isPublic = true;
+				break;
+			default:
+				throw new IllegalArgumentException("Invalid address key type.");
 		}
 
-		byte[] parsedIpBytes = new byte[HOST_LENGTH], parsedPortBytes = new byte[PORT_LENGTH], baseKeyBytes = new byte[B_KEY_LENGTH],
-				handshakeKeyBytes = new byte[H_KEY_LENGTH];
+		byte[] parsedIpBytes = new byte[HOST_LENGTH], parsedPortBytes = new byte[PORT_LENGTH],
+				baseKeyBytes = new byte[B_KEY_LENGTH], handshakeKeyBytes = new byte[H_KEY_LENGTH];
 
 		var password = MessageDigest.getInstance(PASSWORD_HASH_ALGORITHM).digest(connectionKey);
 		var secretKey = new SecretKeySpec(password, "AES");
@@ -212,7 +218,8 @@ public class HandshakeAuthentificator {
 
 		var address = new InetSocketAddress(InetAddress.getByAddress(parsedIpBytes), p);
 
-		return registerHandshakeKey(address, new ConnectionToken(handshakeKeyBytes, address, baseKeyBytes).setPublic(isPublic));
+		return registerHandshakeKey(address,
+				new ConnectionToken(handshakeKeyBytes, address, baseKeyBytes).setPublic(isPublic));
 	}
 
 	public ConnectionToken sendHandshake(BaseCommunicator b, InetSocketAddress a) throws IOException {
@@ -233,11 +240,13 @@ public class HandshakeAuthentificator {
 		return ct;
 	}
 
-	public ConnectionToken readHandshake(Socket remoteSocket) throws InterruptedException, ExecutionException, TimeoutException, InvalidHandshakeKey {
+	public ConnectionToken readHandshake(Socket remoteSocket)
+			throws InterruptedException, ExecutionException, TimeoutException, InvalidHandshakeKey {
 		log("Waiting for handshake, timeout set to " + HANDSHAKE_TIMEOUT + "s...", VerboseLevel.HIGH);
 
 		byte[] b = new byte[C_KEY_LENGTH + H_KEY_LENGTH];
-		peer.getExecutorService().submit(() -> remoteSocket.getInputStream().read(b)).get(HANDSHAKE_TIMEOUT, TimeUnit.SECONDS);
+		peer.getExecutorService().submit(() -> remoteSocket.getInputStream().read(b)).get(HANDSHAKE_TIMEOUT,
+				TimeUnit.SECONDS);
 
 		return handle(b);
 	}
@@ -248,9 +257,10 @@ public class HandshakeAuthentificator {
 		System.arraycopy(b, C_KEY_LENGTH, handshakeKey, 0, H_KEY_LENGTH);
 
 		if (getHRL() == HandshakeRequirementLevel.NONE)
-			if (Arrays.equals(EMPTY_HANDSHAKE_KEY, handshakeKey) && Arrays.equals(PUBLIC_CONNECTION_KEY, connectionKeyBytes))
+			if (Arrays.equals(EMPTY_HANDSHAKE_KEY, handshakeKey)
+					&& Arrays.equals(PUBLIC_CONNECTION_KEY, connectionKeyBytes))
 				return null;
-		
+
 		if (getHRL().compareTo(HandshakeRequirementLevel.PUBLIC) <= 0)
 			if (publicConnectionToken != null && Arrays.equals(PUBLIC_CONNECTION_KEY, connectionKeyBytes)
 					&& Arrays.equals(publicConnectionToken.getHandshakeKey(), handshakeKey))
@@ -258,7 +268,8 @@ public class HandshakeAuthentificator {
 
 		String connectionKey = Utils.encode(connectionKeyBytes);
 
-		if (localStorage.containsKey(connectionKey) && Arrays.equals(localStorage.get(connectionKey).getHandshakeKey(), handshakeKey))
+		if (localStorage.containsKey(connectionKey)
+				&& Arrays.equals(localStorage.get(connectionKey).getHandshakeKey(), handshakeKey))
 			return localStorage.remove(connectionKey);
 
 		String hKey = Utils.encode(handshakeKey);
