@@ -17,8 +17,8 @@ import com.gmail.marcosav2010.cipher.EncryptedMessage;
 import com.gmail.marcosav2010.cipher.SessionCipher;
 import com.gmail.marcosav2010.common.Utils;
 import com.gmail.marcosav2010.communicator.BaseCommunicator;
-import com.gmail.marcosav2010.communicator.module.ModuleScope;
 import com.gmail.marcosav2010.communicator.module.ModuleManager;
+import com.gmail.marcosav2010.communicator.module.ModuleScope;
 import com.gmail.marcosav2010.communicator.packet.AbstractPacket;
 import com.gmail.marcosav2010.communicator.packet.Packet;
 import com.gmail.marcosav2010.communicator.packet.handling.PacketMessager;
@@ -27,9 +27,9 @@ import com.gmail.marcosav2010.communicator.packet.wrapper.PacketReadException;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketReader;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
 import com.gmail.marcosav2010.handshake.HandshakeAuthentificator;
-import com.gmail.marcosav2010.handshake.HandshakeCommunicator;
 import com.gmail.marcosav2010.handshake.HandshakeAuthentificator.ConnectionToken;
-import com.gmail.marcosav2010.logger.Logger;
+import com.gmail.marcosav2010.handshake.HandshakeCommunicator;
+import com.gmail.marcosav2010.logger.Log;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.peer.ConnectedPeer;
@@ -51,7 +51,8 @@ public class Connection extends NetworkConnection implements ModuleScope {
 	private static final long REMOTE_CONNECT_BACK_TIMEOUT = 10L;
 	private static final byte[] DISCONNECT_REQUEST_BYTES = new byte[] { 123, -123 };
 
-	private String LOGGER_PREFIX = "[Connection] [-] ";
+	@Getter
+	private final Log log;
 
 	@Getter
 	private Peer peer;
@@ -85,6 +86,8 @@ public class Connection extends NetworkConnection implements ModuleScope {
 
 	public Connection(Peer peer) {
 		this.peer = peer;
+		log = new Log(peer, "");
+		updateLogPrefix(peer.getAndInc());
 		connected = new AtomicBoolean(false);
 		identificationController = new IdentificationController(this);
 		init();
@@ -104,6 +107,10 @@ public class Connection extends NetworkConnection implements ModuleScope {
 		moduleManager.initializeModules();
 	}
 
+	private void updateLogPrefix(Object prefix) {
+		log.setPrefix("Connection] [" + prefix.toString());
+	}
+
 	public void connect(Socket remoteSocket, ConnectionToken ct) throws IOException {
 		connected.set(true);
 		cancelConnectBackTimeout();
@@ -111,7 +118,7 @@ public class Connection extends NetworkConnection implements ModuleScope {
 		remoteAddress = remoteSocket.getInetAddress();
 
 		if (ct != null) {
-			log("Setting handshake ciphered communicator input key...", VerboseLevel.HIGH);
+			log.log("Setting handshake ciphered communicator input key...", VerboseLevel.HIGH);
 
 			HandshakeCommunicator hCommunicator;
 			if (baseCommunicator instanceof HandshakeCommunicator)
@@ -124,7 +131,7 @@ public class Connection extends NetworkConnection implements ModuleScope {
 			baseCommunicator = hCommunicator;
 		}
 
-		log("Setting input stream...", VerboseLevel.MEDIUM);
+		log.log("Setting input stream...", VerboseLevel.MEDIUM);
 		baseCommunicator.setIn(remoteSocket.getInputStream());
 
 		try {
@@ -132,12 +139,12 @@ public class Connection extends NetworkConnection implements ModuleScope {
 			listenForHandshakeKeyPortAndConnect();
 
 		} catch (Exception e) {
-			Logger.log(e);
+			log.log(e);
 			disconnect(true);
 			return;
 		}
 
-		log("Setup completed, now executing listen task...", VerboseLevel.LOW);
+		log.log("Setup completed, now executing listen task...", VerboseLevel.LOW);
 		listenTask = Main.getInstance().getTasker().run(peer, listenSocket()).setName("Listen Task");
 	}
 
@@ -155,14 +162,12 @@ public class Connection extends NetworkConnection implements ModuleScope {
 					if (!connected.get())
 						return;
 
-					log("Connection lost unexpectedly: " + e.getMessage());
-					Logger.log(e);
+					log.log(e, "Connection lost unexpectedly: " + e.getMessage());
 					disconnect(true);
 					return;
 
 				} catch (Exception e) {
-					log("An unknown exception has ocurred: " + e.getMessage());
-					Logger.log(e);
+					log.log(e, "An unknown exception has ocurred: " + e.getMessage());
 					continue;
 				}
 			}
@@ -181,17 +186,17 @@ public class Connection extends NetworkConnection implements ModuleScope {
 				&& address.getPort() == peer.getPort())
 			throw new IllegalStateException("Cannon connect to itself.");
 
-		log("Connecting to " + address.toString() + "...");
+		log.log("Connecting to " + address.toString() + "...");
 
 		Socket connectingSocket = new Socket();
 		connectingSocket.connect(address, SOCKET_CONNECT_TIMEOUT);
 
-		log("Setting host socket...", VerboseLevel.MEDIUM);
+		log.log("Setting host socket...", VerboseLevel.MEDIUM);
 
 		hostSocket = connectingSocket;
 		remotePort = address.getPort();
 
-		log("Setting output stream...", VerboseLevel.MEDIUM);
+		log.log("Setting output stream...", VerboseLevel.MEDIUM);
 		baseCommunicator.setOut(hostSocket.getOutputStream());
 
 		HandshakeAuthentificator ha = peer.getConnectionManager().getHandshakeAuthentificator();
@@ -200,7 +205,7 @@ public class Connection extends NetworkConnection implements ModuleScope {
 		identificationController.sendTemporaryUUID();
 
 		if (ct != null) {
-			log("Setting handshake ciphered communicator output key...", VerboseLevel.HIGH);
+			log.log("Setting handshake ciphered communicator output key...", VerboseLevel.HIGH);
 
 			HandshakeCommunicator hCommunicator;
 			if (baseCommunicator instanceof HandshakeCommunicator)
@@ -212,27 +217,27 @@ public class Connection extends NetworkConnection implements ModuleScope {
 			baseCommunicator = hCommunicator;
 		}
 
-		log("Generating session input cipher using " + SessionCipher.RSA_KEY_ALGORITHM + "-"
+		log.log("Generating session input cipher using " + SessionCipher.RSA_KEY_ALGORITHM + "-"
 				+ SessionCipher.RSA_KEY_SIZE + "...", VerboseLevel.MEDIUM);
 		sessionCipher.generate();
 
-		log("Starting authentification...", VerboseLevel.MEDIUM);
+		log.log("Starting authentification...", VerboseLevel.MEDIUM);
 		startAuthentication();
 
 		if (!isConnected()) {
-			log("Providing handshake key and port to connect...", VerboseLevel.MEDIUM);
+			log.log("Providing handshake key and port to connect...", VerboseLevel.MEDIUM);
 			writeHandshakeKeyAndPort();
 			startConnectTimeout();
 		}
 
-		log("Connected to remote, please wait...");
+		log.log("Connected to remote, please wait...");
 	}
 
 	private void listenForAuth() throws ConnectionException, PacketWriteException, GeneralSecurityException {
 		if (!sessionCipher.isWaitingForRemoteAuth())
 			return;
 
-		log("Waiting for remote authentication, timeout set to " + AUTH_TIMEOUT + "s...", VerboseLevel.MEDIUM);
+		log.log("Waiting for remote authentication, timeout set to " + AUTH_TIMEOUT + "s...", VerboseLevel.MEDIUM);
 
 		byte[] respose;
 
@@ -245,7 +250,7 @@ public class Connection extends NetworkConnection implements ModuleScope {
 			throw new ConnectionException("There was an error while reading authentication.", e);
 		}
 
-		log("Loading authentication respose...", VerboseLevel.LOW);
+		log.log("Loading authentication respose...", VerboseLevel.LOW);
 		sessionCipher.loadAuthenticationRespose(respose);
 	}
 
@@ -254,7 +259,8 @@ public class Connection extends NetworkConnection implements ModuleScope {
 		if (!shouldReadPort())
 			return;
 
-		log("Waiting for remote handshake key and port, timeout set to " + HP_TIMEOUT + "s...", VerboseLevel.MEDIUM);
+		log.log("Waiting for remote handshake key and port, timeout set to " + HP_TIMEOUT + "s...",
+				VerboseLevel.MEDIUM);
 
 		byte[] respose;
 
@@ -279,11 +285,11 @@ public class Connection extends NetworkConnection implements ModuleScope {
 	}
 
 	private void startConnectTimeout() {
-		log("Waiting for remote connection back, timeout set to " + REMOTE_CONNECT_BACK_TIMEOUT + "s...",
+		log.log("Waiting for remote connection back, timeout set to " + REMOTE_CONNECT_BACK_TIMEOUT + "s...",
 				VerboseLevel.MEDIUM);
 
 		remoteConnectBackTimeout = Main.getInstance().getTasker().schedule(peer, () -> {
-			log("Remote peer didn't connect back at time, stopping connection.");
+			log.log("Remote peer didn't connect back at time, stopping connection.");
 
 			try {
 				writeRawBytes(DISCONNECT_REQUEST_BYTES); // Try to send disconnect request to avoid unnecesary a future
@@ -313,7 +319,7 @@ public class Connection extends NetworkConnection implements ModuleScope {
 
 	private void handleHandshakeKeyPortReadAndConnect(byte[] bytes)
 			throws IOException, GeneralSecurityException, ConnectionException {
-		log("Reading remote port and handshake...", VerboseLevel.MEDIUM);
+		log.log("Reading remote port and handshake...", VerboseLevel.MEDIUM);
 
 		byte[][] sBytes = Utils.split(bytes, Integer.BYTES);
 		remotePort = Utils.bytesToInt(sBytes[0]);
@@ -323,7 +329,7 @@ public class Connection extends NetworkConnection implements ModuleScope {
 		InetSocketAddress address = new InetSocketAddress(remoteAddress, remotePort);
 		peer.getConnectionManager().getHandshakeAuthentificator().storeHandshakeKey(address, hbBytes[0], hbBytes[1]);
 
-		log("Read remote port " + remotePort + " and handshake key.", VerboseLevel.MEDIUM);
+		log.log("Read remote port " + remotePort + " and handshake key.", VerboseLevel.MEDIUM);
 
 		// We wait 500ms for a disconnect request, usually send if connection back has
 		// token too much time
@@ -348,8 +354,7 @@ public class Connection extends NetworkConnection implements ModuleScope {
 			p = reader.read(bytes);
 
 		} catch (PacketReadException e) {
-			log("There was an error while reading bytes.");
-			Logger.log(e);
+			log.log(e, "There was an error while reading bytes.");
 			return;
 		}
 
@@ -357,15 +362,15 @@ public class Connection extends NetworkConnection implements ModuleScope {
 	}
 
 	public void onAuth() throws PacketWriteException {
-		log("Authenticacion process done, ciphering I/O streams using " + CipheredCommunicator.AES_KEY_ALGORITHM + "-"
-				+ CipheredCommunicator.AES_KEY_SIZE + "...", VerboseLevel.MEDIUM);
+		log.log("Authenticacion process done, ciphering I/O streams using " + CipheredCommunicator.AES_KEY_ALGORITHM
+				+ "-" + CipheredCommunicator.AES_KEY_SIZE + "...", VerboseLevel.MEDIUM);
 
 		cipheredCommunicator = new CipheredCommunicator(baseCommunicator, sessionCipher, peer);
 		reader = new PacketReader();
 		messager = new PacketMessager(this, cipheredCommunicator);
 		identificationController.setMessager(messager);
 
-		log("Session ciphering done, communicator ciphered and packet messager set.", VerboseLevel.LOW);
+		log.log("Session ciphering done, communicator ciphered and packet messager set.", VerboseLevel.LOW);
 
 		identificationController.startIdentification();
 	}
@@ -373,9 +378,9 @@ public class Connection extends NetworkConnection implements ModuleScope {
 	public void onPairCompleted() {
 		messager.setupEventHandler();
 
-		moduleManager.onEnable(this);
+		moduleManager.onEnable();
 
-		log("Connection completed.");
+		log.log("Connection completed.");
 	}
 
 	private void startAuthentication() throws IOException, GeneralSecurityException {
@@ -411,7 +416,8 @@ public class Connection extends NetworkConnection implements ModuleScope {
 			throw new ConnectionIdentificationException("ConnectedPeer instance is already set.");
 
 		connectedPeer = cPeer;
-		LOGGER_PREFIX = LOGGER_PREFIX.replaceFirst("-", connectedPeer.getName());
+		log.log("Setting connection tag to " + connectedPeer.getName(), VerboseLevel.MEDIUM);
+		updateLogPrefix(connectedPeer.getName());
 	}
 
 	public UUID getUUID() {
@@ -427,34 +433,34 @@ public class Connection extends NetworkConnection implements ModuleScope {
 			return;
 
 		if (peer.getModuleManager() != null) {
-			log("Disabling connection modules...", VerboseLevel.MEDIUM);
-			moduleManager.onDisable(this);
+			log.log("Disabling connection modules...", VerboseLevel.MEDIUM);
+			moduleManager.onDisable();
 		}
 
-		log("Disconnecting from peer...", VerboseLevel.LOW);
+		log.log("Disconnecting from peer...", VerboseLevel.LOW);
 		connected.set(false);
 
 		if (messager != null) {
-			log("Unregistering listen events...", VerboseLevel.HIGH);
+			log.log("Unregistering listen events...", VerboseLevel.HIGH);
 			messager.stopEventHandler();
 		}
 
 		if (listenTask != null) {
-			log("Stopping listening task...", VerboseLevel.MEDIUM);
+			log.log("Stopping listening task...", VerboseLevel.MEDIUM);
 			listenTask.cancelNow();
 		}
 
 		if (!silent) {
-			log("Sending disconnect message to remote peer...", VerboseLevel.HIGH);
+			log.log("Sending disconnect message to remote peer...", VerboseLevel.HIGH);
 			try {
 				messager.sendStandardPacket(new PacketShutdown());
 			} catch (PacketWriteException e) {
-				log("Could not send disconnect message: " + e.getMessage(), VerboseLevel.HIGH);
+				log.log("Could not send disconnect message: " + e.getMessage(), VerboseLevel.HIGH);
 			}
 		}
 
 		if (cipheredCommunicator != null) {
-			log("Stopping communicator pool and closing I/O streams...", VerboseLevel.MEDIUM);
+			log.log("Stopping communicator pool and closing I/O streams...", VerboseLevel.MEDIUM);
 			cipheredCommunicator.closeQuietly();
 		}
 
@@ -463,7 +469,7 @@ public class Connection extends NetworkConnection implements ModuleScope {
 		}
 
 		if (hostSocket != null) {
-			log("Closing host socket...", VerboseLevel.MEDIUM);
+			log.log("Closing host socket...", VerboseLevel.MEDIUM);
 			try {
 				hostSocket.close();
 			} catch (IOException e) {
@@ -472,14 +478,6 @@ public class Connection extends NetworkConnection implements ModuleScope {
 
 		peer.getConnectionManager().removeConnection(getUUID());
 
-		log("Disconnected successfully.");
-	}
-
-	public void log(String str) {
-		peer.log(LOGGER_PREFIX + str);
-	}
-
-	public void log(String str, VerboseLevel level) {
-		peer.log(LOGGER_PREFIX + str, level);
+		log.log("Disconnected successfully.");
 	}
 }

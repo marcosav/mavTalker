@@ -6,21 +6,21 @@ import lombok.Getter;
 
 public class ExecutedCommand extends CommandBase {
 
-	@Getter
+    @Getter
     private final String[] args;
-	@Getter
+    @Getter
     private final int length;
-    
+
     public ExecutedCommand(String label, String[] args) {
         super(label);
         this.args = args;
         this.length = args.length;
     }
-    
+
     public void tryExecute() {
         var res = Main.getInstance().getCommandManager().fetch(getLabel());
         if (res == null)
-        	throw new CommandNotFoundException("Command not found.");
+            throw new CommandNotFoundException("Command not found");
 
         res.execute(args, length);
     }

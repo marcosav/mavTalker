@@ -16,19 +16,27 @@ import com.gmail.marcosav2010.common.Utils;
 import com.gmail.marcosav2010.handshake.HandshakeAuthentificator;
 import com.gmail.marcosav2010.handshake.HandshakeAuthentificator.ConnectionToken;
 import com.gmail.marcosav2010.handshake.HandshakeAuthentificator.InvalidHandshakeKey;
+import com.gmail.marcosav2010.logger.ILog;
+import com.gmail.marcosav2010.logger.Log;
+import com.gmail.marcosav2010.logger.Loggable;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.peer.Peer;
+
+import lombok.Getter;
 
 /**
  * This clase manages all @Peer stablished @Connection
  * 
  * @author Marcos
  */
-public class ConnectionManager {
+public class ConnectionManager implements Loggable {
 
 	private static final int UUID_BYTES = Long.BYTES * 2;
 
 	private static final long UUID_TIMEOUT = 10L;
+
+	@Getter
+	private final ILog log;
 
 	private Peer peer;
 	private Map<UUID, Connection> connections;
@@ -38,6 +46,8 @@ public class ConnectionManager {
 
 	public ConnectionManager(Peer peer) {
 		this.peer = peer;
+
+		log = new Log(peer, "ConnectionManager");
 		handshakeAuthentificator = new HandshakeAuthentificator(peer);
 		connectionIdentificador = new ConnectionIdentificator();
 		connections = new ConcurrentHashMap<>();
@@ -64,19 +74,20 @@ public class ConnectionManager {
 	public Map<UUID, Connection> getConnectionUUIDs() {
 		return Collections.unmodifiableMap(connections);
 	}
-	
+
 	public Collection<Connection> getConnections() {
 		return Collections.unmodifiableCollection(connections.values());
 	}
 
 	public boolean isConnectedTo(InetSocketAddress address) {
-		return connections.values().stream()
-				.anyMatch(c -> c.getRemotePort() == address.getPort() && c.getRemoteAddress().getHostAddress().equals(address.getAddress().getHostAddress()));
+		return connections.values().stream().anyMatch(c -> c.getRemotePort() == address.getPort()
+				&& c.getRemoteAddress().getHostAddress().equals(address.getAddress().getHostAddress()));
 	}
 
 	public Connection getConnection(InetSocketAddress address) {
 		return connections.values().stream()
-				.filter(c -> c.getRemotePort() == address.getPort() && c.getRemoteAddress().getHostAddress().equals(address.getAddress().getHostAddress()))
+				.filter(c -> c.getRemotePort() == address.getPort()
+						&& c.getRemoteAddress().getHostAddress().equals(address.getAddress().getHostAddress()))
 				.findFirst().orElseGet(null);
 	}
 
@@ -92,7 +103,7 @@ public class ConnectionManager {
 		} else
 			return connections.get(u);
 	}
-	
+
 	private Connection registerConnection(Peer peer, UUID uuid) {
 		if (uuid == null)
 			throw new ConnectionRegistryException("Connection UUID cannot be null.");
@@ -107,36 +118,37 @@ public class ConnectionManager {
 	}
 
 	public void manageSocketConnection(Socket remoteSocket) throws IOException {
-		log("Accepted " + remoteSocket.getRemoteSocketAddress().toString());
+		log.log("Accepted " + remoteSocket.getRemoteSocketAddress().toString());
 
 		ConnectionToken ct;
 
 		try {
-			ct = peer.getConnectionManager().getHandshakeAuthentificator().readHandshake(remoteSocket);
+			ct = handshakeAuthentificator.readHandshake(remoteSocket);
 
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			log("Remote peer didn't send handshake at time, closing remote socket...");
+			log.log("Remote peer didn't send handshake at time, closing remote socket...");
 			remoteSocket.close();
 			return;
 
 		} catch (InvalidHandshakeKey e) {
-			log(e.getMessage() + ", closing remote socket.");
+			log.log(e.getMessage() + ", closing remote socket.");
 			remoteSocket.close();
 			return;
 		}
 
-		log("Reading temporary remote connection UUID, timeout set to " + UUID_TIMEOUT + "s...", VerboseLevel.MEDIUM);
+		log.log("Reading temporary remote connection UUID, timeout set to " + UUID_TIMEOUT + "s...",
+				VerboseLevel.MEDIUM);
 
 		UUID uuid;
 		try {
 			uuid = readUUID(remoteSocket);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			log("Remote peer didn't send UUID at time, closing remote socket...");
+			log.log("Remote peer didn't send UUID at time, closing remote socket...");
 			remoteSocket.close();
 			return;
 		}
 
-		log("Finding and registering remote connection from temporary UUID...", VerboseLevel.MEDIUM);
+		log.log("Finding and registering remote connection from temporary UUID...", VerboseLevel.MEDIUM);
 
 		registerConnection(peer, uuid).connect(remoteSocket, ct);
 	}
@@ -144,7 +156,8 @@ public class ConnectionManager {
 	private UUID readUUID(Socket remoteSocket) throws InterruptedException, ExecutionException, TimeoutException {
 		byte[] b = new byte[UUID_BYTES];
 
-		peer.getExecutorService().submit(() -> remoteSocket.getInputStream().read(b, 0, UUID_BYTES)).get(UUID_TIMEOUT, TimeUnit.SECONDS);
+		peer.getExecutorService().submit(() -> remoteSocket.getInputStream().read(b, 0, UUID_BYTES)).get(UUID_TIMEOUT,
+				TimeUnit.SECONDS);
 
 		return Utils.getUUIDFromBytes(b);
 	}
@@ -153,7 +166,7 @@ public class ConnectionManager {
 		if (connections.isEmpty())
 			return;
 
-		log("Closing and removing client connections...", VerboseLevel.LOW);
+		log.log("Closing and removing client connections...", VerboseLevel.LOW);
 
 		var iterator = connections.entrySet().iterator();
 		while (iterator.hasNext()) {
@@ -162,14 +175,6 @@ public class ConnectionManager {
 			c.disconnect(silent);
 		}
 
-		log("Connections closed and removed successfully.", VerboseLevel.LOW);
-	}
-
-	public void log(String str) {
-		peer.log("[ConnectionManager] " + str);
-	}
-
-	public void log(String str, VerboseLevel level) {
-		peer.log("[ConnectionManager] " + str, level);
+		log.log("Connections closed and removed successfully.", VerboseLevel.LOW);
 	}
 }

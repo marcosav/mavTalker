@@ -9,16 +9,16 @@ import java.util.Map;
 import java.util.PriorityQueue;
 
 import com.gmail.marcosav2010.communicator.packet.handling.listener.PacketListener;
-import com.gmail.marcosav2010.logger.Logger;
+import com.gmail.marcosav2010.logger.ILog;
+import com.gmail.marcosav2010.logger.Log;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
 public class ModuleManager {
 
-	private static final String LOGGER_PREFIX = "[MM] ";
+	@Getter
+	private final ILog log;
 
 	private Map<String, Module> names = new HashMap<>();
 	private PriorityQueue<Module> modules = new PriorityQueue<>();
@@ -26,6 +26,11 @@ public class ModuleManager {
 	private List<PacketListener> listeners = new LinkedList<>();
 
 	private final ModuleScope scope;
+
+	public ModuleManager(ModuleScope scope) {
+		this.scope = scope;
+		log = new Log(scope, "MM");
+	}
 
 	public void initializeModules() {
 		if (!ModuleLoader.isLoaded())
@@ -49,24 +54,23 @@ public class ModuleManager {
 				names.put(desc.name(), module);
 				modules.add(module);
 
-				log("Successfully loaded module " + desc.name() + ".", VerboseLevel.HIGH);
+				log.log("Successfully loaded module " + desc.name() + ".", VerboseLevel.HIGH);
 
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException | NoSuchMethodException | SecurityException | NoSuchFieldException e) {
 
-				log("There was an error while initializing module \"" + desc.name() + "\".");
-				Logger.log(e);
+				log.log(e, "There was an error while initializing module \"" + desc.name() + "\".");
 			}
 		});
 
-		log("Loaded " + modules.size() + " modules.", VerboseLevel.LOW);
+		log.log("Loaded " + modules.size() + " modules.", VerboseLevel.LOW);
 	}
 
-	public void onEnable(ModuleScope scope) {
+	public void onEnable() {
 		modules.forEach(m -> m.onEnable(scope));
 	}
 
-	public void onDisable(ModuleScope scope) {
+	public void onDisable() {
 		modules.forEach(m -> m.onDisable(scope));
 	}
 
@@ -76,21 +80,5 @@ public class ModuleManager {
 
 	void registerListeners(Collection<PacketListener> l) {
 		listeners.addAll(l);
-	}
-
-	private void log(String str) {
-		plog(LOGGER_PREFIX + str);
-	}
-
-	private void log(String str, VerboseLevel level) {
-		plog(LOGGER_PREFIX + str, level);
-	}
-
-	void plog(String str) {
-		scope.log(str);
-	}
-
-	void plog(String str, VerboseLevel level) {
-		scope.log(str, level);
 	}
 }

@@ -8,7 +8,8 @@ import com.gmail.marcosav2010.common.Utils;
 import com.gmail.marcosav2010.communicator.packet.handling.PacketMessager;
 import com.gmail.marcosav2010.communicator.packet.packets.PacketIdentify;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
-import com.gmail.marcosav2010.logger.Logger;
+import com.gmail.marcosav2010.logger.ILog;
+import com.gmail.marcosav2010.logger.Log;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.peer.ConnectedPeer;
@@ -20,6 +21,8 @@ import lombok.Setter;
 public class IdentificationController {
 
 	private static final long IDENTIFICATION_TIMEOUT = 10L;
+
+	private final ILog log;
 
 	private Connection connection;
 	@Setter(AccessLevel.PROTECTED)
@@ -34,6 +37,7 @@ public class IdentificationController {
 
 	public IdentificationController(Connection connection) {
 		this.connection = connection;
+		log = new Log(connection, "IC");
 		uuidProvider = false;
 		cManager = connection.getPeer().getConnectionManager();
 	}
@@ -45,12 +49,12 @@ public class IdentificationController {
 
 	public void sendTemporaryUUID() throws IOException {
 		if (hasUUID()) {
-			log("Providing temporary connection UUID...", VerboseLevel.MEDIUM);
+			log.log("Providing temporary connection UUID...", VerboseLevel.MEDIUM);
 
 			connection.writeRawBytes(Utils.getBytesFromUUID(connectionUUID));
 
 		} else {
-			log("Generating and providing temporary connection UUID...", VerboseLevel.MEDIUM);
+			log.log("Generating and providing temporary connection UUID...", VerboseLevel.MEDIUM);
 
 			uuidProvider = true;
 			UUID uuid = UUID.randomUUID();
@@ -60,8 +64,8 @@ public class IdentificationController {
 	}
 
 	public boolean setUUID(UUID uuid) {
-		if (!cManager.getIdentificator().hasPeer(uuid)) { // se supone que si ya está usada no deja, pero en una UUID es algo
-															// dificil :(
+		if (!cManager.getIdentificator().hasPeer(uuid)) { // se supone que si ya estï¿½ usada no deja, pero en una UUID es
+															// algo dificil :(
 			connectionUUID = uuid;
 
 			return true;
@@ -71,7 +75,7 @@ public class IdentificationController {
 
 	public void startIdentification() throws PacketWriteException {
 		if (uuidProvider) {
-			log("Generating new connection UUID and sending identification packet...", VerboseLevel.MEDIUM);
+			log.log("Generating new connection UUID and sending identification packet...", VerboseLevel.MEDIUM);
 
 			cManager.removeConnection(connectionUUID);
 
@@ -82,16 +86,18 @@ public class IdentificationController {
 
 			cManager.registerConnection(connection);
 
-			messager.sendStandardPacket(new PacketIdentify(connection.getPeer().getName(), newUUID, connection.getPeer().getUUID(), PacketIdentify.SUCCESS));
+			messager.sendStandardPacket(new PacketIdentify(connection.getPeer().getName(), newUUID,
+					connection.getPeer().getUUID(), PacketIdentify.SUCCESS));
 		} else {
-			log("Waiting for UUID renewal and identification, timeout set to " + IDENTIFICATION_TIMEOUT + "s...", VerboseLevel.MEDIUM);
+			log.log("Waiting for UUID renewal and identification, timeout set to " + IDENTIFICATION_TIMEOUT + "s...",
+					VerboseLevel.MEDIUM);
 			startIdentificationCountdown();
 		}
 	}
 
 	private void startIdentificationCountdown() {
 		idTask = Main.getInstance().getTasker().schedule(connection.getPeer(), () -> {
-			log("Identification failure, remote peer didn't send identification at time.");
+			log.log("Identification failure, remote peer didn't send identification at time.");
 			try {
 				sendIdentifyRespose(PacketIdentify.TIMED_OUT);
 			} catch (PacketWriteException e) {
@@ -104,19 +110,19 @@ public class IdentificationController {
 		if (info.providesUUID()) {
 			idTask.cancel();
 
-			log("Received identification from peer \"" + info.getName() + "\".", VerboseLevel.HIGH);
+			log.log("Received identification from peer \"" + info.getName() + "\".", VerboseLevel.HIGH);
 
-			log("Updating new remote connection UUID and setting info...", VerboseLevel.MEDIUM);
+			log.log("Updating new remote connection UUID and setting info...", VerboseLevel.MEDIUM);
 			cManager.removeConnection(getUUID());
 			UUID newUUID = info.getNewUUID();
 
 			if (!setUUID(newUUID)) {
-				log("Identification failure, UUID could not be renewed because it was already identified, sending respose and disconnecting...",
+				log.log("Identification failure, UUID could not be renewed because it was already identified, sending respose and disconnecting...",
 						VerboseLevel.LOW);
 				try {
 					sendIdentifyRespose(PacketIdentify.INVALID_UUID);
 				} catch (PacketWriteException e) {
-					log("There was an exception sending identification respose, disconnecting anyway.");
+					log.log("There was an exception sending identification respose, disconnecting anyway.");
 				}
 				connection.disconnect(true);
 				return null;
@@ -124,45 +130,46 @@ public class IdentificationController {
 
 			cManager.registerConnection(connection);
 
-			log("Identification successfully, sending respose...", VerboseLevel.MEDIUM);
+			log.log("Identification successfully, sending respose...", VerboseLevel.MEDIUM);
 
 			try {
 				sendIdentifyRespose(PacketIdentify.SUCCESS);
 			} catch (PacketWriteException e) {
-				log("There was an exception sending identification respose.");
-				Logger.log(e);
+				log.log(e, "There was an exception sending identification respose.");
 			}
 
 		} else {
-			log("Received identification respose from peer \"" + info.getName() + "\".", VerboseLevel.HIGH);
+			log.log("Received identification respose from peer \"" + info.getName() + "\".", VerboseLevel.HIGH);
 
 			switch (info.getResult()) {
-			case PacketIdentify.SUCCESS:
-				log("Setting remote peer info...", VerboseLevel.MEDIUM);
-				break;
+				case PacketIdentify.SUCCESS:
+					log.log("Setting remote peer info...", VerboseLevel.MEDIUM);
+					break;
 
-			case PacketIdentify.INVALID_UUID:
-				log("There was an error identifying peer, invalid UUID (try again), aborting.", VerboseLevel.MEDIUM);
-				connection.disconnect(true);
-				return null;
+				case PacketIdentify.INVALID_UUID:
+					log.log("There was an error identifying peer, invalid UUID (try again), aborting.",
+							VerboseLevel.MEDIUM);
+					connection.disconnect(true);
+					return null;
 
-			case PacketIdentify.TIMED_OUT:
-				log("Identification timed out, aborting.", VerboseLevel.MEDIUM);
-				connection.disconnect(true);
-				return null;
+				case PacketIdentify.TIMED_OUT:
+					log.log("Identification timed out, aborting.", VerboseLevel.MEDIUM);
+					connection.disconnect(true);
+					return null;
 			}
 		}
 
 		ConnectedPeer cp = cManager.getIdentificator().identifyConnection(connection, info);
 		connection.setConnectedPeer(cp);
-		log("Identification completed, peers paired successfully.", VerboseLevel.MEDIUM);
+		log.log("Identification completed, peers paired successfully.", VerboseLevel.MEDIUM);
 		connection.onPairCompleted();
 
 		return cp;
 	}
 
 	private void sendIdentifyRespose(byte result) throws PacketWriteException {
-		messager.sendStandardPacket(new PacketIdentify(connection.getPeer().getName(), null, connection.getPeer().getUUID(), result));
+		messager.sendStandardPacket(
+				new PacketIdentify(connection.getPeer().getName(), null, connection.getPeer().getUUID(), result));
 	}
 
 	private boolean hasUUID() {
@@ -171,13 +178,5 @@ public class IdentificationController {
 
 	public UUID getUUID() {
 		return connectionUUID;
-	}
-	
-	public void log(String str) {
-		connection.log("[IC] " + str);
-	}
-
-	public void log(String str, VerboseLevel level) {
-		connection.log("[IC] " + str, level);
 	}
 }

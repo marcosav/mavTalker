@@ -24,6 +24,7 @@ import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.connection.ConnectionIdentificator;
 import com.gmail.marcosav2010.connection.ConnectionManager;
 import com.gmail.marcosav2010.handshake.HandshakeAuthentificator.HandshakeRequirementLevel;
+import com.gmail.marcosav2010.logger.ILog;
 import com.gmail.marcosav2010.logger.Logger;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.main.Main;
@@ -33,8 +34,9 @@ import com.gmail.marcosav2010.peer.Peer;
 public class BaseCommandRegistry extends CommandRegistry {
 
 	public BaseCommandRegistry() {
-		super(Set.of(new ExitCMD(), new VerboseCMD(), new InfoCMD(), new StopCMD(), new NewCMD(), new HelpCMD(), new DisconnectCMD(), new GenerateAddressCMD(),
-				new ConnectionKeyCMD(), new PeerPropertyCMD(), new PingCMD()));
+		super(Set.of(new ExitCMD(), new VerboseCMD(), new InfoCMD(), new StopCMD(), new NewCMD(), new HelpCMD(),
+				new DisconnectCMD(), new GenerateAddressCMD(), new ConnectionKeyCMD(), new PeerPropertyCMD(),
+				new PingCMD()));
 	}
 
 	private static class PingCMD extends Command {
@@ -46,7 +48,7 @@ public class BaseCommandRegistry extends CommandRegistry {
 		@Override
 		public void execute(String[] arg, int args) {
 			if (args < 2) {
-				Logger.log("ERROR: Needed transmitter and target.");
+				log.log("ERROR: Needed transmitter and target.");
 				return;
 			}
 
@@ -56,7 +58,7 @@ public class BaseCommandRegistry extends CommandRegistry {
 			if (Main.getInstance().getPeerManager().exists(peerName)) {
 				peer = Main.getInstance().getPeerManager().get(peerName);
 			} else {
-				Logger.log("ERROR: Peer \"" + peerName + "\" doesn't exists.");
+				log.log("ERROR: Peer \"" + peerName + "\" doesn't exists.");
 				return;
 			}
 
@@ -66,7 +68,7 @@ public class BaseCommandRegistry extends CommandRegistry {
 			Connection connection;
 
 			if (!cIdentificator.hasPeer(remoteName)) {
-				Logger.log("ERROR: " + peerName + " peer is not connected to that " + remoteName + ".");
+				log.log("ERROR: " + peerName + " peer is not connected to that " + remoteName + ".");
 				return;
 			}
 
@@ -75,10 +77,10 @@ public class BaseCommandRegistry extends CommandRegistry {
 			long l = System.currentTimeMillis();
 
 			try {
-				connection.sendPacket(new PacketPing(), () -> Logger.log((System.currentTimeMillis() - l) / 2 + "ms"), () -> Logger.log("Ping timed out."), 10L,
-						TimeUnit.SECONDS);
+				connection.sendPacket(new PacketPing(), () -> log.log((System.currentTimeMillis() - l) / 2 + "ms"),
+						() -> log.log("Ping timed out."), 10L, TimeUnit.SECONDS);
 			} catch (PacketWriteException e) {
-				Logger.log(e);
+				log.log(e);
 			}
 		}
 	}
@@ -106,7 +108,7 @@ public class BaseCommandRegistry extends CommandRegistry {
 			int pCount = Main.getInstance().getPeerManager().count();
 
 			if (pCount > 1 && args < 1 || pCount == 0) {
-				Logger.log("ERROR: Specify peer, property and value.");
+				log.log("ERROR: Specify peer, property and value.");
 				return;
 			}
 
@@ -120,7 +122,7 @@ public class BaseCommandRegistry extends CommandRegistry {
 				if (Main.getInstance().getPeerManager().exists(peerName)) {
 					peer = Main.getInstance().getPeerManager().get(peerName);
 				} else {
-					Logger.log("ERROR: Peer \"" + peerName + "\" doesn't exists.");
+					log.log("ERROR: Peer \"" + peerName + "\" doesn't exists.");
 					return;
 				}
 			} else
@@ -129,8 +131,8 @@ public class BaseCommandRegistry extends CommandRegistry {
 			var props = peer.getProperties();
 
 			if (pCount > 1 && args < 3 || pCount <= 1 && args < 2) {
-				Logger.log("Showing peer " + peer.getName() + " properties:");
-				Logger.log(props.toString());
+				log.log("Showing peer " + peer.getName() + " properties:");
+				log.log(props.toString());
 				return;
 			}
 
@@ -138,16 +140,17 @@ public class BaseCommandRegistry extends CommandRegistry {
 
 			if (props.exist(prop)) {
 				if (props.set(prop, value)) {
-					Logger.log("Property \"" + prop + "\" set to: " + value);
+					log.log("Property \"" + prop + "\" set to: " + value);
 					return;
 
 				} else
-					Logger.log("There was an error while setting the property \"" + prop + "\" in " + peer.getName() + ":");
+					log.log("There was an error while setting the property \"" + prop + "\" in " + peer.getName()
+							+ ":");
 
 			} else
-				Logger.log("Unrecognized property \"" + prop + "\", current properties in " + peer.getName() + ":");
+				log.log("Unrecognized property \"" + prop + "\", current properties in " + peer.getName() + ":");
 
-			Logger.log(props.toString());
+			log.log(props.toString());
 		}
 	}
 
@@ -162,7 +165,7 @@ public class BaseCommandRegistry extends CommandRegistry {
 			int pCount = Main.getInstance().getPeerManager().count();
 
 			if (pCount > 1 && args == 0) {
-				Logger.log("ERROR: Specify peer.");
+				log.log("ERROR: Specify peer.");
 				return;
 			}
 
@@ -176,7 +179,7 @@ public class BaseCommandRegistry extends CommandRegistry {
 				if (Main.getInstance().getPeerManager().exists(peerName)) {
 					peer = Main.getInstance().getPeerManager().get(peerName);
 				} else {
-					Logger.log("ERROR: Peer \"" + peerName + "\" doesn't exists.");
+					log.log("ERROR: Peer \"" + peerName + "\" doesn't exists.");
 					return;
 				}
 			} else
@@ -186,9 +189,9 @@ public class BaseCommandRegistry extends CommandRegistry {
 
 			k = peer.getConnectionManager().getHandshakeAuthentificator().getConnectionKeyString();
 
-			System.out.println("-----------------------------------------------------");
-			System.out.println("\tConnection Key => " + k);
-			System.out.println("-----------------------------------------------------");
+			log.log("-----------------------------------------------------");
+			log.log("\tConnection Key => " + k);
+			log.log("-----------------------------------------------------");
 		}
 	}
 
@@ -203,7 +206,7 @@ public class BaseCommandRegistry extends CommandRegistry {
 			int pCount = Main.getInstance().getPeerManager().count();
 
 			if (pCount > 1 && args == 0) {
-				Logger.log("ERROR: Specify peer.");
+				log.log("ERROR: Specify peer.");
 				return;
 			}
 
@@ -219,7 +222,7 @@ public class BaseCommandRegistry extends CommandRegistry {
 				if (Main.getInstance().getPeerManager().exists(peerName)) {
 					peer = Main.getInstance().getPeerManager().get(peerName);
 				} else {
-					Logger.log("ERROR: Peer \"" + peerName + "\" doesn't exists.");
+					log.log("ERROR: Peer \"" + peerName + "\" doesn't exists.");
 					return;
 				}
 			} else
@@ -229,43 +232,48 @@ public class BaseCommandRegistry extends CommandRegistry {
 
 			if (generatePublic) {
 				if (peer.getProperties().getHRL().compareTo(HandshakeRequirementLevel.PRIVATE) >= 0) {
-					Logger.log("Peer \"" + peer.getName() + "\" does only allow private keys, you can change this in peer configuration.");
+					log.log("Peer \"" + peer.getName()
+							+ "\" does only allow private keys, you can change this in peer configuration.");
 					return;
 
 				} else
 					try {
-						addressKey = peer.getConnectionManager().getHandshakeAuthentificator().generatePublicAddressKey();
+						addressKey = peer.getConnectionManager().getHandshakeAuthentificator()
+								.generatePublicAddressKey();
 
-					} catch (BadPaddingException | InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException e) {
-						Logger.log("There was an error generating the public address key, " + e.getMessage() + ".");
+					} catch (BadPaddingException | InvalidKeyException | NoSuchAlgorithmException
+							| NoSuchPaddingException | IllegalBlockSizeException e) {
+						log.log("There was an error generating the public address key, " + e.getMessage() + ".");
 						return;
 					}
 
 			} else {
 
-				Logger.log("Enter requester Connection Key: ");
+				log.log("Enter requester Connection Key: ");
 
 				var requesterConnectionKey = System.console().readPassword();
 				if (requesterConnectionKey == null || requesterConnectionKey.length == 0) {
-					Logger.log("Please enter a Connection Key.");
+					log.log("Please enter a Connection Key.");
 					return;
 				}
 
 				try {
-					addressKey = peer.getConnectionManager().getHandshakeAuthentificator().generatePrivateAddressKey(requesterConnectionKey);
+					addressKey = peer.getConnectionManager().getHandshakeAuthentificator()
+							.generatePrivateAddressKey(requesterConnectionKey);
 
 				} catch (IllegalArgumentException e) {
-					Logger.log(e.getMessage());
+					log.log(e.getMessage());
 					return;
-				} catch (BadPaddingException | InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException e) {
-					Logger.log("There was an error reading the provided address key, " + e.getMessage() + ".");
+				} catch (BadPaddingException | InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException
+						| IllegalBlockSizeException e) {
+					log.log("There was an error reading the provided address key, " + e.getMessage() + ".");
 					return;
 				}
 			}
 
-			System.out.println("--------------------------------------------------------");
-			System.out.println("\tAddress Key => " + addressKey);
-			System.out.println("--------------------------------------------------------");
+			log.log("--------------------------------------------------------");
+			log.log("\tAddress Key => " + addressKey);
+			log.log("--------------------------------------------------------");
 		}
 	}
 
@@ -285,7 +293,8 @@ public class BaseCommandRegistry extends CommandRegistry {
 				try {
 					level = VerboseLevel.valueOf(arg[0].toUpperCase());
 				} catch (IllegalArgumentException ex) {
-					Logger.log("ERROR: Invalid verbose level, use " + Stream.of(levels).map(Enum::toString).collect(Collectors.joining(", ")));
+					log.log("ERROR: Invalid verbose level, use "
+							+ Stream.of(levels).map(Enum::toString).collect(Collectors.joining(", ")));
 					return;
 				}
 			}
@@ -303,8 +312,8 @@ public class BaseCommandRegistry extends CommandRegistry {
 
 		@Override
 		public void execute(String[] arg, int args) {
-			Logger.log(">> cmd <required> [optional] (info)");
-			Main.getInstance().getCommandManager().getCommands().forEach(c -> Logger.log(">> " + c.getUsage()));
+			log.log(">> cmd <required> [optional] (info)");
+			Main.getInstance().getCommandManager().getCommands().forEach(c -> log.log(">> " + c.getUsage()));
 		}
 	}
 
@@ -354,7 +363,7 @@ public class BaseCommandRegistry extends CommandRegistry {
 		@Override
 		public void execute(String[] arg, int args) {
 			if (args < 2) {
-				Logger.log("ERROR: Specify local and remote peer or address.");
+				log.log("ERROR: Specify local and remote peer or address.");
 				return;
 			}
 
@@ -364,7 +373,7 @@ public class BaseCommandRegistry extends CommandRegistry {
 			if (Main.getInstance().getPeerManager().exists(peerName)) {
 				peer = Main.getInstance().getPeerManager().get(peerName);
 			} else {
-				Logger.log("ERROR: Peer \"" + peerName + "\" doesn't exists.");
+				log.log("ERROR: Peer \"" + peerName + "\" doesn't exists.");
 				return;
 			}
 
@@ -385,22 +394,23 @@ public class BaseCommandRegistry extends CommandRegistry {
 				try {
 					port = Integer.valueOf(rawAddress[local ? 0 : 1]);
 				} catch (NumberFormatException ex) {
-					Logger.log("ERROR: Invalid address format or peer.");
+					log.log("ERROR: Invalid address format or peer.");
 					return;
 				}
 
 				try {
-					InetSocketAddress address = local ? new InetSocketAddress(InetAddress.getLocalHost(), port) : new InetSocketAddress(rawAddress[0], port);
+					InetSocketAddress address = local ? new InetSocketAddress(InetAddress.getLocalHost(), port)
+							: new InetSocketAddress(rawAddress[0], port);
 
 					if (cManager.isConnectedTo(address))
 						connection = cManager.getConnection(address);
 					else {
-						Logger.log("ERROR: " + peerName + " peer is not connected to that address.");
+						log.log("ERROR: " + peerName + " peer is not connected to that address.");
 						return;
 					}
 
 				} catch (UnknownHostException ex) {
-					Logger.log("ERROR: Invalid address.");
+					log.log("ERROR: Invalid address.");
 					return;
 				}
 			}
@@ -412,141 +422,146 @@ public class BaseCommandRegistry extends CommandRegistry {
 	private static class NewCMD extends Command {
 
 		NewCMD() {
-			super("new", new String[] { "create" }, "<peer [name] [port]/connection [peer] [address:port] (no address = localhost) [-k]>");
+			super("new", new String[] { "create" },
+					"<peer [name] [port]/connection [peer] [address:port] (no address = localhost) [-k]>");
 		}
 
 		@Override
 		public void execute(String[] arg, int args) {
 			if (args < 1) {
-				Logger.log("ERROR: Specify entity type.");
+				log.log("ERROR: Specify entity type.");
 				return;
 			}
 			switch (arg[0].toLowerCase()) {
-			case "peer": {
-				Peer peer;
-				if (args >= 3) {
-					int port;
-					try {
-						port = Integer.valueOf(arg[2]);
-					} catch (NumberFormatException ex) {
-						Logger.log("ERROR: Invalid port.");
-						return;
-					}
-					peer = Main.getInstance().getPeerManager().create(arg[1], port);
-				} else if (args >= 2) {
-					peer = Main.getInstance().getPeerManager().create(arg[1]);
-				} else {
-					peer = Main.getInstance().getPeerManager().create();
-				}
-
-				if (peer == null)
-					return;
-				peer.start();
-				break;
-			}
-			case "c":
-			case "conn":
-			case "connection":
-				boolean autoPeer = Main.getInstance().getPeerManager().count() == 1 && args == 2;
-
-				if (autoPeer || args >= 3) {
+				case "peer": {
 					Peer peer;
-
-					if (!autoPeer) {
-						String peerName = arg[1];
-
-						if (Main.getInstance().getPeerManager().exists(peerName)) {
-							peer = Main.getInstance().getPeerManager().get(peerName);
-						} else {
-							Logger.log("ERROR: Peer \"" + peerName + "\" doesn't exists.");
-							return;
-						}
-					} else
-						peer = Main.getInstance().getPeerManager().getFirstPeer();
-
-					boolean addressKeyConnection = arg[autoPeer ? 1 : 2].equalsIgnoreCase("-k");
-
-					if (addressKeyConnection) {
-
-						Logger.log("Enter remote Address Key: ");
-
-						var read = System.console().readPassword();
-						if (read == null || read.length == 0) {
-							Logger.log("Please enter an Address Key.");
-							return;
-						}
-
-						InetSocketAddress address;
-
-						try {
-							address = peer.getConnectionManager().getHandshakeAuthentificator().parseAddressKey(read).getAddress();
-
-						} catch (IllegalArgumentException e) {
-							Logger.log(e.getMessage());
-							return;
-						} catch (UnknownHostException e) {
-							Logger.log("This address key references an unknown host.");
-							return;
-						} catch (BadPaddingException | InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException e) {
-							Logger.log("There was an error reading the provided address key: " + e.getMessage() + ".");
-							return;
-						} catch (Exception e) {
-							Logger.log(e, "There was an unknown error reading the provided address key.");
-							return;
-						}
-
-						try {
-							peer.connect(address);
-						} catch (Exception e) {
-							Logger.log(e);
-						}
-
-					} else {
-
-						String[] rawAddress = arg[autoPeer ? 1 : 2].split(":");
-						boolean local = rawAddress.length == 1;
-
+					if (args >= 3) {
 						int port;
 						try {
-							port = Integer.valueOf(rawAddress[local ? 0 : 1]);
+							port = Integer.valueOf(arg[2]);
 						} catch (NumberFormatException ex) {
-							Logger.log("ERROR: Invalid address format.");
+							log.log("ERROR: Invalid port.");
 							return;
 						}
+						peer = Main.getInstance().getPeerManager().create(arg[1], port);
+					} else if (args >= 2) {
+						peer = Main.getInstance().getPeerManager().create(arg[1]);
+					} else {
+						peer = Main.getInstance().getPeerManager().create();
+					}
 
-						try {
-							InetSocketAddress address = local ? new InetSocketAddress(InetAddress.getLocalHost(), port)
-									: new InetSocketAddress(rawAddress[0], port);
+					if (peer == null)
+						return;
+					peer.start();
+					break;
+				}
+				case "c":
+				case "conn":
+				case "connection":
+					boolean autoPeer = Main.getInstance().getPeerManager().count() == 1 && args == 2;
 
-							if (peer.getConnectionManager().isConnectedTo(address)) {
-								Logger.log("ERROR: \"" + peer.getName() + "\" peer is already connected to this address.");
+					if (autoPeer || args >= 3) {
+						Peer peer;
+
+						if (!autoPeer) {
+							String peerName = arg[1];
+
+							if (Main.getInstance().getPeerManager().exists(peerName)) {
+								peer = Main.getInstance().getPeerManager().get(peerName);
+							} else {
+								log.log("ERROR: Peer \"" + peerName + "\" doesn't exists.");
+								return;
+							}
+						} else
+							peer = Main.getInstance().getPeerManager().getFirstPeer();
+
+						boolean addressKeyConnection = arg[autoPeer ? 1 : 2].equalsIgnoreCase("-k");
+
+						if (addressKeyConnection) {
+
+							log.log("Enter remote Address Key: ");
+
+							var read = System.console().readPassword();
+							if (read == null || read.length == 0) {
+								log.log("Please enter an Address Key.");
 								return;
 							}
 
-							if (local)
-								Logger.log("INFO: No hostname provided, connecting to localhost.");
+							InetSocketAddress address;
 
-							peer.connect(address);
-						} catch (UnknownHostException e) {
-							Logger.log("ERROR: Invalid address.");
+							try {
+								address = peer.getConnectionManager().getHandshakeAuthentificator()
+										.parseAddressKey(read).getAddress();
 
-						} catch (IOException | GeneralSecurityException e) {
-							Logger.log(e);
+							} catch (IllegalArgumentException e) {
+								log.log(e.getMessage());
+								return;
+							} catch (UnknownHostException e) {
+								log.log("This address key references an unknown host.");
+								return;
+							} catch (BadPaddingException | InvalidKeyException | NoSuchAlgorithmException
+									| NoSuchPaddingException | IllegalBlockSizeException e) {
+								log.log("There was an error reading the provided address key: " + e.getMessage() + ".");
+								return;
+							} catch (Exception e) {
+								log.log(e, "There was an unknown error reading the provided address key.");
+								return;
+							}
+
+							try {
+								peer.connect(address);
+							} catch (Exception e) {
+								log.log(e);
+							}
+
+						} else {
+
+							String[] rawAddress = arg[autoPeer ? 1 : 2].split(":");
+							boolean local = rawAddress.length == 1;
+
+							int port;
+							try {
+								port = Integer.valueOf(rawAddress[local ? 0 : 1]);
+							} catch (NumberFormatException ex) {
+								log.log("ERROR: Invalid address format.");
+								return;
+							}
+
+							try {
+								InetSocketAddress address = local
+										? new InetSocketAddress(InetAddress.getLocalHost(), port)
+										: new InetSocketAddress(rawAddress[0], port);
+
+								if (peer.getConnectionManager().isConnectedTo(address)) {
+									log.log("ERROR: \"" + peer.getName()
+											+ "\" peer is already connected to this address.");
+									return;
+								}
+
+								if (local)
+									log.log("INFO: No hostname provided, connecting to localhost.");
+
+								peer.connect(address);
+							} catch (UnknownHostException e) {
+								log.log("ERROR: Invalid address.");
+
+							} catch (IOException | GeneralSecurityException e) {
+								log.log(e);
+							}
 						}
 					}
-				}
 			}
 		}
 	}
 
-	public static Set<ConnectedPeer> getTargets(String fromName, String targets) {
+	public static Set<ConnectedPeer> getTargets(ILog log, String fromName, String targets) {
 		Set<ConnectedPeer> to = new HashSet<>();
 		Peer from;
 
 		if (Main.getInstance().getPeerManager().exists(fromName)) {
 			from = Main.getInstance().getPeerManager().get(fromName);
 		} else {
-			Logger.log("ERROR: Peer \"" + fromName + "\" doesn't exists.");
+			log.log("ERROR: Peer \"" + fromName + "\" doesn't exists.");
 			return to;
 		}
 
@@ -560,7 +575,7 @@ public class BaseCommandRegistry extends CommandRegistry {
 				if (from.getConnectionManager().getIdentificator().hasPeer(toName)) {
 					to.add(from.getConnectionManager().getIdentificator().getPeer(toName));
 				} else {
-					Logger.log("ERROR: \"" + from.getName() + "\" isn't connected to \"" + toName + "\".");
+					log.log("ERROR: \"" + from.getName() + "\" isn't connected to \"" + toName + "\".");
 				}
 		}
 

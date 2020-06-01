@@ -24,21 +24,24 @@ import javax.crypto.spec.SecretKeySpec;
 import com.gmail.marcosav2010.common.Utils;
 import com.gmail.marcosav2010.communicator.BaseCommunicator;
 import com.gmail.marcosav2010.communicator.Communicator;
-import com.gmail.marcosav2010.logger.Logger;
+import com.gmail.marcosav2010.logger.ILog;
+import com.gmail.marcosav2010.logger.Log;
 import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.tasker.Task;
 import com.gmail.marcosav2010.tasker.TaskOwner;
 
 /**
- * This is a communicator that encrypts byte arrays with a random symmetric key under @SessionCipher
- * asymmetric encryption, it also handles other message parameters.
+ * This is a communicator that encrypts byte arrays with a random symmetric key
+ * under @SessionCipher asymmetric encryption, it also handles other message
+ * parameters.
  * 
  * @author Marcos
  *
  */
 public class CipheredCommunicator extends Communicator {
 
-	private static final String CIPHER_SYMMETRIC_ALGORITHM = "AES/GCM/PKCS5Padding";
+	private static final String CIPHER_SYMMETRIC_ALGORITHM = "AES/GCM/NoPadding"; // JDK 14 does not recognize
+																					// AES/GCM/PKCS5Padding
 
 	private static final int IV_SIZE = 96;
 	private static final int TAG_LENGTH = 128;
@@ -49,11 +52,13 @@ public class CipheredCommunicator extends Communicator {
 
 	private static final int LENGTH_BYTES = Integer.BYTES;
 
-	private static final int AES_DATA_SIZE = AES_KEY_BYTES + IV_SIZE/* + LENGTH_BYTES */; // Para AES256: 32 + 96 + 4 = 132
+	private static final int AES_DATA_SIZE = AES_KEY_BYTES + IV_SIZE/* + LENGTH_BYTES */; // For AES256: 32 + 96 + 4 =
+																							// 132
 	private static final int RSA_MSG_SIZE = SessionCipher.RSA_KEY_SIZE / Byte.SIZE;
 
 	private final SessionCipher sessionCipher;
 
+	private final ILog log;
 	private final TaskOwner taskOwner;
 
 	private Task writeTask;
@@ -65,6 +70,8 @@ public class CipheredCommunicator extends Communicator {
 
 		this.sessionCipher = sessionCipher;
 		this.taskOwner = taskOwner;
+		log = new Log(taskOwner, "CC");
+
 		start();
 	}
 
@@ -73,12 +80,12 @@ public class CipheredCommunicator extends Communicator {
 	}
 
 	public synchronized EncryptedMessage read() throws IOException {
-		// Leer tamaño del mensaje cifrado en complemento
-		
+		// Leer tamaÃ±o del mensaje cifrado en complemento
+
 		byte[] lengthBytes = getIn().readNBytes(LENGTH_BYTES);
 		if (lengthBytes.length <= 0)
 			return null;
-		
+
 		int length = ~Utils.bytesToInt(lengthBytes);
 		if (length < 0)
 			return null;
@@ -113,10 +120,11 @@ public class CipheredCommunicator extends Communicator {
 				SecretKey symmetricKey = getSecretKey(decryptedSimmetricKey, AES_KEY_ALGORITHM);
 				GCMParameterSpec gcmPS = getGCMParameterSpec(decryptedSimmetricKeyIV);
 
-				onDecrypt.accept(getCipher(Cipher.DECRYPT_MODE, symmetricKey, gcmPS).doFinal(encryptedMessage.getEncryptedData()));
+				onDecrypt.accept(getCipher(Cipher.DECRYPT_MODE, symmetricKey, gcmPS)
+						.doFinal(encryptedMessage.getEncryptedData()));
 
 			} catch (GeneralSecurityException | InterruptedException e) {
-				Logger.log(e);
+				log.log(e);
 			}
 		});
 	}
@@ -131,7 +139,7 @@ public class CipheredCommunicator extends Communicator {
 				try {
 					write(queue.take());
 				} catch (IOException e) {
-					Logger.log(e);
+					log.log(e);
 				} catch (InterruptedException e) {
 				}
 		}
@@ -159,7 +167,7 @@ public class CipheredCommunicator extends Communicator {
 			writePool.queue(encrypt(bytes));
 
 		} catch (GeneralSecurityException | InterruptedException ex) {
-			Logger.log(ex);
+			log.log(ex);
 		}
 	}
 
@@ -193,7 +201,8 @@ public class CipheredCommunicator extends Communicator {
 		return new GCMParameterSpec(TAG_LENGTH, iv);
 	}
 
-	private static Cipher getCipher(int mode, Key key, GCMParameterSpec gcmParameterSpec) throws GeneralSecurityException {
+	private static Cipher getCipher(int mode, Key key, GCMParameterSpec gcmParameterSpec)
+			throws GeneralSecurityException {
 		Cipher c = Cipher.getInstance(CIPHER_SYMMETRIC_ALGORITHM);
 		c.init(mode, key, gcmParameterSpec);
 		return c;

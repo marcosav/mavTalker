@@ -12,22 +12,24 @@ public class GeneralConfiguration extends Configuration {
 
 	private static final String GENERAL_CONFIG_NAME = "general";
 
-	public static final String VERBOSE_LEVEL = "verboseLevel", HANDSHAKE_REQUIREMENT_LEVEL = "defHandshakeRequirementLevel";
+	public static final String VERBOSE_LEVEL = "verboseLevel",
+			HANDSHAKE_REQUIREMENT_LEVEL = "defHandshakeRequirementLevel";
 
 	private static final Map<String, Property<?>> propCategory = new HashMap<>();
 
 	static {
-		propCategory.put(VERBOSE_LEVEL, new Property<VerboseLevel>(PropertyCategory.APPLICATION, VerboseLevel.class, VerboseLevel.MINIMAL));
-		propCategory.put(HANDSHAKE_REQUIREMENT_LEVEL,
-				new Property<HandshakeRequirementLevel>(PropertyCategory.PEER, HandshakeRequirementLevel.class, HandshakeRequirementLevel.PRIVATE));
+		propCategory.put(VERBOSE_LEVEL,
+				new Property<VerboseLevel>(PropertyCategory.APPLICATION, VerboseLevel.class, VerboseLevel.MINIMAL));
+		propCategory.put(HANDSHAKE_REQUIREMENT_LEVEL, new Property<HandshakeRequirementLevel>(PropertyCategory.PEER,
+				HandshakeRequirementLevel.class, HandshakeRequirementLevel.PRIVATE));
 	}
 
 	public GeneralConfiguration() {
 		super(GENERAL_CONFIG_NAME);
-		
+
 		var dp = new java.util.Properties();
 		propCategory.forEach((s, p) -> dp.setProperty(s, p.getDefault().toString()));
-		
+
 		load(dp);
 	}
 
@@ -77,7 +79,8 @@ public class GeneralConfiguration extends Configuration {
 		public Properties(PropertyCategory category, GeneralConfiguration config) {
 			this.category = category;
 			properties = new HashMap<>();
-			propCategory.entrySet().stream().filter(e -> e.getValue().getCategory() == category).forEach(e -> set(e.getKey(), config.get(e.getKey())));
+			propCategory.entrySet().stream().filter(e -> e.getValue().getCategory() == category)
+					.forEach(e -> set(e.getKey(), config.get(e.getKey())));
 		}
 
 		public PropertyCategory getCategory() {
@@ -125,7 +128,8 @@ public class GeneralConfiguration extends Configuration {
 				String p = "  - NAME: " + e.getKey() + "\tVALUE: " + get(e.getKey()) + "\tOPTIONS(";
 				var t = e.getValue().getType();
 				if (t.isEnum())
-					p += Stream.of((Enum<?>[]) t.getEnumConstants()).map(Enum::toString).collect(Collectors.joining(", "));
+					p += Stream.of((Enum<?>[]) t.getEnumConstants()).map(Enum::toString)
+							.collect(Collectors.joining(", "));
 				else
 					p += t.getSimpleName();
 				p += ")";

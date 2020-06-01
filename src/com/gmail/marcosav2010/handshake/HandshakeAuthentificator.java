@@ -26,19 +26,19 @@ import javax.crypto.spec.SecretKeySpec;
 
 import com.gmail.marcosav2010.common.Utils;
 import com.gmail.marcosav2010.communicator.BaseCommunicator;
+import com.gmail.marcosav2010.logger.ILog;
+import com.gmail.marcosav2010.logger.Log;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.peer.Peer;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 /**
  * This clase manages the handshake of a starting @Connection
  * 
  * @author Marcos
  */
-@RequiredArgsConstructor
 public class HandshakeAuthentificator {
 
 	private static final long HANDSHAKE_TIMEOUT = 10L;
@@ -66,6 +66,8 @@ public class HandshakeAuthentificator {
 
 	private SecureRandom random = new SecureRandom();
 
+	private final ILog log;
+
 	private final Peer peer;
 
 	private byte[] connectionKey;
@@ -76,6 +78,11 @@ public class HandshakeAuthentificator {
 
 	private ConnectionToken publicConnectionToken;
 	private String publicAddressKey;
+
+	public HandshakeAuthentificator(Peer peer) {
+		this.peer = peer;
+		log = new Log(peer, "HA");
+	}
 
 	public synchronized byte[] getConnectionKey() {
 		if (connectionKey != null)
@@ -223,7 +230,7 @@ public class HandshakeAuthentificator {
 	}
 
 	public ConnectionToken sendHandshake(BaseCommunicator b, InetSocketAddress a) throws IOException {
-		log("Sending handshake to remote...", VerboseLevel.HIGH);
+		log.log("Sending handshake to remote...", VerboseLevel.HIGH);
 
 		byte[] hk = EMPTY_HANDSHAKE_KEY, ck = PUBLIC_CONNECTION_KEY;
 		ConnectionToken ct = null;
@@ -242,7 +249,7 @@ public class HandshakeAuthentificator {
 
 	public ConnectionToken readHandshake(Socket remoteSocket)
 			throws InterruptedException, ExecutionException, TimeoutException, InvalidHandshakeKey {
-		log("Waiting for handshake, timeout set to " + HANDSHAKE_TIMEOUT + "s...", VerboseLevel.HIGH);
+		log.log("Waiting for handshake, timeout set to " + HANDSHAKE_TIMEOUT + "s...", VerboseLevel.HIGH);
 
 		byte[] b = new byte[C_KEY_LENGTH + H_KEY_LENGTH];
 		peer.getExecutorService().submit(() -> remoteSocket.getInputStream().read(b)).get(HANDSHAKE_TIMEOUT,
@@ -385,13 +392,5 @@ public class HandshakeAuthentificator {
 	public static enum HandshakeRequirementLevel {
 
 		NONE, PUBLIC, PRIVATE;
-	}
-
-	public void log(String str) {
-		peer.log("[HA] " + str);
-	}
-
-	public void log(String str, VerboseLevel level) {
-		peer.log("[HA] " + str, level);
 	}
 }

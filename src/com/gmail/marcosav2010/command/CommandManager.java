@@ -9,17 +9,20 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import com.gmail.marcosav2010.communicator.module.ModuleLoader;
-import com.gmail.marcosav2010.logger.Logger;
+import com.gmail.marcosav2010.logger.ILog;
+import com.gmail.marcosav2010.logger.Log;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
+import com.gmail.marcosav2010.main.Main;
 
 public class CommandManager {
 
-	private static final String LOGGER_PREFIX = "[CommandManager] ";
+	private final ILog log;
 
 	private final Map<String, Command> registeredLabels;
 	private final Set<Class<? extends CommandRegistry>> registries;
 
 	public CommandManager() {
+		log = new Log(Main.getInstance(), "CommandManager");
 		registeredLabels = new HashMap<>();
 		registries = new HashSet<>();
 
@@ -46,8 +49,7 @@ public class CommandManager {
 			r = clazz.getConstructor().newInstance();
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {
-			log("There was an error while initializing registry \"" + clazz.getName() + "\"");
-			Logger.log(e);
+			log.log(e, "There was an error while initializing registry \"" + clazz.getName() + "\"");
 			return;
 		}
 
@@ -57,14 +59,6 @@ public class CommandManager {
 			return 1;
 		}).sum();
 
-		log("Loaded " + v + " commands from registry \"" + clazz.getName() + "\"", VerboseLevel.HIGH);
-	}
-
-	private void log(String str) {
-		Logger.log(LOGGER_PREFIX + str);
-	}
-
-	private void log(String str, VerboseLevel level) {
-		Logger.log(LOGGER_PREFIX + str, level);
+		log.log("Loaded " + v + " commands from registry \"" + clazz.getName() + "\"", VerboseLevel.HIGH);
 	}
 }

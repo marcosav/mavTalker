@@ -7,9 +7,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
 
-import com.gmail.marcosav2010.logger.Logger;
+import com.gmail.marcosav2010.logger.ILog;
+import com.gmail.marcosav2010.logger.Log;
+import com.gmail.marcosav2010.main.Main;
 
 public class Configuration {
+
+	private final ILog log;
 
 	private String configName;
 	private Path path;
@@ -17,15 +21,16 @@ public class Configuration {
 	private boolean save;
 
 	private Properties properties;
-	
+
 	public Configuration(String configName) {
 		this.configName = configName + ".properties";
 		save = false;
+		log = new Log(Main.getInstance(), "Conf-" + configName);
 	}
 
 	public void load(Properties defaultProperties) {
 		properties = defaultProperties;
-		
+
 		File f = new File(configName);
 		path = f.toPath();
 		if (f.exists()) {
@@ -33,7 +38,7 @@ public class Configuration {
 			try {
 				properties.load(Files.newInputStream(path));
 			} catch (IOException e) {
-				Logger.log(e);
+				log.log(e);
 			}
 
 		} else {
@@ -41,7 +46,7 @@ public class Configuration {
 				f.createNewFile();
 				_store();
 			} catch (IOException e) {
-				Logger.log(e);
+				log.log(e);
 			}
 		}
 	}
@@ -49,7 +54,7 @@ public class Configuration {
 	public boolean exists(String key) {
 		return properties.getProperty(key) != null;
 	}
-	
+
 	public String get(String key) {
 		return properties.getProperty(key);
 	}
@@ -67,7 +72,7 @@ public class Configuration {
 		if (save)
 			_store();
 	}
-	
+
 	private void _store() throws IOException {
 		try (OutputStream out = Files.newOutputStream(path)) {
 			properties.store(out, null);

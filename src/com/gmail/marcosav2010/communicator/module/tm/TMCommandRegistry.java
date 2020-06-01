@@ -7,7 +7,6 @@ import com.gmail.marcosav2010.command.BaseCommandRegistry;
 import com.gmail.marcosav2010.command.Command;
 import com.gmail.marcosav2010.command.CommandRegistry;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
-import com.gmail.marcosav2010.logger.Logger;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.peer.ConnectedPeer;
 
@@ -26,11 +25,11 @@ public class TMCommandRegistry extends CommandRegistry {
 		@Override
 		public void execute(String[] arg, int args) {
 			if (args < 3) {
-				Logger.log("ERROR: Needed transmitter, targets, and a message.");
+				log.log("ERROR: Needed transmitter, targets, and a message.");
 				return;
 			}
 
-			Set<ConnectedPeer> to = BaseCommandRegistry.getTargets(arg[0], arg[1]);
+			Set<ConnectedPeer> to = BaseCommandRegistry.getTargets(log, arg[0], arg[1]);
 			if (to.isEmpty())
 				return;
 
@@ -41,14 +40,14 @@ public class TMCommandRegistry extends CommandRegistry {
 
 			String finalMsg = toWrite.trim();
 
-			Logger.log("INFO: Sending to \"" + to.stream().map(t -> t.getName()).collect(Collectors.joining(","))
+			log.log("INFO: Sending to \"" + to.stream().map(t -> t.getName()).collect(Collectors.joining(","))
 					+ "\" message \"" + finalMsg + "\".", VerboseLevel.MEDIUM);
 
 			to.forEach(c -> {
 				try {
 					c.sendPacket(new PacketMessage(finalMsg));
 				} catch (PacketWriteException e) {
-					Logger.log(e);
+					log.log(e);
 				}
 			});
 		}

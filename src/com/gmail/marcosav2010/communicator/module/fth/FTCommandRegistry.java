@@ -18,7 +18,6 @@ import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
 import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.connection.ConnectionIdentificator;
 import com.gmail.marcosav2010.connection.ConnectionManager;
-import com.gmail.marcosav2010.logger.Logger;
 import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.peer.ConnectedPeer;
 import com.gmail.marcosav2010.peer.Peer;
@@ -44,7 +43,7 @@ public class FTCommandRegistry extends CommandRegistry {
 			int pCount = Main.getInstance().getPeerManager().count();
 
 			if (args < 1 && pCount == 1 || args < 2 && pCount > 1 || pCount == 0) {
-				Logger.log("ERROR: Needed filename at least.");
+				log.log("ERROR: Needed filename at least.");
 				return;
 			}
 
@@ -57,7 +56,7 @@ public class FTCommandRegistry extends CommandRegistry {
 				if (Main.getInstance().getPeerManager().exists(peerName)) {
 					peer = Main.getInstance().getPeerManager().get(peerName);
 				} else {
-					Logger.log("ERROR: Peer \"" + peerName + "\" doesn't exists.");
+					log.log("ERROR: Peer \"" + peerName + "\" doesn't exists.");
 					return;
 				}
 			} else
@@ -65,7 +64,7 @@ public class FTCommandRegistry extends CommandRegistry {
 
 			String filename = arg[autoPeer ? 0 : 1];
 
-			Logger.log("Finding file \"" + filename + "\"...");
+			log.log("Finding file \"" + filename + "\"...");
 
 			var connectedPeers = peer.getConnectionManager().getIdentificator().getConnectedPeers();
 			var p = new PacketFindFile(filename, 1,
@@ -75,7 +74,7 @@ public class FTCommandRegistry extends CommandRegistry {
 				try {
 					c.sendPacket(p);
 				} catch (PacketWriteException e) {
-					Logger.log(e, "There was a problem while sending find packet to " + c.getName() + ".");
+					log.log(e, "There was a problem while sending find packet to " + c.getName() + ".");
 				}
 			});
 		}
@@ -90,11 +89,11 @@ public class FTCommandRegistry extends CommandRegistry {
 		@Override
 		public void execute(String[] arg, int args) {
 			if (args < 3) {
-				Logger.log("ERROR: Needed transmitter, targets, and a file name.");
+				log.log("ERROR: Needed transmitter, targets, and a file name.");
 				return;
 			}
 
-			Set<ConnectedPeer> to = BaseCommandRegistry.getTargets(arg[0], arg[1]);
+			Set<ConnectedPeer> to = BaseCommandRegistry.getTargets(log, arg[0], arg[1]);
 			if (to.isEmpty())
 				return;
 
@@ -106,13 +105,13 @@ public class FTCommandRegistry extends CommandRegistry {
 			try {
 				info = FileTransferHandler.createRequest(fIn);
 			} catch (IllegalArgumentException ex) {
-				Logger.log("ERROR: " + ex.getMessage());
+				log.log("ERROR: " + ex.getMessage());
 				return;
 			}
 
 			to.forEach(c -> getFTH(c.getConnection()).sendRequest(info));
 
-			Logger.log("INFO: File \"" + info.getFileName() + "\" transfer request has been sent to "
+			log.log("INFO: File \"" + info.getFileName() + "\" transfer request has been sent to "
 					+ to.stream().map(t -> t.getName()).collect(Collectors.joining(",")) + ".");
 		}
 	}
@@ -127,7 +126,7 @@ public class FTCommandRegistry extends CommandRegistry {
 		@Override
 		public void execute(String[] arg, int args) {
 			if (args < 3) {
-				Logger.log("ERROR: Needed host and remote peer, file id and yes/no option (yes by default).");
+				log.log("ERROR: Needed host and remote peer, file id and yes/no option (yes by default).");
 				return;
 			}
 
@@ -137,7 +136,7 @@ public class FTCommandRegistry extends CommandRegistry {
 			if (Main.getInstance().getPeerManager().exists(peerName)) {
 				peer = Main.getInstance().getPeerManager().get(peerName);
 			} else {
-				Logger.log("ERROR: Peer \"" + peerName + "\" doesn't exists.");
+				log.log("ERROR: Peer \"" + peerName + "\" doesn't exists.");
 				return;
 			}
 
@@ -148,7 +147,7 @@ public class FTCommandRegistry extends CommandRegistry {
 			Connection connection;
 
 			if (!cIdentificator.hasPeer(remoteName)) {
-				Logger.log("ERROR: " + peerName + " peer is not connected to that " + remoteName + ".");
+				log.log("ERROR: " + peerName + " peer is not connected to that " + remoteName + ".");
 				return;
 			}
 			connection = cIdentificator.getPeer(remoteName).getConnection();
@@ -159,12 +158,12 @@ public class FTCommandRegistry extends CommandRegistry {
 			try {
 				id = Integer.valueOf(arg[2]);
 			} catch (NumberFormatException ex) {
-				Logger.log("ERROR: Invalid file id.");
+				log.log("ERROR: Invalid file id.");
 				return;
 			}
 
 			if (!fth.isPendingRequest(id)) {
-				Logger.log("ERROR: File ID #" + id + " hasn't got requests.");
+				log.log("ERROR: File ID #" + id + " hasn't got requests.");
 				return;
 			}
 			FileReceiveInfo info = fth.getRequest(id);
@@ -177,11 +176,11 @@ public class FTCommandRegistry extends CommandRegistry {
 			}
 
 			if (yes) {
-				Logger.log("Accepted file #" + id + " (" + info.getFileName() + ") transfer request.");
+				log.log("Accepted file #" + id + " (" + info.getFileName() + ") transfer request.");
 				fth.acceptRequest(id);
 			} else {
 				fth.rejectRequest(id);
-				Logger.log("Rejected file #" + id + " (" + info.getFileName() + ") transfer request.");
+				log.log("Rejected file #" + id + " (" + info.getFileName() + ") transfer request.");
 			}
 		}
 	}
@@ -200,13 +199,13 @@ public class FTCommandRegistry extends CommandRegistry {
 					long totalSize = Files.walk(p).sorted(Collections.reverseOrder())
 							.mapToLong(sp -> sp.toFile().length()).sum();
 					Files.walk(p).sorted(Collections.reverseOrder()).map(Path::toFile).forEach(File::delete);
-					Logger.log("INFO: Successfully removed " + Utils.formatSize(totalSize) + " of downloaded files.");
+					log.log("INFO: Successfully removed " + Utils.formatSize(totalSize) + " of downloaded files.");
 
 				} catch (IOException e) {
-					Logger.log(e);
+					log.log(e);
 				}
 			else
-				Logger.log("INFO: There are currently no downloads.");
+				log.log("INFO: There are currently no downloads.");
 		}
 	}
 }

@@ -2,12 +2,12 @@ package com.gmail.marcosav2010.command;
 
 import java.util.Set;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 public abstract class CommandRegistry {
-	
+
 	@Getter
-	protected Set<Command> commands;
+	protected final Set<Command> commands;
 }

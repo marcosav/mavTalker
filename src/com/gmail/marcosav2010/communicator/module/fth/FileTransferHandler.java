@@ -25,13 +25,17 @@ import com.gmail.marcosav2010.communicator.module.fth.packet.PacketFileRequest;
 import com.gmail.marcosav2010.communicator.module.fth.packet.PacketFileSend;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
 import com.gmail.marcosav2010.connection.Connection;
-import com.gmail.marcosav2010.logger.Logger;
+import com.gmail.marcosav2010.logger.ILog;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.tasker.Task;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+
 /**
- * This class handles file related packets, this includes file sending, downloading and accepting.
+ * This class handles file related packets, this includes file sending,
+ * downloading and accepting.
  * 
  * @author Marcos
  *
@@ -39,7 +43,7 @@ import com.gmail.marcosav2010.tasker.Task;
 public class FileTransferHandler {
 
 	private static final long DOWNLOAD_STATUS_INFO_WAIT = 2000;
-	
+
 	public static final String DOWNLOAD_FOLDER = "FilesTransferred/";
 
 	public static final short HASH_BITS = 224;
@@ -55,7 +59,9 @@ public class FileTransferHandler {
 	public static final int MIN_BLOCK_SIZE = Short.MAX_VALUE * 4; // 128 KB
 	public static final int MAX_TASKS = Runtime.getRuntime().availableProcessors() / 2 + 1;
 
-	private FTModule module;
+	@Getter(value = AccessLevel.PACKAGE)
+	private final ILog log;
+
 	private Connection connection;
 
 	private Map<Integer, FileReceiveInfo> pendingFileRequests;
@@ -64,12 +70,13 @@ public class FileTransferHandler {
 	private Map<Integer, Integer> downloading;
 
 	private Map<Integer, Task> pendingTasks;
-	
+
 	private AtomicInteger nextId;
 
 	public FileTransferHandler(FTModule module, Connection connection) {
-		this.module = module;
 		this.connection = connection;
+
+		log = module.getLog();
 
 		pendingFileRequests = new ConcurrentHashMap<>();
 		pendingForAcceptFiles = new ConcurrentHashMap<>();
@@ -77,7 +84,7 @@ public class FileTransferHandler {
 		downloading = new ConcurrentHashMap<>();
 
 		pendingTasks = new HashMap<>();
-		
+
 		nextId = new AtomicInteger(1);
 	}
 
@@ -149,7 +156,8 @@ public class FileTransferHandler {
 			File file = new File(DOWNLOAD_FOLDER + info.getFileName());
 			file.getParentFile().mkdirs();
 
-			try (FileChannel channel = FileChannel.open(file.toPath(), StandardOpenOption.CREATE, StandardOpenOption.WRITE)) {
+			try (FileChannel channel = FileChannel.open(file.toPath(), StandardOpenOption.CREATE,
+					StandardOpenOption.WRITE)) {
 				channel.write(bBuffer, pointer);
 			}
 
@@ -157,14 +165,14 @@ public class FileTransferHandler {
 			if (last) {
 				long elapsed = System.currentTimeMillis() - info.getFirstArrivalTime();
 				long speed = file.length() / elapsed * 1000;
-				log("File #" + id + " \"" + info.getFileName() + "\" has been downloaded successfully (" + elapsed + "ms | " + Utils.formatSize(speed) + "/s).");
-				
+				log.log("File #" + id + " \"" + info.getFileName() + "\" has been downloaded successfully (" + elapsed
+						+ "ms | " + Utils.formatSize(speed) + "/s).");
+
 			} else if (info.updateLastArrivalTime(DOWNLOAD_STATUS_INFO_WAIT))
-				log(String.format("File #%s \"%s\" %.2f%% downloaded.", id, info.getFileName(), dw));
+				log.log(String.format("File #%s \"%s\" %.2f%% downloaded.", id, info.getFileName(), dw));
 
 		} catch (Exception ex) {
-			log("There was an exception writing the file #" + id + ".");
-			Logger.log(ex);
+			log.log("There was an exception writing the file #" + id + ".");
 			return FileDownloadResult.WRITE_EXCEPTION;
 		}
 
@@ -195,16 +203,16 @@ public class FileTransferHandler {
 		try {
 			checkFile(file, fileBytes);
 		} catch (IllegalArgumentException ex) {
-			Logger.log(ex);
+			log.log(ex);
 			return FileSendResult.FILE_EXCEPTION;
 		}
 
 		int tasks = blocks < MAX_TASKS ? blocks : MAX_TASKS;
 		int blocksPerThread = (int) Math.ceil((double) blocks / tasks);
 
-		log("Computing File #" + id + " \"" + info.getFileName() + "\" send, splitting up in " + blocks + " block(s) [" + Utils.formatSize(blockSize)
-				+ "/block], using " + tasks + " tasks(s) [" + blocksPerThread + " block(s)/task] and hashing with " + HASH_ALGORITHM + "...",
-				VerboseLevel.HIGH);
+		log.log("Computing File #" + id + " \"" + info.getFileName() + "\" send, splitting up in " + blocks
+				+ " block(s) [" + Utils.formatSize(blockSize) + "/block], using " + tasks + " tasks(s) ["
+				+ blocksPerThread + " block(s)/task] and hashing with " + HASH_ALGORITHM + "...", VerboseLevel.HIGH);
 
 		AtomicReference<FileSendResult> exception = new AtomicReference<>();
 		ExecutorService execServ = Executors.newFixedThreadPool(tasks);
@@ -216,18 +224,19 @@ public class FileTransferHandler {
 				int startBlock = t * blocksPerThread;
 				int endBlock = Math.min(startBlock + blocksPerThread, blocks);
 
-				execServ.submit(createSendProcess(channel, fileBytes, startBlock, endBlock, blockSize, exception, id, info));
+				execServ.submit(
+						createSendProcess(channel, fileBytes, startBlock, endBlock, blockSize, exception, id, info));
 			}
 
 			execServ.shutdown();
 			execServ.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
 
 		} catch (IOException e) {
-			Logger.log(e);
+			log.log(e);
 			return FileSendResult.READ_EXCEPTION;
 
 		} catch (InterruptedException e) {
-			Logger.log(e);
+			log.log(e);
 			return FileSendResult.OTHER_EXCEPTION;
 		}
 
@@ -239,13 +248,14 @@ public class FileTransferHandler {
 
 		long elapsed = t2 - t1;
 		long speed = fileBytes / elapsed * 1000;
-		log("File #" + id + " \"" + info.getFileName() + "\" has been sent successfully (" + elapsed + "ms | " + Utils.formatSize(speed) + "/s).");
+		log.log("File #" + id + " \"" + info.getFileName() + "\" has been sent successfully (" + elapsed + "ms | "
+				+ Utils.formatSize(speed) + "/s).");
 
 		return FileSendResult.SUCCESS;
 	}
 
-	private Callable<FileSendResult> createSendProcess(FileChannel channel, int fileBytes, int startBlock, int endBlock, int blockSize,
-			AtomicReference<FileSendResult> exception, int id, FileSendInfo info) {
+	private Callable<FileSendResult> createSendProcess(FileChannel channel, int fileBytes, int startBlock, int endBlock,
+			int blockSize, AtomicReference<FileSendResult> exception, int id, FileSendInfo info) {
 		return () -> {
 			for (int i = startBlock; i < endBlock; i++) {
 				FileSendResult ex = exception.get();
@@ -267,7 +277,7 @@ public class FileTransferHandler {
 				try {
 					hash = getHash(block);
 				} catch (NoSuchAlgorithmException e) {
-					Logger.log(e);
+					log.log(e);
 					return exception.getAndSet(FileSendResult.HASHING_EXCEPTION);
 				}
 
@@ -277,11 +287,12 @@ public class FileTransferHandler {
 				try {
 					connection.sendPacket(new PacketFileSend(id, start, block, hash));
 				} catch (PacketWriteException e) {
-					Logger.log(e);
+					log.log(e);
 					return exception.getAndSet(FileSendResult.PACKET_WRITE_EXCEPTION);
 				}
 
-				// log("File #" + id + " \"" + info.getFileName() + "\" block #" + n + " sent.", VerboseLevel.HIGH);
+				// log("File #" + id + " \"" + info.getFileName() + "\" block #" + n + " sent.",
+				// VerboseLevel.HIGH);
 
 			}
 			return FileSendResult.SUCCESS;
@@ -320,13 +331,13 @@ public class FileTransferHandler {
 	public void sendRequest(FileSendInfo info, long expireTimeout, TimeUnit timeUnit) {
 		int id = nextId.getAndIncrement();
 		info.setFileID(id);
-		
+
 		PacketFileRequest p = new PacketFileRequest(info);
 
 		try {
 			connection.sendPacket(p);
 		} catch (PacketWriteException e) {
-			Logger.log(e);
+			log.log(e);
 			return;
 		}
 
@@ -349,7 +360,7 @@ public class FileTransferHandler {
 		try {
 			connection.sendPacket(new PacketFileAccept(id));
 		} catch (PacketWriteException e) {
-			Logger.log(e);
+			log.log(e);
 		}
 
 		if (timeUnit == null || receiveTimeout < 0) {
@@ -383,7 +394,8 @@ public class FileTransferHandler {
 
 	private synchronized void addTask(int id, Runnable runnable, long receiveTimeout, TimeUnit timeUnit) {
 		removeTask(id);
-		pendingTasks.put(id, Main.getInstance().getTasker().schedule(connection.getPeer(), runnable, receiveTimeout, timeUnit));
+		pendingTasks.put(id,
+				Main.getInstance().getTasker().schedule(connection.getPeer(), runnable, receiveTimeout, timeUnit));
 	}
 
 	private void onReceiveTimeout(int id) {
@@ -399,18 +411,11 @@ public class FileTransferHandler {
 	}
 
 	public static enum FileSendResult {
-		NOT_PENDING_OR_TIMED_OUT, CONNECTION_EXPIRED, FILE_EXCEPTION, READ_EXCEPTION, HASHING_EXCEPTION, PACKET_WRITE_EXCEPTION, OTHER_EXCEPTION, SUCCESS
+		NOT_PENDING_OR_TIMED_OUT, CONNECTION_EXPIRED, FILE_EXCEPTION, READ_EXCEPTION, HASHING_EXCEPTION,
+		PACKET_WRITE_EXCEPTION, OTHER_EXCEPTION, SUCCESS
 	}
 
 	public static enum FileDownloadResult {
 		NOT_PENDING_OR_TIMED_OUT, WRITE_EXCEPTION, HASH_MISMATCH, SUCCESS
-	}
-
-	public void log(String str) {
-		module.log(str);
-	}
-
-	public void log(String str, VerboseLevel level) {
-		module.log(str, level);
 	}
 }

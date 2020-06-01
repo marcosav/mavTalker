@@ -11,12 +11,14 @@ public class Launcher {
 
 	public static void main(String[] args) throws NumberFormatException, IOException, GeneralSecurityException {
 		var pkg = Launcher.class.getPackage();
-		Logger.log("Loading " + pkg.getImplementationTitle() + " v" + pkg.getImplementationVersion() + " by marcosav...");
+		Logger.log(
+				"Loading " + pkg.getImplementationTitle() + " v" + pkg.getImplementationVersion() + " by marcosav...");
 
 		addSignalHook();
 
 		Main main = new Main();
 		Main.setInstance(main);
+		main.init();
 
 		main.main(args);
 
@@ -31,6 +33,7 @@ public class Launcher {
 			System.exit(0);
 		}
 
+		System.out.print(">> ");
 		while (!Main.getInstance().isShuttingDown())
 			CommandHandler.handleCommand(console.readLine());
 	}

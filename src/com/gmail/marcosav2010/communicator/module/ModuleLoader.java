@@ -8,18 +8,20 @@ import java.util.Map;
 import java.util.Set;
 
 import com.gmail.marcosav2010.command.CommandRegistry;
-import com.gmail.marcosav2010.logger.Logger;
+import com.gmail.marcosav2010.logger.ILog;
+import com.gmail.marcosav2010.logger.Log;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.main.Launcher;
+import com.gmail.marcosav2010.main.Main;
 
 import org.atteo.classindex.ClassIndex;
 
 public class ModuleLoader {
 
+    private static ILog log = new Log(Main.getInstance(), "ML");
+
     private static Set<Class<? extends CommandRegistry>> commandRegistries = new HashSet<>();
     private static Map<ModuleDescriptor, Class<? extends Module>> loadedModules = new HashMap<>();
-
-    private static final String LOGGER_PREFIX = "[ML] ";
 
     private static boolean loaded;
 
@@ -70,11 +72,10 @@ public class ModuleLoader {
 
                 addCommands(registryClass);
 
-                Logger.log(LOGGER_PREFIX + "Found module in class \"" + c.getName() + "\".", VerboseLevel.HIGH);
+                log.log("Found module in class \"" + c.getName() + "\".", VerboseLevel.HIGH);
 
             } catch (Exception e) {
-                Logger.log(LOGGER_PREFIX + "There was an error while loading class \"" + clazz.getName() + "\"");
-                Logger.log(e);
+                log.log(e, "There was an error while loading class \"" + clazz.getName() + "\"");
             }
         }
     }

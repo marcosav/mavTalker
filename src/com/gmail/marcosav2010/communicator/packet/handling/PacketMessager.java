@@ -14,7 +14,8 @@ import com.gmail.marcosav2010.communicator.packet.packets.PacketShutdown;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWritter;
 import com.gmail.marcosav2010.connection.Connection;
-import com.gmail.marcosav2010.logger.Logger;
+import com.gmail.marcosav2010.logger.ILog;
+import com.gmail.marcosav2010.logger.Log;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 
 /**
@@ -25,8 +26,8 @@ import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
  */
 public class PacketMessager {
 
-	private static final String LOGGER_PREFIX = "[PM] ";
-	
+	private final ILog log;
+
 	private AtomicInteger lastPacket;
 
 	private final Connection connection;
@@ -39,7 +40,8 @@ public class PacketMessager {
 	public PacketMessager(Connection connection, CipheredCommunicator communicator) {
 		this.communicator = communicator;
 		this.connection = connection;
-		
+
+		log = new Log(connection, "PM");
 		writter = new PacketWritter();
 		eventHandlerManager = new PacketEventHandlerManager(connection);
 		actionHandler = new PacketActionHandler(connection);
@@ -57,9 +59,9 @@ public class PacketMessager {
 		if (sp instanceof PacketRespose) {
 			PacketRespose pr = (PacketRespose) sp;
 			long id = pr.getResposePacketId();
-			
+
 			actionHandler.handleRespose(id);
-			log("Sucessfully sent packet #" + id + ".", VerboseLevel.HIGH);
+			log.log("Sucessfully sent packet #" + id + ".", VerboseLevel.HIGH);
 
 		} else if (sp instanceof PacketIdentify) {
 			PacketIdentify pi = (PacketIdentify) sp;
@@ -68,29 +70,29 @@ public class PacketMessager {
 
 		} else if (sp instanceof PacketShutdown) {
 			connection.disconnect(true);
-			
+
 		}
 	}
 
 	private void handlePacket(Packet packet) {
 		int id = packet.getPacketID();
-		log("Received packet #" + id + ".", VerboseLevel.HIGH);
+		log.log("Received packet #" + id + ".", VerboseLevel.HIGH);
 		eventHandlerManager.handlePacket(packet, connection.getConnectedPeer());
-		
+
 		if (packet.shouldSendRespose())
 			try {
 				sendStandardPacket(new PacketRespose(id));
 			} catch (PacketWriteException ex) {
-				log("There was an exception sending receive respose in packet #" + id + ".");
-				Logger.log(ex);
+				log.log(ex, "There was an exception sending receive respose in packet #" + id + ".");
 			}
 	}
 
-	public int sendPacket(Packet packet, Runnable action, Runnable onTimeOut, long timeout, TimeUnit timeUnit) throws PacketWriteException {
+	public int sendPacket(Packet packet, Runnable action, Runnable onTimeOut, long timeout, TimeUnit timeUnit)
+			throws PacketWriteException {
 		int id = lastPacket.incrementAndGet();
-		log("Sending packet #" + id + ".", VerboseLevel.HIGH);
+		log.log("Sending packet #" + id + ".", VerboseLevel.HIGH);
 		communicator.write(writter.write(packet.setPacketID(id)));
-		
+
 		if (action != null)
 			actionHandler.handleSend(connection.getPeer(), id, packet, action, onTimeOut, timeout, timeUnit);
 
@@ -102,22 +104,15 @@ public class PacketMessager {
 	}
 
 	public void setupEventHandler() {
-		log("Registering packet handlers...", VerboseLevel.MEDIUM);
+		log.log("Registering packet handlers...", VerboseLevel.MEDIUM);
 
 		eventHandlerManager.registerListeners(connection.getPeer().getModuleManager().getListeners());
 
-		log("Registered " + eventHandlerManager.getHandlerCount() + " handlers in " + eventHandlerManager.getListenerCount() + " listeners.", VerboseLevel.LOW);
+		log.log("Registered " + eventHandlerManager.getHandlerCount() + " handlers in "
+				+ eventHandlerManager.getListenerCount() + " listeners.", VerboseLevel.LOW);
 	}
 
 	public void stopEventHandler() {
 		eventHandlerManager.unregisterEvents();
-	}
-
-	public void log(String str) {
-		connection.log(LOGGER_PREFIX + str);
-	}
-
-	public void log(String str, VerboseLevel level) {
-		connection.log(LOGGER_PREFIX + str, level);
 	}
 }

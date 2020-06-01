@@ -6,7 +6,11 @@ import java.net.InetAddress;
 import com.gmail.marcosav2010.command.CommandManager;
 import com.gmail.marcosav2010.common.Utils;
 import com.gmail.marcosav2010.communicator.module.ModuleLoader;
+import com.gmail.marcosav2010.communicator.module.ModuleManager;
+import com.gmail.marcosav2010.communicator.module.ModuleScope;
 import com.gmail.marcosav2010.config.GeneralConfiguration;
+import com.gmail.marcosav2010.logger.BaseLog;
+import com.gmail.marcosav2010.logger.ILog;
 import com.gmail.marcosav2010.logger.Logger;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.peer.Peer;
@@ -16,14 +20,14 @@ import com.gmail.marcosav2010.tasker.Tasker;
 import lombok.Getter;
 import lombok.Setter;
 
-public class Main {
+public class Main implements ModuleScope {
 
 	@Getter
 	@Setter
 	private static Main instance;
 
 	@Getter
-	private final CommandManager commandManager;
+	private CommandManager commandManager;
 	@Getter
 	private GeneralConfiguration generalConfig;
 	@Getter
@@ -31,12 +35,17 @@ public class Main {
 	@Getter
 	private Tasker tasker;
 	@Getter
+	private ModuleManager moduleManager;
+	@Getter
+	private ILog log;
+
+	@Getter
 	private InetAddress publicAddress;
 	@Getter
 	private boolean shuttingDown;
 
-	protected Main() {
-		shuttingDown = false;
+	void init() {
+		log = new BaseLog();
 		generalConfig = new GeneralConfiguration();
 
 		Logger.setVerboseLevel(generalConfig.getVerboseLevel());
@@ -46,12 +55,17 @@ public class Main {
 		commandManager = new CommandManager();
 		peerManager = new PeerManager(generalConfig);
 		tasker = new Tasker();
+
+		moduleManager = new ModuleManager(this);
+		moduleManager.initializeModules();
 	}
 
 	public void main(String[] args) {
 		obtainPublicAddress();
 
-		Logger.log("\nStarting application...");
+		log.log("\nStarting application...");
+
+		moduleManager.onEnable();
 
 		if (args.length == 2)
 			run(args[0], Integer.parseInt(args[1]));
@@ -63,16 +77,14 @@ public class Main {
 	}
 
 	private void obtainPublicAddress() {
-		Logger.log("Obtaining public address...", VerboseLevel.MEDIUM);
+		log.log("Obtaining public address...", VerboseLevel.MEDIUM);
 		try {
 			long m = System.currentTimeMillis();
 			publicAddress = Utils.obtainExternalAddress();
-			Logger.log(
-					"Public address got in " + (System.currentTimeMillis() - m) + "ms: " + publicAddress.getHostName(),
+			log.log("Public address got in " + (System.currentTimeMillis() - m) + "ms: " + publicAddress.getHostName(),
 					VerboseLevel.MEDIUM);
 		} catch (IOException e) {
-			Logger.log("There was an error while obtaining public address, shutting down...");
-			Logger.log(e);
+			log.log(e, "There was an error while obtaining public address, shutting down...");
 		}
 	}
 
@@ -82,7 +94,9 @@ public class Main {
 
 		shuttingDown = true;
 
-		Logger.log("Exiting application...");
+		moduleManager.onDisable();
+
+		log.log("Exiting application...");
 		if (getPeerManager() != null)
 			getPeerManager().shutdown();
 
@@ -93,6 +107,6 @@ public class Main {
 				e.printStackTrace();
 			}
 
-		Logger.log("Bye");
+		log.log("Bye");
 	}
 }

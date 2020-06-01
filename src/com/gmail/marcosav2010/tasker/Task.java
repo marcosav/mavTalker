@@ -3,11 +3,14 @@ package com.gmail.marcosav2010.tasker;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.gmail.marcosav2010.logger.Logger;
+import com.gmail.marcosav2010.logger.ILog;
+import com.gmail.marcosav2010.logger.Log;
 
 import lombok.Getter;
 
 public class Task implements Runnable {
+
+	private final ILog log;
 
 	private final Tasker tasker;
 	@Getter
@@ -25,6 +28,8 @@ public class Task implements Runnable {
 	private final AtomicBoolean running = new AtomicBoolean(true);
 
 	public Task(Tasker tasker, TaskOwner owner, int id, Runnable task, long delay, long period, TimeUnit unit) {
+		log = new Log(owner, "Task #" + id);
+
 		this.tasker = tasker;
 		this.owner = owner;
 		this.id = id;
@@ -32,7 +37,7 @@ public class Task implements Runnable {
 		this.delay = unit.toMillis(delay);
 		this.period = unit.toMillis(period);
 	}
-	
+
 	public Task setName(String name) {
 		if (name == null)
 			throw new IllegalStateException("This task is already named.");
@@ -46,7 +51,7 @@ public class Task implements Runnable {
 		if (wasRunning)
 			tasker.cancel0(this);
 	}
-	
+
 	public void cancelNow() {
 		thread.interrupt();
 		cancel();
@@ -55,7 +60,7 @@ public class Task implements Runnable {
 	@Override
 	public void run() {
 		thread = Thread.currentThread();
-		
+
 		if (delay > 0)
 			try {
 				Thread.sleep(delay);
@@ -67,7 +72,7 @@ public class Task implements Runnable {
 			try {
 				task.run();
 			} catch (Throwable t) {
-				Logger.log(t, "Task " + (name == null ? "" : name + " ") + "#" + id + " encountered an exception");
+				log.log(t, "Task " + (name == null ? "" : name + " ") + "#" + id + " encountered an exception");
 			}
 
 			if (period <= 0)
