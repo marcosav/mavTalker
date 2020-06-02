@@ -33,10 +33,10 @@ public class ModuleManager {
 	}
 
 	public void initializeModules() {
-		if (!ModuleLoader.isLoaded())
+		if (!ModuleLoader.getInstance().isLoaded())
 			throw new RuntimeException("Modules has not been loaded yet!");
 
-		ModuleLoader.getModules().forEach((desc, m) -> {
+		ModuleLoader.getInstance().getModules().forEach((desc, m) -> {
 			if (!scope.getClass().isAssignableFrom(desc.scope()))
 				return;
 

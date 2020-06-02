@@ -1,5 +1,6 @@
 package com.gmail.marcosav2010.logger;
 
+import com.gmail.marcosav2010.common.Color;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 
 import lombok.AllArgsConstructor;
@@ -10,6 +11,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @RequiredArgsConstructor
 public class Log implements ILog {
+
+    private static String BRACKET_COLOR = Color.WHITE;
 
     private final ILog log;
 
@@ -43,6 +46,7 @@ public class Log implements ILog {
     }
 
     private String format(Object o) {
-        return String.format("[%s] %s", prefix, o);
+        return String.format("%s[%s%s%s]%s %s", BRACKET_COLOR, Color.CYAN_BRIGHT, prefix, BRACKET_COLOR, Color.RESET,
+                o);
     }
 }

@@ -27,7 +27,7 @@ public class CommandManager {
 		registries = new HashSet<>();
 
 		register(BaseCommandRegistry.class);
-		ModuleLoader.flushRegistries().forEach(this::register);
+		ModuleLoader.getInstance().flushRegistries().forEach(this::register);
 	}
 
 	Set<Command> getCommands() {

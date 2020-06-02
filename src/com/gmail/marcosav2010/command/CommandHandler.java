@@ -26,7 +26,5 @@ public class CommandHandler {
                 log.log(ex, "There was an error executing command \"" + command + "\"");
             }
         }
-
-        System.out.print(">> ");
     }
 }

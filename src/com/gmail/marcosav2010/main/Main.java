@@ -50,7 +50,7 @@ public class Main implements ModuleScope {
 
 		Logger.setVerboseLevel(generalConfig.getVerboseLevel());
 
-		ModuleLoader.loadModules();
+		ModuleLoader.getInstance().loadModules();
 
 		commandManager = new CommandManager();
 		peerManager = new PeerManager(generalConfig);
@@ -63,7 +63,7 @@ public class Main implements ModuleScope {
 	public void main(String[] args) {
 		obtainPublicAddress();
 
-		log.log("\nStarting application...");
+		log.log("Starting application...");
 
 		moduleManager.onEnable();
 
@@ -107,6 +107,6 @@ public class Main implements ModuleScope {
 				e.printStackTrace();
 			}
 
-		log.log("Bye");
+		log.log("Bye :)");
 	}
 }

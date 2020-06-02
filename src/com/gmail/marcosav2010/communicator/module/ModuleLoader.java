@@ -18,32 +18,34 @@ import org.atteo.classindex.ClassIndex;
 
 public class ModuleLoader {
 
-    private static ILog log = new Log(Main.getInstance(), "ML");
+    private static ModuleLoader instance;
 
-    private static Set<Class<? extends CommandRegistry>> commandRegistries = new HashSet<>();
-    private static Map<ModuleDescriptor, Class<? extends Module>> loadedModules = new HashMap<>();
+    private ILog log = new Log(Main.getInstance(), "ML");
 
-    private static boolean loaded;
+    private Set<Class<? extends CommandRegistry>> commandRegistries = new HashSet<>();
+    private Map<ModuleDescriptor, Class<? extends Module>> loadedModules = new HashMap<>();
 
-    static Map<ModuleDescriptor, Class<? extends Module>> getModules() {
+    private boolean loaded;
+
+    Map<ModuleDescriptor, Class<? extends Module>> getModules() {
         return Collections.unmodifiableMap(loadedModules);
     }
 
-    static boolean isLoaded() {
+    boolean isLoaded() {
         return loaded;
     }
 
-    static void addCommands(Class<? extends CommandRegistry> cmds) {
+    void addCommands(Class<? extends CommandRegistry> cmds) {
         commandRegistries.add(cmds);
     }
 
-    public static Set<Class<? extends CommandRegistry>> flushRegistries() {
+    public Set<Class<? extends CommandRegistry>> flushRegistries() {
         var r = new HashSet<>(commandRegistries);
         commandRegistries.clear();
         return r;
     }
 
-    public static void loadModules() {
+    public void loadModules() {
         if (loaded)
             throw new IllegalStateException("Modules are already loaded.");
 
@@ -78,5 +80,11 @@ public class ModuleLoader {
                 log.log(e, "There was an error while loading class \"" + clazz.getName() + "\"");
             }
         }
+    }
+
+    public static ModuleLoader getInstance() {
+        if (instance == null)
+            instance = new ModuleLoader();
+        return instance;
     }
 }
