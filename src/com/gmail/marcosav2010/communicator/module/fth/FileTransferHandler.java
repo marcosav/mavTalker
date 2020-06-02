@@ -172,7 +172,7 @@ public class FileTransferHandler {
 				log.log(String.format("File #%s \"%s\" %.2f%% downloaded.", id, info.getFileName(), dw));
 
 		} catch (Exception ex) {
-			log.log("There was an exception writing the file #" + id + ".");
+			log.log(ex, "There was an exception writing the file #" + id + ".");
 			return FileDownloadResult.WRITE_EXCEPTION;
 		}
 

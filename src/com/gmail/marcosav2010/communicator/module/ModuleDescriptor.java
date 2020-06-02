@@ -9,6 +9,7 @@ import java.lang.annotation.ElementType;
 import org.atteo.classindex.IndexAnnotated;
 
 import com.gmail.marcosav2010.command.CommandRegistry;
+import com.gmail.marcosav2010.communicator.packet.handling.listener.PacketListener;
 
 @Documented
 @Retention(value = RetentionPolicy.RUNTIME)
@@ -25,4 +26,6 @@ public @interface ModuleDescriptor {
 	int priority() default 0;
 
 	Class<? extends ModuleScope> scope();
+
+	Class<? extends PacketListener>[] listeners();
 }

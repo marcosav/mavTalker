@@ -15,32 +15,32 @@ import com.gmail.marcosav2010.communicator.packet.handling.listener.PacketEventH
 import com.gmail.marcosav2010.communicator.packet.handling.listener.PacketListener;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
 import com.gmail.marcosav2010.connection.Connection;
-import com.gmail.marcosav2010.logger.ILog;
 import com.gmail.marcosav2010.peer.ConnectedPeer;
 
 public class FTListener implements PacketListener {
 
 	private FileTransferHandler fth;
-	private ILog fthl;
+	private FTModule module;
 
-	public void setFTH(FileTransferHandler fth) {
-		this.fth = fth;
-		fthl = fth.getLog();
+	public FTListener(FTModule module) {
+		this.module = module;
+		this.fth = module.getFTH();
 	}
 
 	@PacketEventHandler
 	public void onFileRequest(PacketFileRequest pf, ConnectedPeer peer) {
-		fthl.log("File request: #" + pf.getPacketID() + " \"" + pf.getName() + "\" (" + Utils.formatSize(pf.getSize())
-				+ "), accept download? Use /d " + peer.getConnection().getPeer().getName() + " " + peer.getName() + " "
-				+ pf.getFileID());
-		fth.handleRequest(pf);
+		module.getFTH().getLog()
+				.log("File request: #" + pf.getPacketID() + " \"" + pf.getName() + "\" ("
+						+ Utils.formatSize(pf.getSize()) + "), accept download? Use /d "
+						+ peer.getConnection().getPeer().getName() + " " + peer.getName() + " " + pf.getFileID());
+		module.getFTH().handleRequest(pf);
 	}
 
 	@PacketEventHandler
 	public void onFileReceive(PacketFileSend p, ConnectedPeer peer) {
 		FileDownloadResult result = fth.handleReceiveFile(p);
 		if (result != FileDownloadResult.SUCCESS)
-			fthl.log("File #" + p.getFileID() + " could not be downloaded: " + result.toString());
+			fth.getLog().log("File #" + p.getFileID() + " could not be downloaded: " + result.toString());
 	}
 
 	@PacketEventHandler
@@ -49,12 +49,12 @@ public class FTListener implements PacketListener {
 		FileSendResult result = fth.handleAcceptRespose(p);
 
 		if (result != FileSendResult.SUCCESS) {
-			fthl.log("File #" + p.getFileID() + " could not be sent because: " + result.toString());
+			fth.getLog().log("File #" + p.getFileID() + " could not be sent because: " + result.toString());
 			if (connection.isConnected())
 				try {
 					connection.sendPacket(new PacketFileSendFailed(p.getFileID(), result));
 				} catch (PacketWriteException e) {
-					fthl.log(e, "Couldn't send result of File #" + p.getFileID() + ".");
+					fth.getLog().log(e, "Couldn't send result of File #" + p.getFileID() + ".");
 				}
 		}
 	}
@@ -62,7 +62,7 @@ public class FTListener implements PacketListener {
 	@PacketEventHandler
 	public void onFileRemoteSendFailed(PacketFileSendFailed p, ConnectedPeer peer) {
 		FileSendResult result = p.getCause();
-		fthl.log("File #" + p.getFileID() + " could not be sent because: " + result.toString());
+		fth.getLog().log("File #" + p.getFileID() + " could not be sent because: " + result.toString());
 	}
 
 	@PacketEventHandler
@@ -79,7 +79,7 @@ public class FTListener implements PacketListener {
 				try {
 					c.sendPacket(newPacket);
 				} catch (PacketWriteException e) {
-					fthl.log(e, "There was a problem while sending find packet to " + c.getName() + ".");
+					fth.getLog().log(e, "There was a problem while sending find packet to " + c.getName() + ".");
 				}
 			});
 
@@ -88,6 +88,6 @@ public class FTListener implements PacketListener {
 
 	@PacketEventHandler
 	public void onFileGotPacket(PacketGotFile p, ConnectedPeer peer) {
-		fthl.log(p.getFileName() + " is own by " + p.getOwner());
+		fth.getLog().log(p.getFileName() + " is own by " + p.getOwner());
 	}
 }

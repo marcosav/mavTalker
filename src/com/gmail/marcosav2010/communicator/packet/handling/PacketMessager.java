@@ -17,6 +17,7 @@ import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.logger.ILog;
 import com.gmail.marcosav2010.logger.Log;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
+import com.gmail.marcosav2010.main.Main;
 
 /**
  * This class handles a @Connection @IPacket traffic.
@@ -77,7 +78,7 @@ public class PacketMessager {
 	private void handlePacket(Packet packet) {
 		int id = packet.getPacketID();
 		log.log("Received packet #" + id + ".", VerboseLevel.HIGH);
-		eventHandlerManager.handlePacket(packet, connection.getConnectedPeer());
+		eventHandlerManager.handlePacket(packet);
 
 		if (packet.shouldSendRespose())
 			try {
@@ -106,7 +107,10 @@ public class PacketMessager {
 	public void setupEventHandler() {
 		log.log("Registering packet handlers...", VerboseLevel.MEDIUM);
 
+		// TODO: Mejorar esta mierda
+		eventHandlerManager.registerListeners(connection.getModuleManager().getListeners());
 		eventHandlerManager.registerListeners(connection.getPeer().getModuleManager().getListeners());
+		eventHandlerManager.registerListeners(Main.getInstance().getModuleManager().getListeners());
 
 		log.log("Registered " + eventHandlerManager.getHandlerCount() + " handlers in "
 				+ eventHandlerManager.getListenerCount() + " listeners.", VerboseLevel.LOW);

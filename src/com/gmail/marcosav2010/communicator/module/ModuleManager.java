@@ -1,7 +1,6 @@
 package com.gmail.marcosav2010.communicator.module;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -40,24 +39,35 @@ public class ModuleManager {
 			if (!scope.getClass().isAssignableFrom(desc.scope()))
 				return;
 
+			log.log("Loading module " + desc.name() + ".", VerboseLevel.HIGH);
+
 			try {
 				Module module = m.getConstructor(ModuleDescriptor.class).newInstance(desc);
 
-				var manager = m.getSuperclass().getDeclaredField("manager");
-				manager.setAccessible(true);
-				manager.set(module, this);
+				module.onInit(scope);
 
-				module.registerListeners();
+				for (Class<? extends PacketListener> lc : desc.listeners()) {
+					PacketListener pl;
 
-				manager.setAccessible(false);
+					if (!m.isAssignableFrom(lc)) {
+						try {
+							pl = lc.getConstructor(m).newInstance(module);
+						} catch (NoSuchMethodException ex) {
+							pl = lc.getConstructor().newInstance();
+						}
+					} else
+						pl = (PacketListener) module;
+
+					listeners.add(pl);
+				}
 
 				names.put(desc.name(), module);
 				modules.add(module);
 
-				log.log("Successfully loaded module " + desc.name() + ".", VerboseLevel.HIGH);
+				log.log("Successfully loaded module " + desc.name() + ".", VerboseLevel.MEDIUM);
 
 			} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-					| InvocationTargetException | NoSuchMethodException | SecurityException | NoSuchFieldException e) {
+					| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 
 				log.log(e, "There was an error while initializing module \"" + desc.name() + "\".");
 			}
@@ -76,9 +86,5 @@ public class ModuleManager {
 
 	public Module getModule(String name) {
 		return names.get(name);
-	}
-
-	void registerListeners(Collection<PacketListener> l) {
-		listeners.addAll(l);
 	}
 }

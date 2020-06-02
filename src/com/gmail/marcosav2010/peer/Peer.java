@@ -69,6 +69,8 @@ public class Peer extends KnownPeer implements TaskOwner, ModuleScope {
 		connectionManager = new ConnectionManager(this);
 		executorService = new ThreadPoolExecutor(1, Integer.MAX_VALUE, 10L, TimeUnit.SECONDS,
 				new SynchronousQueue<Runnable>(), new PeerThreadFactory());
+		moduleManager = new ModuleManager(this);
+		moduleManager.initializeModules();
 		started = false;
 	}
 
@@ -97,10 +99,8 @@ public class Peer extends KnownPeer implements TaskOwner, ModuleScope {
 
 	public void start() {
 		try {
-			log.log("Initializing module manager and loading modules...", VerboseLevel.LOW);
+			log.log("Loading modules...", VerboseLevel.LOW);
 
-			moduleManager = new ModuleManager(this);
-			moduleManager.initializeModules();
 			moduleManager.onEnable();
 
 			log.log("Starting server on port " + getPort() + "...");

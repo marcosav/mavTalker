@@ -28,7 +28,10 @@ public class PacketEventHandlerManager {
 	private final Map<Method, ? extends PacketListener> methodListener = new HashMap<>();
 	private final Map<Class<? extends Packet>, Set<Method>> packetMethods = new HashMap<>();
 
+	private final Connection connection;
+
 	public PacketEventHandlerManager(Connection connection) {
+		this.connection = connection;
 		log = new Log(connection, "PEH");
 	}
 
@@ -71,14 +74,14 @@ public class PacketEventHandlerManager {
 		methodListener.clear();
 	}
 
-	public void handlePacket(Packet packet, ConnectedPeer peer) {
+	public void handlePacket(Packet packet) {
 		Set<Method> pClass = packetMethods.get(packet.getClass());
 		if (pClass == null)
 			return;
 
 		pClass.forEach(me -> {
 			try {
-				me.invoke(methodListener.get(me), packet, peer);
+				me.invoke(methodListener.get(me), packet, connection.getConnectedPeer());
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 				log.log(e,
 						"There was an error while handling event:\n\tMethod: " + me.getName() + "\n\tClass: "

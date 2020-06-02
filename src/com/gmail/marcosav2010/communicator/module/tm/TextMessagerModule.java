@@ -7,7 +7,8 @@ import com.gmail.marcosav2010.communicator.packet.handling.listener.PacketListen
 import com.gmail.marcosav2010.peer.ConnectedPeer;
 import com.gmail.marcosav2010.peer.Peer;
 
-@ModuleDescriptor(name = "TextMessager", scope = Peer.class, registry = TMCommandRegistry.class)
+@ModuleDescriptor(name = "TextMessager", scope = Peer.class, registry = TMCommandRegistry.class, listeners = {
+		TextMessagerModule.class })
 public class TextMessagerModule extends Module implements PacketListener {
 
 	static {
@@ -16,8 +17,6 @@ public class TextMessagerModule extends Module implements PacketListener {
 
 	public TextMessagerModule(ModuleDescriptor moduleDescriptor) {
 		super(moduleDescriptor);
-
-		registerListeners(this);
 	}
 
 	@PacketEventHandler
