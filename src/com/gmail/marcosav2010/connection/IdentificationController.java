@@ -11,9 +11,9 @@ import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
 import com.gmail.marcosav2010.logger.ILog;
 import com.gmail.marcosav2010.logger.Log;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
-import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.peer.ConnectedPeer;
 import com.gmail.marcosav2010.tasker.Task;
+import com.gmail.marcosav2010.tasker.Tasker;
 
 import lombok.AccessLevel;
 import lombok.Setter;
@@ -96,7 +96,7 @@ public class IdentificationController {
 	}
 
 	private void startIdentificationCountdown() {
-		idTask = Main.getInstance().getTasker().schedule(connection.getPeer(), () -> {
+		idTask = Tasker.getInstance().schedule(connection.getPeer(), () -> {
 			log.log("Identification failure, remote peer didn't send identification at time.");
 			try {
 				sendIdentifyRespose(PacketIdentify.TIMED_OUT);

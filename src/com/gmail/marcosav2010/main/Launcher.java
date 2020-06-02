@@ -16,7 +16,7 @@ public class Launcher {
 
 	public static void main(String[] args) throws NumberFormatException, IOException, GeneralSecurityException {
 		var pkg = Launcher.class.getPackage();
-		Logger.log(
+		Logger.getGlobal().log(
 				"Loading " + pkg.getImplementationTitle() + " v" + pkg.getImplementationVersion() + " by marcosav...");
 
 		Main main = new Main();

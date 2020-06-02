@@ -16,12 +16,14 @@ public class PacketReader {
 
 			Class<? extends AbstractPacket> packetClass = PacketRegistry.getById(packetType);
 			if (packetClass == null)
-				throw new PacketReadException("Packet type not recognized");
+				throw new PacketReadException("Packet type " + Byte.toUnsignedInt(packetType) + " not recognized");
 
 			packet = packetClass.getConstructor().newInstance();
 
 			packet.decode(decoder);
 
+		} catch (PacketReadException ex) {
+			throw ex;
 		} catch (Exception ex) {
 			throw new PacketReadException(ex);
 		}

@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import com.gmail.marcosav2010.logger.ILog;
 import com.gmail.marcosav2010.logger.Log;
 import com.gmail.marcosav2010.logger.Loggable;
-import com.gmail.marcosav2010.main.Main;
+import com.gmail.marcosav2010.logger.Logger;
 
 import lombok.Getter;
 
@@ -31,7 +31,7 @@ public class PeerManager implements Loggable {
 	private final Map<String, Peer> peers;
 
 	public PeerManager() {
-		log = new Log(Main.getInstance(), "PeerManager");
+		log = new Log(Logger.getGlobal(), "PeerManager");
 		peersCreated = 0;
 		parentPeerThreadGroup = new ThreadGroup("parentPeerThreadGroup");
 		peers = new ConcurrentHashMap<>();

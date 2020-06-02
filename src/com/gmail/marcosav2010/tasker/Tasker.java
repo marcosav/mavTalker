@@ -12,6 +12,8 @@ import com.gmail.marcosav2010.common.Utils;
 
 public class Tasker {
 
+	private static Tasker instance;
+
 	private final Object lock = new Object();
 	private final AtomicInteger taskCounter = new AtomicInteger();
 	private final Map<Integer, Task> tasks = new ConcurrentHashMap<>();
@@ -38,7 +40,7 @@ public class Tasker {
 
 	public int cancel(TaskOwner peer) {
 		Set<Task> toRemove = Collections.synchronizedSet(new HashSet<>());
-		
+
 		tasksByOwner.get(peer).forEach(toRemove::add);
 
 		toRemove.forEach(this::cancel);
@@ -58,7 +60,7 @@ public class Tasker {
 			throw new IllegalArgumentException("Owner cannot be null ");
 		if (task == null)
 			throw new IllegalArgumentException("Task runnable cannot be null ");
-		
+
 		Task prepared = new Task(this, owner, taskCounter.getAndIncrement(), task, delay, period, unit);
 
 		synchronized (lock) {
@@ -68,5 +70,12 @@ public class Tasker {
 
 		owner.getExecutorService().execute(prepared);
 		return prepared;
+	}
+
+	public static Tasker getInstance() {
+		if (instance == null)
+			instance = new Tasker();
+
+		return instance;
 	}
 }

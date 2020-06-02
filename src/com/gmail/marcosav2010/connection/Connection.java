@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.gmail.marcosav2010.cipher.CipheredCommunicator;
 import com.gmail.marcosav2010.cipher.EncryptedMessage;
 import com.gmail.marcosav2010.cipher.SessionCipher;
+import com.gmail.marcosav2010.common.PublicIPResolver;
 import com.gmail.marcosav2010.common.Utils;
 import com.gmail.marcosav2010.communicator.BaseCommunicator;
 import com.gmail.marcosav2010.communicator.module.ModuleManager;
@@ -31,10 +32,10 @@ import com.gmail.marcosav2010.handshake.HandshakeAuthentificator.ConnectionToken
 import com.gmail.marcosav2010.handshake.HandshakeCommunicator;
 import com.gmail.marcosav2010.logger.Log;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
-import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.peer.ConnectedPeer;
 import com.gmail.marcosav2010.peer.Peer;
 import com.gmail.marcosav2010.tasker.Task;
+import com.gmail.marcosav2010.tasker.Tasker;
 
 import lombok.Getter;
 
@@ -145,7 +146,7 @@ public class Connection extends NetworkConnection implements ModuleScope {
 		}
 
 		log.log("Setup completed, now executing listen task...", VerboseLevel.LOW);
-		listenTask = Main.getInstance().getTasker().run(peer, listenSocket()).setName("Listen Task");
+		listenTask = Tasker.getInstance().run(peer, listenSocket()).setName("Listen Task");
 	}
 
 	private Runnable listenSocket() {
@@ -181,7 +182,7 @@ public class Connection extends NetworkConnection implements ModuleScope {
 		if (!(hostSocket == null || hostSocket.isBound()))
 			throw new IllegalStateException("Already connected.");
 
-		if ((address.getAddress().equals(Main.getInstance().getPublicAddress())
+		if ((address.getAddress().equals(PublicIPResolver.getInstance().getPublicAddress())
 				|| address.getAddress().getHostName().equals(InetAddress.getLocalHost().getHostName()))
 				&& address.getPort() == peer.getPort())
 			throw new IllegalStateException("Cannon connect to itself.");
@@ -288,7 +289,7 @@ public class Connection extends NetworkConnection implements ModuleScope {
 		log.log("Waiting for remote connection back, timeout set to " + REMOTE_CONNECT_BACK_TIMEOUT + "s...",
 				VerboseLevel.MEDIUM);
 
-		remoteConnectBackTimeout = Main.getInstance().getTasker().schedule(peer, () -> {
+		remoteConnectBackTimeout = Tasker.getInstance().schedule(peer, () -> {
 			log.log("Remote peer didn't connect back at time, stopping connection.");
 
 			try {

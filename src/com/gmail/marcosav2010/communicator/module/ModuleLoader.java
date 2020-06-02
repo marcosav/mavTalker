@@ -10,9 +10,9 @@ import java.util.Set;
 import com.gmail.marcosav2010.command.CommandRegistry;
 import com.gmail.marcosav2010.logger.ILog;
 import com.gmail.marcosav2010.logger.Log;
+import com.gmail.marcosav2010.logger.Logger;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.main.Launcher;
-import com.gmail.marcosav2010.main.Main;
 
 import org.atteo.classindex.ClassIndex;
 
@@ -20,7 +20,7 @@ public class ModuleLoader {
 
     private static ModuleLoader instance;
 
-    private ILog log = new Log(Main.getInstance(), "ML");
+    private ILog log = new Log(Logger.getGlobal(), "ML");
 
     private Set<Class<? extends CommandRegistry>> commandRegistries = new HashSet<>();
     private Map<ModuleDescriptor, Class<? extends Module>> loadedModules = new HashMap<>();

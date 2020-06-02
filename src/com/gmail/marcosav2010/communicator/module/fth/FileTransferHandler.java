@@ -27,8 +27,8 @@ import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
 import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.logger.ILog;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
-import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.tasker.Task;
+import com.gmail.marcosav2010.tasker.Tasker;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -165,6 +165,7 @@ public class FileTransferHandler {
 			if (last) {
 				long elapsed = System.currentTimeMillis() - info.getFirstArrivalTime();
 				long speed = file.length() / elapsed * 1000;
+
 				log.log("File #" + id + " \"" + info.getFileName() + "\" has been downloaded successfully (" + elapsed
 						+ "ms | " + Utils.formatSize(speed) + "/s).");
 
@@ -394,8 +395,7 @@ public class FileTransferHandler {
 
 	private synchronized void addTask(int id, Runnable runnable, long receiveTimeout, TimeUnit timeUnit) {
 		removeTask(id);
-		pendingTasks.put(id,
-				Main.getInstance().getTasker().schedule(connection.getPeer(), runnable, receiveTimeout, timeUnit));
+		pendingTasks.put(id, Tasker.getInstance().schedule(connection.getPeer(), runnable, receiveTimeout, timeUnit));
 	}
 
 	private void onReceiveTimeout(int id) {

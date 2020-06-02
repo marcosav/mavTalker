@@ -24,12 +24,12 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import com.gmail.marcosav2010.common.PublicIPResolver;
 import com.gmail.marcosav2010.common.Utils;
 import com.gmail.marcosav2010.communicator.BaseCommunicator;
 import com.gmail.marcosav2010.logger.ILog;
 import com.gmail.marcosav2010.logger.Log;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
-import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.peer.Peer;
 
 import lombok.Getter;
@@ -139,7 +139,7 @@ public class HandshakeAuthentificator {
 
 		checkMark(requesterConnectionKeyBytes, C_KEY_MARK);
 
-		var ip = Main.getInstance().getPublicAddress();
+		var ip = PublicIPResolver.getInstance().getPublicAddress();
 		var ipBytes = ip.getAddress();
 
 		var handshakeKey = ct.getHandshakeKey();

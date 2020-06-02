@@ -3,12 +3,11 @@ package com.gmail.marcosav2010.communicator.module.fth;
 import com.gmail.marcosav2010.communicator.module.Module;
 import com.gmail.marcosav2010.communicator.module.ModuleDescriptor;
 import com.gmail.marcosav2010.communicator.module.ModuleScope;
+import com.gmail.marcosav2010.communicator.module.fth.command.FTCommandRegistry;
 import com.gmail.marcosav2010.communicator.module.fth.packet.PacketFileAccept;
 import com.gmail.marcosav2010.communicator.module.fth.packet.PacketFileRequest;
 import com.gmail.marcosav2010.communicator.module.fth.packet.PacketFileSend;
 import com.gmail.marcosav2010.communicator.module.fth.packet.PacketFileSendFailed;
-import com.gmail.marcosav2010.communicator.module.fth.packet.PacketFindFile;
-import com.gmail.marcosav2010.communicator.module.fth.packet.PacketGotFile;
 import com.gmail.marcosav2010.connection.Connection;
 
 @ModuleDescriptor(name = "FTH", scope = Connection.class, registry = FTCommandRegistry.class, listeners = {
@@ -20,8 +19,9 @@ public class FTModule extends Module {
 		registerPacket(4, PacketFileRequest.class);
 		registerPacket(5, PacketFileSend.class);
 		registerPacket(6, PacketFileSendFailed.class);
-		registerPacket(7, PacketFindFile.class);
-		registerPacket(8, PacketGotFile.class);
+		
+		/*registerPacket(7, PacketFindFile.class);
+		registerPacket(8, PacketGotFile.class);*/
 	}
 
 	private FileTransferHandler fth;

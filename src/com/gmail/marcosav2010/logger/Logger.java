@@ -6,7 +6,12 @@ import java.util.Date;
 
 import com.gmail.marcosav2010.common.Color;
 
+import lombok.Getter;
+
 public class Logger {
+
+	@Getter
+	private static final ILog global = new BaseLog();
 
 	private static VerboseLevel VERBOSE_LEVEL = VerboseLevel.HIGH;
 	private static VerboseLevel DEFAULT_LEVEL = VerboseLevel.MINIMAL;

@@ -29,6 +29,7 @@ import com.gmail.marcosav2010.logger.Log;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.tasker.TaskOwner;
+import com.gmail.marcosav2010.tasker.Tasker;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -109,7 +110,7 @@ public class Peer extends KnownPeer implements TaskOwner, ModuleScope {
 
 			started = true;
 
-			Main.getInstance().getTasker().run(this, findClient()).setName(getName() + " Find Client");
+			Tasker.getInstance().run(this, findClient()).setName(getName() + " Find Client");
 
 			log.log("Server created and waiting for someone to connect...");
 
@@ -189,7 +190,7 @@ public class Peer extends KnownPeer implements TaskOwner, ModuleScope {
 			executorService.shutdownNow();
 		}
 
-		Main.getInstance().getPeerManager().remove(this);
+		//Main.getInstance().getPeerManager().remove(this);
 
 		log.log("Shutdown done successfully.", VerboseLevel.LOW);
 	}

@@ -1,34 +1,16 @@
 package com.gmail.marcosav2010.common;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.net.InetAddress;
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.Base64;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Utils {
-
-	private static final String[] IP_PROVIDERS = new String[] { "http://checkip.amazonaws.com",
-			"http://bot.whatismyipaddress.com/", "https://ident.me/", "https://ip.seeip.org/",
-			"https://api.ipify.org" };
-	private static final long IP_TIMEOUT = 5L;
-	private static final ExecutorService exec = Executors.newFixedThreadPool(1);
 
 	public static byte[] intToBytes(int value) {
 		return new byte[] { (byte) (value >>> 24), (byte) (value >>> 16), (byte) (value >>> 8), (byte) value };
@@ -126,35 +108,13 @@ public class Utils {
 		map.forEach((k, v) -> v.remove(value));
 	}
 
-	public static InetAddress obtainExternalAddress() throws IOException {
-		String r;
-		try {
-			r = exec.invokeAny(Stream.of(IP_PROVIDERS).map(Utils::readRawWebsite).collect(Collectors.toList()),
-					IP_TIMEOUT, TimeUnit.SECONDS);
-		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			return InetAddress.getLocalHost();
-		}
-
-		exec.shutdownNow();
-
-		return InetAddress.getByName(r);
-	}
-
-	private static Callable<String> readRawWebsite(String str) {
-		return () -> {
-			URL ipUrl = new URL(str);
-			try (BufferedReader in = new BufferedReader(new InputStreamReader(ipUrl.openStream()))) {
-				return in.readLine();
-			}
-		};
-	}
-
 	public static String encode(byte[] array) {
-		return Base64.getUrlEncoder().withoutPadding().encodeToString(array).replaceAll("_", "ñ").replaceAll("-", "Ñ");
+		return Base64.getUrlEncoder().withoutPadding()
+				.encodeToString(array)/* .replaceAll("_", "ñ").replaceAll("-", "Ñ") */;
 	}
 
 	public static byte[] decode(String str) {
-		return Base64.getUrlDecoder().decode(str.replaceAll("ñ", "_").replaceAll("Ñ", "-"));
+		return Base64.getUrlDecoder().decode(str/* .replaceAll("ñ", "_").replaceAll("Ñ", "-") */);
 	}
 
 	public static String toBase64(UUID uuid) {

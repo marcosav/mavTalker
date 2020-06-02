@@ -10,7 +10,7 @@ import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.connection.NetworkIdentificator;
 import com.gmail.marcosav2010.logger.ILog;
 import com.gmail.marcosav2010.logger.Log;
-import com.gmail.marcosav2010.main.Main;
+import com.gmail.marcosav2010.logger.Logger;
 
 import lombok.Getter;
 
@@ -32,7 +32,7 @@ public class ConnectedPeer extends KnownPeer {
 
 	public ConnectedPeer(String name, UUID uuid, Connection connection) {
 		super(name, connection.getRemoteAddress(), connection.getRemotePort(), uuid);
-		log = new Log(Main.getInstance(), name);
+		log = new Log(Logger.getGlobal(), name);
 		networkIdentificator = new NetworkIdentificator<>();
 		this.connection = connection;
 	}

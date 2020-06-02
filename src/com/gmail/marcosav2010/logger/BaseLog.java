@@ -2,6 +2,10 @@ package com.gmail.marcosav2010.logger;
 
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
 public class BaseLog implements ILog {
 
     @Override

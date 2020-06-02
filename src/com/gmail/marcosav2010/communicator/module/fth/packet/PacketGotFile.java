@@ -8,7 +8,9 @@ import com.gmail.marcosav2010.communicator.packet.wrapper.PacketEncoder;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
 @AllArgsConstructor
 public class PacketGotFile extends Packet {
 

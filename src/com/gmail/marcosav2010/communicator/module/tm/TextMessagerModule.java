@@ -12,7 +12,7 @@ import com.gmail.marcosav2010.peer.Peer;
 public class TextMessagerModule extends Module implements PacketListener {
 
 	static {
-		registerPacket(7, PacketMessage.class);
+		registerPacket(9, PacketMessage.class);
 	}
 
 	public TextMessagerModule(ModuleDescriptor moduleDescriptor) {

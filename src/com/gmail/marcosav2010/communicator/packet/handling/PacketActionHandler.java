@@ -8,8 +8,8 @@ import com.gmail.marcosav2010.communicator.packet.Packet;
 import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.logger.ILog;
 import com.gmail.marcosav2010.logger.Log;
-import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.tasker.TaskOwner;
+import com.gmail.marcosav2010.tasker.Tasker;
 
 /**
  * This class handles the action is done when a packet is received by remote
@@ -58,7 +58,7 @@ public class PacketActionHandler {
 			timeUnit = TimeUnit.SECONDS;
 		}
 
-		Main.getInstance().getTasker().schedule(owner, () -> onExpire(id), expireTimeout, timeUnit);
+		Tasker.getInstance().schedule(owner, () -> onExpire(id), expireTimeout, timeUnit);
 	}
 
 	public void onExpire(long id) {

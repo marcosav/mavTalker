@@ -13,20 +13,18 @@ public class PacketRegistry {
 	static {
 		packetsById = new HashMap<Byte, Class<? extends AbstractPacket>>();
 		packetsByClass = new HashMap<Class<? extends AbstractPacket>, Byte>();
-		
+
 		register((byte) 0, PacketIdentify.class);
 		register((byte) 1, PacketRespose.class);
 		register((byte) 2, PacketShutdown.class);
-		
+
 		register((byte) -1, PacketPing.class);
 	}
 
 	public static void register(byte id, Class<? extends AbstractPacket> packet) {
 		if (packetsById.containsKey(id) || packetsByClass.containsKey(packet))
-			// TODO: Only one package registration.
-			// throw new IllegalArgumentException("Duplicated id or packet type");
-			return;
-		
+			throw new IllegalArgumentException("Duplicated id or packet type");
+
 		packetsById.put(id, packet);
 		packetsByClass.put(packet, id);
 	}

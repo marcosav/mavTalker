@@ -26,9 +26,9 @@ import com.gmail.marcosav2010.communicator.BaseCommunicator;
 import com.gmail.marcosav2010.communicator.Communicator;
 import com.gmail.marcosav2010.logger.ILog;
 import com.gmail.marcosav2010.logger.Log;
-import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.tasker.Task;
 import com.gmail.marcosav2010.tasker.TaskOwner;
+import com.gmail.marcosav2010.tasker.Tasker;
 
 /**
  * This is a communicator that encrypts byte arrays with a random symmetric key
@@ -76,7 +76,7 @@ public class CipheredCommunicator extends Communicator {
 	}
 
 	private void start() {
-		writeTask = Main.getInstance().getTasker().run(taskOwner, writePool = new WritePool());
+		writeTask = Tasker.getInstance().run(taskOwner, writePool = new WritePool());
 	}
 
 	public synchronized EncryptedMessage read() throws IOException {
@@ -108,7 +108,7 @@ public class CipheredCommunicator extends Communicator {
 		if (encryptedMessage == null)
 			return;
 
-		Main.getInstance().getTasker().run(taskOwner, () -> {
+		Tasker.getInstance().run(taskOwner, () -> {
 			try {
 				byte[] simmetricKeyBytes = sessionCipher.decode(encryptedMessage.getEncryptedSimmetricKeyBytes());
 

@@ -1,21 +1,17 @@
 package com.gmail.marcosav2010.main;
 
 import java.io.IOException;
-import java.net.InetAddress;
 
 import com.gmail.marcosav2010.command.CommandManager;
-import com.gmail.marcosav2010.common.Utils;
+import com.gmail.marcosav2010.common.PublicIPResolver;
 import com.gmail.marcosav2010.communicator.module.ModuleLoader;
 import com.gmail.marcosav2010.communicator.module.ModuleManager;
 import com.gmail.marcosav2010.communicator.module.ModuleScope;
 import com.gmail.marcosav2010.config.GeneralConfiguration;
-import com.gmail.marcosav2010.logger.BaseLog;
 import com.gmail.marcosav2010.logger.ILog;
 import com.gmail.marcosav2010.logger.Logger;
-import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.peer.Peer;
 import com.gmail.marcosav2010.peer.PeerManager;
-import com.gmail.marcosav2010.tasker.Tasker;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -33,19 +29,15 @@ public class Main implements ModuleScope {
 	@Getter
 	private PeerManager peerManager;
 	@Getter
-	private Tasker tasker;
-	@Getter
 	private ModuleManager moduleManager;
 	@Getter
 	private ILog log;
 
 	@Getter
-	private InetAddress publicAddress;
-	@Getter
 	private boolean shuttingDown;
 
 	void init() {
-		log = new BaseLog();
+		log = Logger.getGlobal();
 		generalConfig = new GeneralConfiguration();
 
 		Logger.setVerboseLevel(generalConfig.getVerboseLevel());
@@ -54,14 +46,13 @@ public class Main implements ModuleScope {
 
 		commandManager = new CommandManager();
 		peerManager = new PeerManager();
-		tasker = new Tasker();
 
 		moduleManager = new ModuleManager(this);
 		moduleManager.initializeModules();
 	}
 
 	public void main(String[] args) {
-		obtainPublicAddress();
+		PublicIPResolver.getInstance();
 
 		log.log("Starting application...");
 
@@ -74,18 +65,6 @@ public class Main implements ModuleScope {
 	private void run(String name, int port) {
 		Peer startPeer = peerManager.create(name, port);
 		startPeer.start();
-	}
-
-	private void obtainPublicAddress() {
-		log.log("Obtaining public address...", VerboseLevel.MEDIUM);
-		try {
-			long m = System.currentTimeMillis();
-			publicAddress = Utils.obtainExternalAddress();
-			log.log("Public address got in " + (System.currentTimeMillis() - m) + "ms: " + publicAddress.getHostName(),
-					VerboseLevel.MEDIUM);
-		} catch (IOException e) {
-			log.log(e, "There was an error while obtaining public address, shutting down...");
-		}
 	}
 
 	public void shutdown() {
