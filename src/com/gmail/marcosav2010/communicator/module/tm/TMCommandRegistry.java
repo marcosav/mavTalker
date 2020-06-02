@@ -3,9 +3,9 @@ package com.gmail.marcosav2010.communicator.module.tm;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.gmail.marcosav2010.command.BaseCommandRegistry;
 import com.gmail.marcosav2010.command.Command;
 import com.gmail.marcosav2010.command.CommandRegistry;
+import com.gmail.marcosav2010.command.base.BaseCommandUtils;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.peer.ConnectedPeer;
@@ -29,7 +29,7 @@ public class TMCommandRegistry extends CommandRegistry {
 				return;
 			}
 
-			Set<ConnectedPeer> to = BaseCommandRegistry.getTargets(log, arg[0], arg[1]);
+			Set<ConnectedPeer> to = BaseCommandUtils.getTargets(log, arg[0], arg[1]);
 			if (to.isEmpty())
 				return;
 

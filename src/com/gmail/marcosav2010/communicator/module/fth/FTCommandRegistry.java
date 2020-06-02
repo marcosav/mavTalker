@@ -9,9 +9,9 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.gmail.marcosav2010.command.BaseCommandRegistry;
 import com.gmail.marcosav2010.command.Command;
 import com.gmail.marcosav2010.command.CommandRegistry;
+import com.gmail.marcosav2010.command.base.BaseCommandUtils;
 import com.gmail.marcosav2010.common.Utils;
 import com.gmail.marcosav2010.communicator.module.fth.packet.PacketFindFile;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
@@ -93,7 +93,7 @@ public class FTCommandRegistry extends CommandRegistry {
 				return;
 			}
 
-			Set<ConnectedPeer> to = BaseCommandRegistry.getTargets(log, arg[0], arg[1]);
+			Set<ConnectedPeer> to = BaseCommandUtils.getTargets(log, arg[0], arg[1]);
 			if (to.isEmpty())
 				return;
 

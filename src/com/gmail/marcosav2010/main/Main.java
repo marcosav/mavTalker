@@ -53,7 +53,7 @@ public class Main implements ModuleScope {
 		ModuleLoader.getInstance().loadModules();
 
 		commandManager = new CommandManager();
-		peerManager = new PeerManager(generalConfig);
+		peerManager = new PeerManager();
 		tasker = new Tasker();
 
 		moduleManager = new ModuleManager(this);

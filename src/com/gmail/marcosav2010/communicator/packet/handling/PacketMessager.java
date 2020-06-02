@@ -50,13 +50,13 @@ public class PacketMessager {
 	}
 
 	public void onReceive(AbstractPacket p) {
-		if (p instanceof StandardPacket)
-			handleStandardPacket((StandardPacket) p);
+		if (p.isStandard())
+			handleStandardPacket(p);
 		else
 			handlePacket((Packet) p);
 	}
 
-	private void handleStandardPacket(StandardPacket sp) {
+	private void handleStandardPacket(AbstractPacket sp) {
 		if (sp instanceof PacketRespose) {
 			PacketRespose pr = (PacketRespose) sp;
 			long id = pr.getResposePacketId();
