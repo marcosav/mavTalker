@@ -1,4 +1,4 @@
-package com.gmail.marcosav2010.communicator.module;
+package com.gmail.marcosav2010.module;
 
 import com.gmail.marcosav2010.logger.Loggable;
 

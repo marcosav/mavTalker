@@ -1,10 +1,10 @@
-package com.gmail.marcosav2010.communicator.module.fth.command;
+package com.gmail.marcosav2010.module.fth.command;
 
 import java.util.Set;
 
 import com.gmail.marcosav2010.command.CommandRegistry;
-import com.gmail.marcosav2010.communicator.module.fth.FTModule;
-import com.gmail.marcosav2010.communicator.module.fth.FileTransferHandler;
+import com.gmail.marcosav2010.module.fth.FTModule;
+import com.gmail.marcosav2010.module.fth.FileTransferHandler;
 import com.gmail.marcosav2010.connection.Connection;
 
 public class FTCommandRegistry extends CommandRegistry {

@@ -4,12 +4,13 @@ import java.io.IOException;
 
 import com.gmail.marcosav2010.command.CommandManager;
 import com.gmail.marcosav2010.common.PublicIPResolver;
-import com.gmail.marcosav2010.communicator.module.ModuleLoader;
-import com.gmail.marcosav2010.communicator.module.ModuleManager;
-import com.gmail.marcosav2010.communicator.module.ModuleScope;
+import com.gmail.marcosav2010.module.ModuleLoader;
+import com.gmail.marcosav2010.module.ModuleManager;
+import com.gmail.marcosav2010.module.ModuleScope;
 import com.gmail.marcosav2010.config.GeneralConfiguration;
 import com.gmail.marcosav2010.logger.ILog;
 import com.gmail.marcosav2010.logger.Logger;
+import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.peer.Peer;
 import com.gmail.marcosav2010.peer.PeerManager;
 
@@ -54,12 +55,17 @@ public class Main implements ModuleScope {
 	public void main(String[] args) {
 		PublicIPResolver.getInstance();
 
-		log.log("Starting application...");
+		log.log("Starting application...", VerboseLevel.MEDIUM);
 
 		moduleManager.onEnable();
 
-		if (args.length == 2)
-			run(args[0], Integer.parseInt(args[1]));
+		log.log("Done");
+
+		if (args.length == 2) {
+			String name = args[0], port = args[1];
+			log.log("Trying to create Peer \"" + name + "\" in localhost:" + port + "...", VerboseLevel.MEDIUM);
+			run(name, Integer.parseInt(port));
+		}
 	}
 
 	private void run(String name, int port) {

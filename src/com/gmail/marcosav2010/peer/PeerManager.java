@@ -39,7 +39,7 @@ public class PeerManager implements Loggable {
 	}
 
 	public PeerManager(ExecutorService executorService) {
-		log = new Log(Logger.getGlobal(), "PeerManager");
+		log = new Log(Logger.getGlobal(), "PeerMan");
 		peersCreated = 0;
 
 		this.executorService = executorService;

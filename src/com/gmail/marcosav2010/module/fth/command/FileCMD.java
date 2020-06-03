@@ -1,4 +1,4 @@
-package com.gmail.marcosav2010.communicator.module.fth.command;
+package com.gmail.marcosav2010.module.fth.command;
 
 import java.io.File;
 import java.util.Set;
@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 
 import com.gmail.marcosav2010.command.Command;
 import com.gmail.marcosav2010.command.base.BaseCommandUtils;
-import com.gmail.marcosav2010.communicator.module.fth.FileSendInfo;
-import com.gmail.marcosav2010.communicator.module.fth.FileTransferHandler;
+import com.gmail.marcosav2010.module.fth.FileSendInfo;
+import com.gmail.marcosav2010.module.fth.FileTransferHandler;
 import com.gmail.marcosav2010.peer.ConnectedPeer;
 
 class FileCMD extends Command {

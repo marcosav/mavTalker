@@ -1,4 +1,4 @@
-package com.gmail.marcosav2010.communicator.module.fth.command;
+package com.gmail.marcosav2010.module.fth.command;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,7 +9,7 @@ import java.util.Collections;
 
 import com.gmail.marcosav2010.command.Command;
 import com.gmail.marcosav2010.common.Utils;
-import com.gmail.marcosav2010.communicator.module.fth.FileTransferHandler;
+import com.gmail.marcosav2010.module.fth.FileTransferHandler;
 
 class ClearDownloadsCMD extends Command {
 

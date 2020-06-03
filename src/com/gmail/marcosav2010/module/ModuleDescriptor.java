@@ -1,4 +1,4 @@
-package com.gmail.marcosav2010.communicator.module;
+package com.gmail.marcosav2010.module;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;

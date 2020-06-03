@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import com.gmail.marcosav2010.command.base.BaseCommandRegistry;
-import com.gmail.marcosav2010.communicator.module.ModuleLoader;
+import com.gmail.marcosav2010.module.ModuleLoader;
 import com.gmail.marcosav2010.logger.ILog;
 import com.gmail.marcosav2010.logger.Log;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;

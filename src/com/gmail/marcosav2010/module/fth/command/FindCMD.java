@@ -1,9 +1,9 @@
-package com.gmail.marcosav2010.communicator.module.fth.command;
+package com.gmail.marcosav2010.module.fth.command;
 
 import java.util.stream.Collectors;
 
 import com.gmail.marcosav2010.command.Command;
-import com.gmail.marcosav2010.communicator.module.fth.packet.PacketFindFile;
+import com.gmail.marcosav2010.module.fth.packet.PacketFindFile;
 import com.gmail.marcosav2010.communicator.packet.wrapper.exception.PacketWriteException;
 import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.peer.ConnectedPeer;

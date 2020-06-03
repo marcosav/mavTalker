@@ -1,8 +1,8 @@
-package com.gmail.marcosav2010.communicator.module.fth.command;
+package com.gmail.marcosav2010.module.fth.command;
 
 import com.gmail.marcosav2010.command.Command;
-import com.gmail.marcosav2010.communicator.module.fth.FileReceiveInfo;
-import com.gmail.marcosav2010.communicator.module.fth.FileTransferHandler;
+import com.gmail.marcosav2010.module.fth.FileReceiveInfo;
+import com.gmail.marcosav2010.module.fth.FileTransferHandler;
 import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.connection.ConnectionIdentificator;
 import com.gmail.marcosav2010.connection.ConnectionManager;

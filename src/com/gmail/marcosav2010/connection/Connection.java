@@ -18,8 +18,8 @@ import com.gmail.marcosav2010.cipher.SessionCipher;
 import com.gmail.marcosav2010.common.PublicIPResolver;
 import com.gmail.marcosav2010.common.Utils;
 import com.gmail.marcosav2010.communicator.BaseCommunicator;
-import com.gmail.marcosav2010.communicator.module.ModuleManager;
-import com.gmail.marcosav2010.communicator.module.ModuleScope;
+import com.gmail.marcosav2010.module.ModuleManager;
+import com.gmail.marcosav2010.module.ModuleScope;
 import com.gmail.marcosav2010.communicator.packet.AbstractPacket;
 import com.gmail.marcosav2010.communicator.packet.Packet;
 import com.gmail.marcosav2010.communicator.packet.handling.PacketMessager;
@@ -90,7 +90,7 @@ public class Connection extends NetworkConnection implements ModuleScope {
 	public Connection(Peer peer) {
 		this.peer = peer;
 		log = new Log(peer, "");
-		updateLogPrefix(peer.getAndInc());
+		updateLogTag("Connecting " + peer.getAndInc());
 		connected = new AtomicBoolean(false);
 		identificationController = new IdentificationController(this);
 		init();
@@ -110,8 +110,8 @@ public class Connection extends NetworkConnection implements ModuleScope {
 		moduleManager.initializeModules();
 	}
 
-	private void updateLogPrefix(Object prefix) {
-		log.setPrefix("Connection] [" + prefix.toString());
+	private void updateLogTag(String tag) {
+		log.setPrefix(tag);
 	}
 
 	public void connect(Socket remoteSocket, ConnectionToken ct) throws IOException {
@@ -419,8 +419,8 @@ public class Connection extends NetworkConnection implements ModuleScope {
 			throw new ConnectionIdentificationException("ConnectedPeer instance is already set.");
 
 		connectedPeer = cPeer;
-		log.log("Setting connection tag to " + connectedPeer.getName(), VerboseLevel.MEDIUM);
-		updateLogPrefix(connectedPeer.getName());
+		log.log("Setting connection tag to \"" + connectedPeer.getName() + "\"", VerboseLevel.MEDIUM);
+		updateLogTag(connectedPeer.getName());
 	}
 
 	public UUID getUUID() {

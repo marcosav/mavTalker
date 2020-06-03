@@ -12,8 +12,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import com.gmail.marcosav2010.communicator.module.ModuleManager;
-import com.gmail.marcosav2010.communicator.module.ModuleScope;
+import com.gmail.marcosav2010.module.ModuleManager;
+import com.gmail.marcosav2010.module.ModuleScope;
 import com.gmail.marcosav2010.config.IConfiguration;
 import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.connection.ConnectionIdentificator;
