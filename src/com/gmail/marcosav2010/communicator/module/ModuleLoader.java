@@ -51,11 +51,9 @@ public class ModuleLoader {
 
         loaded = true;
 
-        Iterable<Class<?>> matches;
+        var matches = ClassIndex.getAnnotated(ModuleDescriptor.class, Launcher.class.getClassLoader());
 
-        matches = ClassIndex.getAnnotated(ModuleDescriptor.class, Launcher.class.getClassLoader());
-
-        for (Class<?> clazz : matches) {
+        for (var clazz : matches) {
             if (Modifier.isAbstract(clazz.getModifiers()))
                 continue;
 

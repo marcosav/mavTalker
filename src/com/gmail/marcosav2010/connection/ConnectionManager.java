@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.gmail.marcosav2010.common.Utils;
+import com.gmail.marcosav2010.connection.exception.ConnectionRegistryException;
 import com.gmail.marcosav2010.handshake.HandshakeAuthentificator;
 import com.gmail.marcosav2010.handshake.HandshakeAuthentificator.ConnectionToken;
 import com.gmail.marcosav2010.handshake.HandshakeAuthentificator.InvalidHandshakeKey;

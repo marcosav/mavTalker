@@ -18,7 +18,8 @@ public class CipherPool {
 	private static final int DEFAULT_INITIAL_CIPHERS = 2;
 
 	private static final String CIPHER_ASYMMETRIC_ALGORITHM = "RSA/ECB/OAEPWithSHA-512AndMGF1Padding";
-	private static final AlgorithmParameterSpec ALGORITHM_SPEC = new OAEPParameterSpec("SHA3-512", "MGF1", MGF1ParameterSpec.SHA512, PSource.PSpecified.DEFAULT);
+	private static final AlgorithmParameterSpec ALGORITHM_SPEC = new OAEPParameterSpec("SHA3-512", "MGF1",
+			MGF1ParameterSpec.SHA512, PSource.PSpecified.DEFAULT);
 
 	private AtomicInteger cipherCount;
 

@@ -2,12 +2,16 @@ package com.gmail.marcosav2010.peer;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.gmail.marcosav2010.logger.ILog;
 import com.gmail.marcosav2010.logger.Log;
 import com.gmail.marcosav2010.logger.Loggable;
 import com.gmail.marcosav2010.logger.Logger;
+import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
+import com.gmail.marcosav2010.main.Main;
 
 import lombok.Getter;
 
@@ -24,16 +28,22 @@ public class PeerManager implements Loggable {
 	@Getter
 	private final ILog log;
 
-	private final ThreadGroup parentPeerThreadGroup;
+	private final ExecutorService executorService;
 
 	private int peersCreated;
 
 	private final Map<String, Peer> peers;
 
 	public PeerManager() {
+		this(new DefaultPeerExecutor("peerManager", new ThreadGroup("parentPeerThreadGroup")));
+	}
+
+	public PeerManager(ExecutorService executorService) {
 		log = new Log(Logger.getGlobal(), "PeerManager");
 		peersCreated = 0;
-		parentPeerThreadGroup = new ThreadGroup("parentPeerThreadGroup");
+
+		this.executorService = executorService;
+
 		peers = new ConcurrentHashMap<>();
 	}
 
@@ -49,7 +59,7 @@ public class PeerManager implements Loggable {
 		return DEFAULT_PORT_BASE + peersCreated;
 	}
 
-	public String suggestName() {
+	private String suggestName() {
 		return "P" + (peersCreated + 1);
 	}
 
@@ -57,8 +67,8 @@ public class PeerManager implements Loggable {
 		return getSuitablePort() + 1;
 	}
 
-	public Peer remove(Peer peer) {
-		return peers.remove(peer.getName());
+	private Peer remove(String peer) {
+		return peers.remove(peer);
 	}
 
 	public Peer create() {
@@ -72,7 +82,8 @@ public class PeerManager implements Loggable {
 	public Peer create(String name, int port) {
 		if (!isValidName(name))
 			return null;
-		Peer peer = new Peer(this, name, port);
+
+		Peer peer = new Peer(name, port, log, executorService, Main.getInstance().getGeneralConfig());
 		peers.put(name, peer);
 		peersCreated++;
 		return peer;
@@ -90,11 +101,23 @@ public class PeerManager implements Loggable {
 			p.stop(false);
 		}
 		log.log("All peers have been shutdown.");
+
+		log.log("Shutting down thread pool executor...", VerboseLevel.MEDIUM);
+
+		executorService.shutdown();
+		try {
+			executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			log.log("There was an error while terminating the pool, forcing shutdown...", VerboseLevel.MEDIUM);
+			executorService.shutdownNow();
+		}
 	}
 
 	public void shutdown(String peer) {
-		if (exists(peer))
-			get(peer).stop(false);
+		if (exists(peer)) {
+			Peer p = remove(peer);
+			p.stop(false);
+		}
 	}
 
 	private boolean isValidName(String name) {
@@ -119,10 +142,6 @@ public class PeerManager implements Loggable {
 
 	public Peer getFirstPeer() {
 		return peers.values().iterator().next();
-	}
-
-	ThreadGroup getPeerThreadGroup() {
-		return parentPeerThreadGroup;
 	}
 
 	public void printInfo() {

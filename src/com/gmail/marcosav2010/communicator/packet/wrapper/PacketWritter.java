@@ -5,6 +5,8 @@ import java.io.IOException;
 
 import com.gmail.marcosav2010.communicator.packet.AbstractPacket;
 import com.gmail.marcosav2010.communicator.packet.PacketRegistry;
+import com.gmail.marcosav2010.communicator.packet.wrapper.exception.OverExceededByteLimitException;
+import com.gmail.marcosav2010.communicator.packet.wrapper.exception.PacketWriteException;
 
 public class PacketWritter {
 

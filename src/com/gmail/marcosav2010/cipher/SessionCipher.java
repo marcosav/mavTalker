@@ -12,7 +12,7 @@ import java.security.spec.X509EncodedKeySpec;
 
 import javax.crypto.Cipher;
 
-import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
+import com.gmail.marcosav2010.communicator.packet.wrapper.exception.PacketWriteException;
 import com.gmail.marcosav2010.connection.Connection;
 
 import lombok.RequiredArgsConstructor;

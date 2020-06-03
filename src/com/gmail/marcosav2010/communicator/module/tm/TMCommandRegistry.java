@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import com.gmail.marcosav2010.command.Command;
 import com.gmail.marcosav2010.command.CommandRegistry;
 import com.gmail.marcosav2010.command.base.BaseCommandUtils;
-import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
+import com.gmail.marcosav2010.communicator.packet.wrapper.exception.PacketWriteException;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.peer.ConnectedPeer;
 

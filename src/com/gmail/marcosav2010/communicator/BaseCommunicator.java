@@ -21,7 +21,8 @@ public class BaseCommunicator extends Communicator {
 		return read;
 	}
 
-	public byte[] read(int bytes, TaskOwner taskOwner, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+	public byte[] read(int bytes, TaskOwner taskOwner, long timeout, TimeUnit unit)
+			throws InterruptedException, ExecutionException, TimeoutException {
 		return taskOwner.getExecutorService().submit(() -> read(bytes)).get(timeout, unit);
 	}
 

@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.util.UUID;
 
 import com.gmail.marcosav2010.communicator.packet.AbstractPacket;
+import com.gmail.marcosav2010.communicator.packet.wrapper.exception.OverExceededByteLimitException;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

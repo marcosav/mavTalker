@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 import com.gmail.marcosav2010.common.Utils;
 import com.gmail.marcosav2010.communicator.packet.handling.PacketMessager;
 import com.gmail.marcosav2010.communicator.packet.packets.PacketIdentify;
-import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
+import com.gmail.marcosav2010.communicator.packet.wrapper.exception.PacketWriteException;
 import com.gmail.marcosav2010.logger.ILog;
 import com.gmail.marcosav2010.logger.Log;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;

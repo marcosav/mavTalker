@@ -19,6 +19,8 @@ public class Launcher {
 		Logger.getGlobal().log(
 				"Loading " + pkg.getImplementationTitle() + " v" + pkg.getImplementationVersion() + " by marcosav...");
 
+		addSignalHook();
+
 		Main main = new Main();
 		Main.setInstance(main);
 		main.init();
@@ -37,8 +39,16 @@ public class Launcher {
 				CommandHandler.handleCommand(lineReader.readLine(">> "));
 
 		} catch (org.jline.reader.UserInterruptException ex) {
-			if (Main.getInstance() != null)
-				Main.getInstance().shutdown();
+			handleShutdown.run();
 		}
 	}
+
+	private static void addSignalHook() {
+		Runtime.getRuntime().addShutdownHook(new Thread(handleShutdown));
+	}
+
+	private static Runnable handleShutdown = () -> {
+		if (Main.getInstance() != null)
+			Main.getInstance().shutdown();
+	};
 }

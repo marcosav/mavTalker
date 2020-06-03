@@ -9,9 +9,9 @@ import java.util.Properties;
 
 import com.gmail.marcosav2010.logger.ILog;
 import com.gmail.marcosav2010.logger.Log;
-import com.gmail.marcosav2010.main.Main;
+import com.gmail.marcosav2010.logger.Logger;
 
-public class Configuration {
+public class Configuration implements IConfiguration {
 
 	private final ILog log;
 
@@ -25,7 +25,7 @@ public class Configuration {
 	public Configuration(String configName) {
 		this.configName = configName + ".properties";
 		save = false;
-		log = new Log(Main.getInstance(), "Conf-" + configName);
+		log = new Log(Logger.getGlobal(), "Conf-" + configName);
 	}
 
 	public void load(Properties defaultProperties) {
@@ -51,18 +51,22 @@ public class Configuration {
 		}
 	}
 
+	@Override
 	public boolean exists(String key) {
 		return properties.getProperty(key) != null;
 	}
 
+	@Override
 	public String get(String key) {
 		return properties.getProperty(key);
 	}
 
+	@Override
 	public String get(String key, String def) {
 		return properties.getProperty(key, def);
 	}
 
+	@Override
 	public void set(String key, String value) {
 		properties.setProperty(key, value);
 		save = true;

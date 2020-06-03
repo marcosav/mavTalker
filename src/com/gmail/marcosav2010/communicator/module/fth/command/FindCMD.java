@@ -4,7 +4,7 @@ import java.util.stream.Collectors;
 
 import com.gmail.marcosav2010.command.Command;
 import com.gmail.marcosav2010.communicator.module.fth.packet.PacketFindFile;
-import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
+import com.gmail.marcosav2010.communicator.packet.wrapper.exception.PacketWriteException;
 import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.peer.ConnectedPeer;
 import com.gmail.marcosav2010.peer.Peer;

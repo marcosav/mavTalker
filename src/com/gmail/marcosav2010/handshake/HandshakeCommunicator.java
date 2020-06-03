@@ -21,8 +21,8 @@ import com.gmail.marcosav2010.communicator.BaseCommunicator;
 import com.gmail.marcosav2010.tasker.TaskOwner;
 
 /**
- * This communicator encripts data using AES and a key, only used for handshake to guarantee some
- * security
+ * This communicator encripts data using AES and a key, only used for handshake
+ * to guarantee some security
  * 
  * @author Marcos
  *
@@ -81,7 +81,7 @@ public class HandshakeCommunicator extends BaseCommunicator {
 			byte[] lengthBytes = super.read(LENGTH_BYTES);
 			if (lengthBytes.length <= 0)
 				return null;
-			
+
 			int length = Utils.bytesToInt(lengthBytes);
 
 			if (length < 0)
@@ -96,7 +96,8 @@ public class HandshakeCommunicator extends BaseCommunicator {
 		}
 	}
 
-	public byte[] read(int bytes, TaskOwner taskOwner, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+	public byte[] read(int bytes, TaskOwner taskOwner, long timeout, TimeUnit unit)
+			throws InterruptedException, ExecutionException, TimeoutException {
 		return taskOwner.getExecutorService().submit(() -> read(bytes)).get(timeout, unit);
 	}
 

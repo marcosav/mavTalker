@@ -23,7 +23,7 @@ import com.gmail.marcosav2010.common.Utils;
 import com.gmail.marcosav2010.communicator.module.fth.packet.PacketFileAccept;
 import com.gmail.marcosav2010.communicator.module.fth.packet.PacketFileRequest;
 import com.gmail.marcosav2010.communicator.module.fth.packet.PacketFileSend;
-import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
+import com.gmail.marcosav2010.communicator.packet.wrapper.exception.PacketWriteException;
 import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.logger.ILog;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;

@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 
 import com.gmail.marcosav2010.communicator.packet.AbstractPacket;
 import com.gmail.marcosav2010.communicator.packet.PacketRegistry;
+import com.gmail.marcosav2010.communicator.packet.wrapper.exception.PacketReadException;
 
 public class PacketReader {
 

@@ -8,26 +8,20 @@ import java.net.SocketException;
 import java.security.GeneralSecurityException;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import com.gmail.marcosav2010.communicator.module.ModuleManager;
 import com.gmail.marcosav2010.communicator.module.ModuleScope;
-import com.gmail.marcosav2010.config.GeneralConfiguration;
-import com.gmail.marcosav2010.config.GeneralConfiguration.Properties;
-import com.gmail.marcosav2010.config.GeneralConfiguration.PropertyCategory;
+import com.gmail.marcosav2010.config.IConfiguration;
 import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.connection.ConnectionIdentificator;
 import com.gmail.marcosav2010.connection.ConnectionManager;
-import com.gmail.marcosav2010.handshake.HandshakeAuthentificator.HandshakeRequirementLevel;
 import com.gmail.marcosav2010.logger.ILog;
 import com.gmail.marcosav2010.logger.Log;
+import com.gmail.marcosav2010.logger.Logger;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
-import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.tasker.TaskOwner;
 import com.gmail.marcosav2010.tasker.Tasker;
 
@@ -57,45 +51,31 @@ public class Peer extends KnownPeer implements TaskOwner, ModuleScope {
 	@Getter
 	private boolean started;
 
+	private boolean externalExecutor;
+
 	@Getter
 	@Setter
 	private AtomicInteger connectionCount;
 
-	public Peer(PeerManager peerManager, String name, int port) {
-		super(name, port, UUID.randomUUID());
-
-		log = new Log(peerManager, name);
-		connectionCount = new AtomicInteger();
-		properties = new PeerProperties();
-		connectionManager = new ConnectionManager(this);
-		executorService = new ThreadPoolExecutor(1, Integer.MAX_VALUE, 10L, TimeUnit.SECONDS,
-				new SynchronousQueue<Runnable>(), new PeerThreadFactory());
-		moduleManager = new ModuleManager(this);
-		moduleManager.initializeModules();
-		started = false;
+	public Peer(String name, int port, IConfiguration configuration) {
+		this(name, port, Logger.getGlobal(), new DefaultPeerExecutor(name), configuration);
 	}
 
-	private class PeerThreadFactory implements ThreadFactory {
-		private final ThreadGroup group;
-		private final AtomicInteger threadNumber = new AtomicInteger(1);
-		private final String namePrefix;
+	public Peer(String name, int port, ILog log, ExecutorService executorService, IConfiguration configuration) {
+		super(name, port, UUID.randomUUID());
 
-		PeerThreadFactory() {
-			group = new ThreadGroup(Main.getInstance().getPeerManager().getPeerThreadGroup(),
-					"peerThreadGroup-" + getName());
-			namePrefix = "peerPool-" + getName() + "-thread-";
-		}
+		this.log = new Log(log, name);
 
-		@Override
-		public Thread newThread(Runnable r) {
-			Thread t = new Thread(group, r, namePrefix + threadNumber.getAndIncrement(), 0);
-			if (t.isDaemon())
-				t.setDaemon(false);
-			if (t.getPriority() != Thread.NORM_PRIORITY)
-				t.setPriority(Thread.NORM_PRIORITY);
+		connectionCount = new AtomicInteger();
 
-			return t;
-		}
+		properties = new PeerProperties(configuration);
+		connectionManager = new ConnectionManager(this);
+
+		externalExecutor = true;
+		this.executorService = executorService;
+
+		moduleManager = new ModuleManager(this);
+		moduleManager.initializeModules();
 	}
 
 	public void start() {
@@ -180,33 +160,18 @@ public class Peer extends KnownPeer implements TaskOwner, ModuleScope {
 			} catch (IOException e) {
 			}
 
-		log.log("Shutting down thread pool executor...", VerboseLevel.MEDIUM);
+		if (!externalExecutor) {
+			log.log("Shutting down thread pool executor...", VerboseLevel.MEDIUM);
 
-		executorService.shutdown();
-		try {
-			executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
-		} catch (InterruptedException e) {
-			log.log("There was an error while terminating the pool, forcing shutdown...", VerboseLevel.MEDIUM);
-			executorService.shutdownNow();
+			executorService.shutdown();
+			try {
+				executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+			} catch (InterruptedException e) {
+				log.log("There was an error while terminating the pool, forcing shutdown...", VerboseLevel.MEDIUM);
+				executorService.shutdownNow();
+			}
 		}
-
-		//Main.getInstance().getPeerManager().remove(this);
 
 		log.log("Shutdown done successfully.", VerboseLevel.LOW);
-	}
-
-	public static class PeerProperties extends Properties {
-
-		public PeerProperties() {
-			super(PropertyCategory.PEER, Main.getInstance().getGeneralConfig());
-		}
-
-		public HandshakeRequirementLevel getHRL() {
-			return super.get(GeneralConfiguration.HANDSHAKE_REQUIREMENT_LEVEL);
-		}
-
-		public void setHRL(HandshakeRequirementLevel level) {
-			super.set(GeneralConfiguration.HANDSHAKE_REQUIREMENT_LEVEL, level);
-		}
 	}
 }

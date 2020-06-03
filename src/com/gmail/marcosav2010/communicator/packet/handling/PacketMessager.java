@@ -11,13 +11,12 @@ import com.gmail.marcosav2010.communicator.packet.handling.listener.PacketEventH
 import com.gmail.marcosav2010.communicator.packet.packets.PacketIdentify;
 import com.gmail.marcosav2010.communicator.packet.packets.PacketRespose;
 import com.gmail.marcosav2010.communicator.packet.packets.PacketShutdown;
-import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
+import com.gmail.marcosav2010.communicator.packet.wrapper.exception.PacketWriteException;
 import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWritter;
 import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.logger.ILog;
 import com.gmail.marcosav2010.logger.Log;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
-import com.gmail.marcosav2010.main.Main;
 
 /**
  * This class handles a @Connection @IPacket traffic.
@@ -107,10 +106,8 @@ public class PacketMessager {
 	public void setupEventHandler() {
 		log.log("Registering packet handlers...", VerboseLevel.MEDIUM);
 
-		// TODO: Mejorar esta mierda
 		eventHandlerManager.registerListeners(connection.getModuleManager().getListeners());
 		eventHandlerManager.registerListeners(connection.getPeer().getModuleManager().getListeners());
-		eventHandlerManager.registerListeners(Main.getInstance().getModuleManager().getListeners());
 
 		log.log("Registered " + eventHandlerManager.getHandlerCount() + " handlers in "
 				+ eventHandlerManager.getListenerCount() + " listeners.", VerboseLevel.LOW);

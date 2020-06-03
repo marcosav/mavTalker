@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.gmail.marcosav2010.command.Command;
 import com.gmail.marcosav2010.communicator.packet.packets.PacketPing;
-import com.gmail.marcosav2010.communicator.packet.wrapper.PacketWriteException;
+import com.gmail.marcosav2010.communicator.packet.wrapper.exception.PacketWriteException;
 import com.gmail.marcosav2010.connection.Connection;
 import com.gmail.marcosav2010.connection.ConnectionIdentificator;
 import com.gmail.marcosav2010.connection.ConnectionManager;
