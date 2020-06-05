@@ -10,7 +10,7 @@
     <version>2.0</version>
 
     <properties>
-        <user.name>marcosav</user.name>
+        <author>marcosav</author>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>14</maven.compiler.source>
         <maven.compiler.target>14</maven.compiler.target>
@@ -21,7 +21,7 @@
 
     <developers>
         <developer>
-            <id>marcosav</id>
+            <id>${author}</id>
         </developer>
     </developers>
 

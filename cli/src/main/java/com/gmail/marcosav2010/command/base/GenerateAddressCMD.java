@@ -1,7 +1,7 @@
 package com.gmail.marcosav2010.command.base;
 
 import com.gmail.marcosav2010.command.Command;
-import com.gmail.marcosav2010.handshake.HandshakeAuthentificator.HandshakeRequirementLevel;
+import com.gmail.marcosav2010.handshake.HandshakeAuthenticator.HandshakeRequirementLevel;
 import com.gmail.marcosav2010.main.Main;
 import com.gmail.marcosav2010.peer.Peer;
 
@@ -54,7 +54,7 @@ class GenerateAddressCMD extends Command {
 
             } else
                 try {
-                    addressKey = peer.getConnectionManager().getHandshakeAuthentificator()
+                    addressKey = peer.getConnectionManager().getHandshakeAuthenticator()
                             .generatePublicAddressKey();
 
                 } catch (BadPaddingException | InvalidKeyException | NoSuchAlgorithmException
@@ -74,7 +74,7 @@ class GenerateAddressCMD extends Command {
             }
 
             try {
-                addressKey = peer.getConnectionManager().getHandshakeAuthentificator()
+                addressKey = peer.getConnectionManager().getHandshakeAuthenticator()
                         .generatePrivateAddressKey(requesterConnectionKey);
 
             } catch (IllegalArgumentException e) {

@@ -40,8 +40,11 @@
                         <manifestEntries>
                             <Main-Class>${project.groupId}.main.Launcher</Main-Class>
                             <Implementation-Title>${project.build.finalName}</Implementation-Title>
+                            <Specification-Title>${project.build.finalName}</Specification-Title>
                             <Implementation-Version>${project.version}</Implementation-Version>
                             <Specification-Version>${maven.build.timestamp}</Specification-Version>
+                            <Specification-Vendor>${author}</Specification-Vendor>
+                            <Implementation-Vendor>${author}</Implementation-Vendor>
                         </manifestEntries>
                     </archive>
                 </configuration>

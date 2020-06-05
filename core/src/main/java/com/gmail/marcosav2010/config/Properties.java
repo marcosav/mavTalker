@@ -1,6 +1,6 @@
 package com.gmail.marcosav2010.config;
 
-import com.gmail.marcosav2010.handshake.HandshakeAuthentificator;
+import com.gmail.marcosav2010.handshake.HandshakeAuthenticator;
 import com.gmail.marcosav2010.logger.Logger;
 import com.gmail.marcosav2010.peer.PeerProperties;
 
@@ -18,7 +18,7 @@ public class Properties {
         propCategory.put(Logger.VERBOSE_LEVEL_PROP,
                 new Property<>(PropertyCategory.GLOBAL, Logger.VerboseLevel.class, Logger.VerboseLevel.MINIMAL));
         propCategory.put(PeerProperties.HANDSHAKE_REQUIREMENT_LEVEL, new Property<>(PropertyCategory.PEER,
-                HandshakeAuthentificator.HandshakeRequirementLevel.class, HandshakeAuthentificator.HandshakeRequirementLevel.PRIVATE));
+                HandshakeAuthenticator.HandshakeRequirementLevel.class, HandshakeAuthenticator.HandshakeRequirementLevel.PRIVATE));
     }
 
     private final PropertyCategory category;

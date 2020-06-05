@@ -12,41 +12,42 @@ import java.io.IOException;
 
 public class Launcher {
 
-	private static final Runnable handleShutdown = () -> {
-		if (Main.getInstance() != null)
-			Main.getInstance().shutdown();
-	};
+    private static final Runnable handleShutdown = () -> {
+        if (Main.getInstance() != null)
+            Main.getInstance().shutdown();
+    };
 
-	public static void main(String[] args) throws NumberFormatException, IOException {
-		var pkg = Launcher.class.getPackage();
-		Logger.getGlobal().log(
-				"Loading " + pkg.getImplementationTitle() + " v" + pkg.getImplementationVersion() + " by marcosav...");
+    public static void main(String[] args) throws NumberFormatException, IOException {
+        var pkg = Launcher.class.getPackage();
+        Logger.getGlobal().log(
+                "Loading " + pkg.getImplementationTitle() + " v" + pkg.getImplementationVersion() +
+                        " by " + pkg.getSpecificationVendor() + "...");
 
-		addSignalHook();
+        addSignalHook();
 
-		Main main = new Main();
-		Main.setInstance(main);
-		main.init();
+        Main main = new Main();
+        Main.setInstance(main);
+        main.init();
 
-		main.main(args);
+        main.main(args);
 
-		listenForCommands();
-	}
+        listenForCommands();
+    }
 
-	private static void listenForCommands() throws IOException {
-		Terminal terminal = TerminalBuilder.terminal();
-		LineReader lineReader = LineReaderBuilder.builder().terminal(terminal).history(new DefaultHistory()).build();
+    private static void listenForCommands() throws IOException {
+        Terminal terminal = TerminalBuilder.terminal();
+        LineReader lineReader = LineReaderBuilder.builder().terminal(terminal).history(new DefaultHistory()).build();
 
-		try {
-			while (!Main.getInstance().isShuttingDown())
-				CommandHandler.handleCommand(lineReader.readLine(">> "));
+        try {
+            while (!Main.getInstance().isShuttingDown())
+                CommandHandler.handleCommand(lineReader.readLine(">> "));
 
-		} catch (org.jline.reader.UserInterruptException ex) {
-			handleShutdown.run();
-		}
-	}
+        } catch (org.jline.reader.UserInterruptException ex) {
+            handleShutdown.run();
+        }
+    }
 
-	private static void addSignalHook() {
-		Runtime.getRuntime().addShutdownHook(new Thread(handleShutdown));
-	}
+    private static void addSignalHook() {
+        Runtime.getRuntime().addShutdownHook(new Thread(handleShutdown));
+    }
 }

@@ -37,7 +37,7 @@ class ConnectionKeyCMD extends Command {
 
         String k;
 
-        k = peer.getConnectionManager().getHandshakeAuthentificator().getConnectionKeyString();
+        k = peer.getConnectionManager().getHandshakeAuthenticator().getConnectionKeyString();
 
         log.log("-----------------------------------------------------");
         log.log("\tConnection Key => " + k);

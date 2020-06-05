@@ -7,7 +7,6 @@ import com.gmail.marcosav2010.logger.ILog;
 import com.gmail.marcosav2010.logger.Log;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.peer.Peer;
-import lombok.Getter;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
@@ -29,11 +28,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * This clase manages the handshake of a starting @Connection
+ * This class manages the handshake of a starting @Connection
  *
  * @author Marcos
  */
-public class HandshakeAuthentificator {
+public class HandshakeAuthenticator {
 
     public static final int B_KEY_LENGTH = 128 / 8;
     public static final int H_KEY_LENGTH = B_KEY_LENGTH;
@@ -64,7 +63,7 @@ public class HandshakeAuthentificator {
     private ConnectionToken publicConnectionToken;
     private String publicAddressKey;
 
-    public HandshakeAuthentificator(Peer peer) {
+    public HandshakeAuthenticator(Peer peer) {
         this.peer = peer;
         log = new Log(peer, "HA");
     }
@@ -328,51 +327,5 @@ public class HandshakeAuthentificator {
     public enum HandshakeRequirementLevel {
 
         NONE, PUBLIC, PRIVATE
-    }
-
-    public static class ConnectionToken {
-
-        @Getter
-        private final byte[] handshakeKey;
-        private final String handshakeKeyStr;
-        @Getter
-        private byte[] baseKey;
-        @Getter
-        private InetSocketAddress address;
-        @Getter
-        private boolean isPublic = false;
-
-        public ConnectionToken(byte[] handshakeKey) {
-            this.handshakeKey = handshakeKey;
-            handshakeKeyStr = Utils.encode(handshakeKey);
-        }
-
-        public ConnectionToken(byte[] handshakeKey, byte[] baseKey) {
-            this(handshakeKey);
-            this.baseKey = baseKey;
-        }
-
-        public ConnectionToken(byte[] handshakeKey, InetSocketAddress address, byte[] baseKey) {
-            this(handshakeKey, baseKey);
-            this.address = address;
-        }
-
-        public String getHandshakeKeyAsString() {
-            return handshakeKeyStr;
-        }
-
-        public ConnectionToken setPublic(boolean b) {
-            isPublic = b;
-            return this;
-        }
-    }
-
-    public static class InvalidHandshakeKey extends Exception {
-
-        private static final long serialVersionUID = -1705689877146623444L;
-
-        public InvalidHandshakeKey() {
-            super("Invalid handshake key");
-        }
     }
 }

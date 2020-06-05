@@ -2,9 +2,9 @@ package com.gmail.marcosav2010.connection;
 
 import com.gmail.marcosav2010.common.Utils;
 import com.gmail.marcosav2010.connection.exception.ConnectionRegistryException;
-import com.gmail.marcosav2010.handshake.HandshakeAuthentificator;
-import com.gmail.marcosav2010.handshake.HandshakeAuthentificator.ConnectionToken;
-import com.gmail.marcosav2010.handshake.HandshakeAuthentificator.InvalidHandshakeKey;
+import com.gmail.marcosav2010.handshake.ConnectionToken;
+import com.gmail.marcosav2010.handshake.HandshakeAuthenticator;
+import com.gmail.marcosav2010.handshake.InvalidHandshakeKey;
 import com.gmail.marcosav2010.logger.ILog;
 import com.gmail.marcosav2010.logger.Log;
 import com.gmail.marcosav2010.logger.Loggable;
@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * This clase manages all @Peer stablished @Connection
+ * This class manages all @Peer established @Connection
  *
  * @author Marcos
  */
@@ -41,24 +41,24 @@ public class ConnectionManager implements Loggable {
     private final Peer peer;
     private final Map<UUID, Connection> connections;
 
-    private final HandshakeAuthentificator handshakeAuthentificator;
-    private final ConnectionIdentificator connectionIdentificador;
+    private final HandshakeAuthenticator handshakeAuthenticator;
+    private final ConnectionIdentificator connectionIdentificator;
 
     public ConnectionManager(Peer peer) {
         this.peer = peer;
 
         log = new Log(peer, "ConnectionManager");
-        handshakeAuthentificator = new HandshakeAuthentificator(peer);
-        connectionIdentificador = new ConnectionIdentificator();
+        handshakeAuthenticator = new HandshakeAuthenticator(peer);
+        connectionIdentificator = new ConnectionIdentificator();
         connections = new ConcurrentHashMap<>();
     }
 
-    public HandshakeAuthentificator getHandshakeAuthentificator() {
-        return handshakeAuthentificator;
+    public HandshakeAuthenticator getHandshakeAuthenticator() {
+        return handshakeAuthenticator;
     }
 
     public ConnectionIdentificator getIdentificator() {
-        return connectionIdentificador;
+        return connectionIdentificator;
     }
 
     public Connection getConnection(UUID uuid) {
@@ -67,7 +67,7 @@ public class ConnectionManager implements Loggable {
 
     public Connection removeConnection(UUID uuid) {
         Connection c = connections.remove(uuid);
-        connectionIdentificador.removePeer(uuid);
+        connectionIdentificator.removePeer(uuid);
         return c;
     }
 
@@ -123,7 +123,7 @@ public class ConnectionManager implements Loggable {
         ConnectionToken ct;
 
         try {
-            ct = handshakeAuthentificator.readHandshake(remoteSocket);
+            ct = handshakeAuthenticator.readHandshake(remoteSocket);
 
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             log.log("Remote peer didn't send handshake at time, closing remote socket...");

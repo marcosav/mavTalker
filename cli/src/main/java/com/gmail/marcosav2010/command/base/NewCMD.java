@@ -82,7 +82,7 @@ class NewCMD extends Command {
                         InetSocketAddress address;
 
                         try {
-                            address = peer.getConnectionManager().getHandshakeAuthentificator()
+                            address = peer.getConnectionManager().getHandshakeAuthenticator()
                                     .parseAddressKey(read).getAddress();
 
                         } catch (IllegalArgumentException e) {

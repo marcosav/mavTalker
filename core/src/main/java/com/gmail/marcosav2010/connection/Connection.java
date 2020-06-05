@@ -15,8 +15,8 @@ import com.gmail.marcosav2010.communicator.packet.wrapper.exception.PacketReadEx
 import com.gmail.marcosav2010.communicator.packet.wrapper.exception.PacketWriteException;
 import com.gmail.marcosav2010.connection.exception.ConnectionException;
 import com.gmail.marcosav2010.connection.exception.ConnectionIdentificationException;
-import com.gmail.marcosav2010.handshake.HandshakeAuthentificator;
-import com.gmail.marcosav2010.handshake.HandshakeAuthentificator.ConnectionToken;
+import com.gmail.marcosav2010.handshake.ConnectionToken;
+import com.gmail.marcosav2010.handshake.HandshakeAuthenticator;
 import com.gmail.marcosav2010.handshake.HandshakeCommunicator;
 import com.gmail.marcosav2010.logger.Log;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
@@ -197,7 +197,7 @@ public class Connection extends NetworkConnection implements ModuleScope {
         log.log("Setting output stream...", VerboseLevel.MEDIUM);
         baseCommunicator.setOut(hostSocket.getOutputStream());
 
-        HandshakeAuthentificator ha = peer.getConnectionManager().getHandshakeAuthentificator();
+        HandshakeAuthenticator ha = peer.getConnectionManager().getHandshakeAuthenticator();
         ConnectionToken ct = ha.sendHandshake(baseCommunicator, address);
 
         identificationController.sendTemporaryUUID();
@@ -264,7 +264,7 @@ public class Connection extends NetworkConnection implements ModuleScope {
 
         try {
             respose = baseCommunicator.read(
-                    Integer.BYTES + HandshakeAuthentificator.H_KEY_LENGTH + HandshakeAuthentificator.B_KEY_LENGTH, peer,
+                    Integer.BYTES + HandshakeAuthenticator.H_KEY_LENGTH + HandshakeAuthenticator.B_KEY_LENGTH, peer,
                     HP_TIMEOUT, TimeUnit.SECONDS);
         } catch (TimeoutException e) {
             throw new ConnectionException("Remote peer didn't send handshake key and port at time, aborting.");
@@ -277,7 +277,7 @@ public class Connection extends NetworkConnection implements ModuleScope {
     }
 
     private void writeHandshakeKeyAndPort() throws IOException {
-        var c = peer.getConnectionManager().getHandshakeAuthentificator().generateTemporalHandshakeKey();
+        var c = peer.getConnectionManager().getHandshakeAuthenticator().generateTemporalHandshakeKey();
 
         writeRawBytes(Utils.concat(Utils.intToBytes(peer.getPort()), c.getHandshakeKey(), c.getBaseKey()));
     }
@@ -322,10 +322,10 @@ public class Connection extends NetworkConnection implements ModuleScope {
         byte[][] sBytes = Utils.split(bytes, Integer.BYTES);
         remotePort = Utils.bytesToInt(sBytes[0]);
 
-        byte[][] hbBytes = Utils.split(sBytes[1], HandshakeAuthentificator.H_KEY_LENGTH);
+        byte[][] hbBytes = Utils.split(sBytes[1], HandshakeAuthenticator.H_KEY_LENGTH);
 
         InetSocketAddress address = new InetSocketAddress(remoteAddress, remotePort);
-        peer.getConnectionManager().getHandshakeAuthentificator().storeHandshakeKey(address, hbBytes[0], hbBytes[1]);
+        peer.getConnectionManager().getHandshakeAuthenticator().storeHandshakeKey(address, hbBytes[0], hbBytes[1]);
 
         log.log("Read remote port " + remotePort + " and handshake key.", VerboseLevel.MEDIUM);
 
