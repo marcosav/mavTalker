@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.gmail.marcosav2010</groupId>
         <artifactId>mavTalker</artifactId>
-        <version>1.1.1</version>
+        <version>2.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -27,5 +27,42 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <finalName>mavTalker</finalName>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.1.2</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Main-Class>${project.groupId}.main.Launcher</Main-Class>
+                            <Implementation-Title>${project.build.finalName}</Implementation-Title>
+                            <Implementation-Version>${project.version}</Implementation-Version>
+                            <Specification-Version>${maven.build.timestamp}</Specification-Version>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

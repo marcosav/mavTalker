@@ -59,6 +59,6 @@ public class CommandManager {
 			return 1;
 		}).sum();
 
-		log.log("Loaded " + v + " commands from registry \"" + clazz.getName() + "\"", VerboseLevel.HIGH);
+		log.log("Loaded " + v + " commands from registry \"" + clazz.getSimpleName() + "\"", VerboseLevel.HIGH);
 	}
 }

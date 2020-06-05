@@ -6,15 +6,13 @@ import com.gmail.marcosav2010.config.GeneralConfiguration;
 import com.gmail.marcosav2010.logger.ILog;
 import com.gmail.marcosav2010.logger.Logger;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
-import com.gmail.marcosav2010.module.CommandModuleLoader;
-import com.gmail.marcosav2010.module.ModuleLoader;
-import com.gmail.marcosav2010.module.ModuleManager;
-import com.gmail.marcosav2010.module.ModuleScope;
+import com.gmail.marcosav2010.module.*;
 import com.gmail.marcosav2010.peer.Peer;
 import com.gmail.marcosav2010.peer.PeerManager;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.File;
 import java.io.IOException;
 
 public class Main implements ModuleScope {
@@ -30,6 +28,8 @@ public class Main implements ModuleScope {
     @Getter
     private PeerManager peerManager;
     @Getter
+    private ExternalModuleLoader externalModuleLoader;
+    @Getter
     private ModuleManager moduleManager;
     @Getter
     private ILog log;
@@ -42,6 +42,9 @@ public class Main implements ModuleScope {
         generalConfig = new GeneralConfiguration();
 
         Logger.setVerboseLevel(generalConfig.getVerboseLevel());
+
+        externalModuleLoader = new ExternalModuleLoader(new File("modules"));
+        externalModuleLoader.load();
 
         ModuleLoader.getInstance().load();
         CommandModuleLoader.getInstance().load();

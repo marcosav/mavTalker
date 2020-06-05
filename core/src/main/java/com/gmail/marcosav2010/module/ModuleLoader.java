@@ -40,31 +40,34 @@ public class ModuleLoader {
         return loaded;
     }
 
+    ModuleDescriptor registerModule(Class<?> clazz) {
+        if (!Module.class.isAssignableFrom(clazz) || Modifier.isAbstract(clazz.getModifiers()))
+            return null;
+
+        @SuppressWarnings("unchecked")
+        var c = (Class<? extends Module>) clazz;
+        ModuleDescriptor descriptor = c.getAnnotation(ModuleDescriptor.class);
+
+        if (!descriptor.load())
+            return null;
+
+        loadedModules.put(descriptor, c);
+        modulesByClass.put(c, descriptor);
+        return descriptor;
+    }
+
     public void load() {
         if (loaded)
-            throw new IllegalStateException("Modules are already loaded.");
+            throw new IllegalStateException("Modules are already registered.");
 
         loaded = true;
 
         var matches = ClassIndex.getAnnotated(ModuleDescriptor.class, ModuleLoader.class.getClassLoader());
 
         for (var clazz : matches) {
-            if (Modifier.isAbstract(clazz.getModifiers()))
-                continue;
-
             try {
-                @SuppressWarnings("unchecked")
-                var c = (Class<? extends Module>) clazz;
-
-                ModuleDescriptor m = clazz.getAnnotation(ModuleDescriptor.class);
-
-                if (!m.load())
-                    continue;
-
-                loadedModules.put(m, c);
-                modulesByClass.put(c, m);
-
-                log.log("Found module in class \"" + c.getSimpleName() + "\".", VerboseLevel.HIGH);
+                if (registerModule(clazz) != null)
+                    log.log("Registered module in class \"" + clazz.getSimpleName() + "\".", VerboseLevel.HIGH);
 
             } catch (Exception e) {
                 log.log(e, "There was an error while loading class \"" + clazz.getName() + "\"");

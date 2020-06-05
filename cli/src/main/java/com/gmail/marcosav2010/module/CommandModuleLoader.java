@@ -5,9 +5,7 @@ import com.gmail.marcosav2010.logger.ILog;
 import com.gmail.marcosav2010.logger.Log;
 import com.gmail.marcosav2010.logger.Logger;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
-import org.atteo.classindex.ClassIndex;
 
-import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -27,11 +25,7 @@ public class CommandModuleLoader {
         return instance;
     }
 
-    boolean isLoaded() {
-        return loaded;
-    }
-
-    void addCommands(Class<? extends CommandRegistry> commands) {
+    private void addCommands(Class<? extends CommandRegistry> commands) {
         commandRegistries.add(commands);
     }
 
@@ -47,31 +41,22 @@ public class CommandModuleLoader {
 
         loaded = true;
 
-        var matches = ClassIndex.getAnnotated(ModuleCommandRegistry.class, CommandModuleLoader.class.getClassLoader());
-
-        for (var clazz : matches) {
-            if (Modifier.isAbstract(clazz.getModifiers()))
-                continue;
-
-            var moduleDesc = ModuleLoader.getInstance().getDescription(clazz);
-            if (moduleDesc == null)
-                continue;
-
+        ModuleLoader.getInstance().getModules().forEach((moduleDesc, m) -> {
             try {
-                ModuleCommandRegistry m = clazz.getAnnotation(ModuleCommandRegistry.class);
+                ModuleCommandRegistry mcr = m.getAnnotation(ModuleCommandRegistry.class);
 
                 if (!moduleDesc.load())
-                    continue;
+                    return;
 
-                Class<? extends CommandRegistry> registryClass = m.value();
+                Class<? extends CommandRegistry> registryClass = mcr.value();
 
                 addCommands(registryClass);
 
-                log.log("Found command module in class \"" + clazz.getSimpleName() + "\".", VerboseLevel.HIGH);
+                log.log("Found command module in class \"" + m.getSimpleName() + "\".", VerboseLevel.HIGH);
 
             } catch (Exception e) {
-                log.log(e, "There was an error while loading class \"" + clazz.getName() + "\"");
+                log.log(e, "There was an error while loading command registries in \"" + m.getName() + "\"");
             }
-        }
+        });
     }
 }

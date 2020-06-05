@@ -1,7 +1,6 @@
 package com.gmail.marcosav2010.command.base;
 
 import com.gmail.marcosav2010.command.Command;
-import com.gmail.marcosav2010.config.GeneralConfiguration;
 import com.gmail.marcosav2010.logger.Logger;
 import com.gmail.marcosav2010.logger.Logger.VerboseLevel;
 import com.gmail.marcosav2010.main.Main;
@@ -31,7 +30,7 @@ class VerboseCMD extends Command {
             }
         }
 
-        Main.getInstance().getGeneralConfig().set(GeneralConfiguration.VERBOSE_LEVEL, level.name());
+        Main.getInstance().getGeneralConfig().set(Logger.VERBOSE_LEVEL_PROP, level.name());
         Logger.setVerboseLevel(level);
     }
 }

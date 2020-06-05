@@ -21,6 +21,8 @@ public class Logger {
     private static final PrintStream err = System.err;
     private static VerboseLevel VERBOSE_LEVEL = VerboseLevel.HIGH;
 
+    public static final String VERBOSE_LEVEL_PROP = "verboseLevel";
+
     public static void log(Object o) {
         log(o, DEFAULT_LEVEL);
     }
