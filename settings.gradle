@@ -1,0 +1,6 @@
+rootProject.name = 'mavTalker'
+
+include 'core'
+include 'cli'
+include 'modules:file-transfer'
+include 'modules:text-messager'

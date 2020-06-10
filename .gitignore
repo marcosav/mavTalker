@@ -11,7 +11,7 @@ target/
 .factorypath
 
 # Other
-/TESTS/
+hs_err_pid*
 
 # VSCode
 .vscode
@@ -19,3 +19,11 @@ target/
 # Idea
 .idea
 *.iml
+
+### Gradle ###
+.gradle
+build/
+**/build/
+.gradletasknamecache
+!gradle-wrapper.jar
+gradle-app.setting
