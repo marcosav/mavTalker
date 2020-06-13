@@ -12,6 +12,7 @@ target/
 
 # Other
 hs_err_pid*
+/TESTS
 
 # VSCode
 .vscode
