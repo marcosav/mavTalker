@@ -3,6 +3,7 @@ package com.gmail.marcosav2010.cipher
 import com.gmail.marcosav2010.common.Utils
 import com.gmail.marcosav2010.communicator.BaseCommunicator
 import com.gmail.marcosav2010.communicator.Communicator
+import com.gmail.marcosav2010.communicator.readXBytes
 import com.gmail.marcosav2010.logger.ILog
 import com.gmail.marcosav2010.logger.Log
 import com.gmail.marcosav2010.tasker.Task
@@ -52,17 +53,17 @@ class CipheredCommunicator(baseCommunicator: BaseCommunicator,
     @Synchronized
     fun read(): EncryptedMessage? {
         // Leer tamaño del mensaje cifrado en complemento
-        val lengthBytes = input!!.readNBytes(LENGTH_BYTES)
+        val lengthBytes = input!!.readXBytes(LENGTH_BYTES)
         if (lengthBytes.isEmpty()) return null
 
         val length = Utils.bytesToInt(lengthBytes).inv()
         if (length < 0) return null
 
         // Leer parte RSA donde esta la llave AES
-        val encryptedAESData = input!!.readNBytes(RSA_MSG_SIZE)
+        val encryptedAESData = input!!.readXBytes(RSA_MSG_SIZE)
 
         // Leer mensaje encriptado con AES de longitud dada antes
-        val encryptedData = input!!.readNBytes(length)
+        val encryptedData = input!!.readXBytes(length)
 
         return EncryptedMessage(encryptedAESData, encryptedData)
     }

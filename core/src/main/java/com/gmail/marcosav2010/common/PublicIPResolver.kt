@@ -23,9 +23,14 @@ object PublicIPResolver {
     private val log: ILog = Logger.global
 
     var publicAddress: InetAddress? = null
+        get() {
+            if (field == null)
+                obtainPublicAddress()
+            return field
+        }
         private set
 
-    fun obtainPublicAddress() {
+    private fun obtainPublicAddress() {
         log.log("Obtaining public address...", VerboseLevel.MEDIUM)
         try {
             val m = System.currentTimeMillis()

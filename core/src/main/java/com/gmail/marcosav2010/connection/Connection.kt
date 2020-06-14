@@ -203,7 +203,13 @@ class Connection : NetworkConnection, ModuleScope {
         log.log("Generating session input cipher using ${SessionCipher.RSA_KEY_ALGORITHM}-"
                 + "${SessionCipher.RSA_KEY_SIZE}...", VerboseLevel.MEDIUM)
 
-        sessionCipher!!.generate()
+        try {
+            sessionCipher!!.generate()
+        } catch (e: Exception) {
+            log.log(e, "Aborting, there was an error while generating session cipher: ${e.message}")
+            disconnect(silent = true, force = true)
+            return
+        }
 
         log.log("Starting authentication...", VerboseLevel.MEDIUM)
 
@@ -223,9 +229,11 @@ class Connection : NetworkConnection, ModuleScope {
         log.log("Waiting for remote authentication, timeout set to ${AUTH_TIMEOUT}s...", VerboseLevel.MEDIUM)
 
         try {
-            val response = baseCommunicator!!.read(SessionCipher.RSA_KEY_MSG, peer, AUTH_TIMEOUT, TimeUnit.SECONDS)!!
+            val response = baseCommunicator!!.read(SessionCipher.RSA_KEY_MSG, peer, AUTH_TIMEOUT, TimeUnit.SECONDS)
+                    ?: throw ConnectionException("Got empty message, seems like remote disconnected.")
 
             log.log("Loading authentication response...", VerboseLevel.LOW)
+
             sessionCipher!!.loadAuthenticationResponse(response)
         } catch (e: TimeoutException) {
             throw ConnectionException("Remote peer didn't send authentication at time, aborting.")
@@ -245,15 +253,13 @@ class Connection : NetworkConnection, ModuleScope {
                     Integer.BYTES + HandshakeAuthenticator.H_KEY_LENGTH + HandshakeAuthenticator.B_KEY_LENGTH,
                     peer,
                     HP_TIMEOUT,
-                    TimeUnit.SECONDS)
+                    TimeUnit.SECONDS) ?: throw ConnectionException("Got empty message, seems like remote disconnected.")
 
         } catch (e: TimeoutException) {
             throw ConnectionException("Remote peer didn't send handshake key and port at time, aborting.")
         } catch (e: Exception) {
             throw ConnectionException("There was an error while reading handshake key and port.", e)
         }
-
-        checkNotNull(response) { "Received null handshake key, aborting." }
 
         handleHandshakeKeyPortReadAndConnect(response)
     }

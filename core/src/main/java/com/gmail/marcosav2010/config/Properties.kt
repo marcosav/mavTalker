@@ -29,7 +29,7 @@ open class Properties(private val category: PropertyCategory, config: IConfigura
     private val properties: MutableMap<String, Any> = HashMap()
 
     init {
-        propCategory.entries.filter { e -> e.value.category === category }.forEach { e -> set(e.key, config[e.key]) }
+        propCategory.entries.filter { e -> e.value.category === category }.forEach { e -> set(e.key, config[e.key, e.value.default.toString()]) }
     }
 
     @Suppress("UNCHECKED_CAST")

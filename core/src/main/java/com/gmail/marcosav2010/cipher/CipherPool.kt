@@ -19,7 +19,7 @@ class CipherPool(private val mode: Int,
         private const val DEFAULT_MAX_CAPACITY = 10
         private const val DEFAULT_INITIAL_CIPHERS = 2
         private const val CIPHER_ASYMMETRIC_ALGORITHM = "RSA/ECB/OAEPWithSHA-512AndMGF1Padding"
-        private val ALGORITHM_SPEC: AlgorithmParameterSpec = OAEPParameterSpec("SHA3-512", "MGF1",
+        private val ALGORITHM_SPEC: AlgorithmParameterSpec = OAEPParameterSpec("SHA-512", "MGF1",
                 MGF1ParameterSpec.SHA512, PSource.PSpecified.DEFAULT)
     }
 

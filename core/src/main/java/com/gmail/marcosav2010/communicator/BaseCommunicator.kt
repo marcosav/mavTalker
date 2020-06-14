@@ -12,7 +12,10 @@ import java.util.concurrent.TimeUnit
 open class BaseCommunicator : Communicator() {
 
     @Synchronized
-    open fun read(bytes: Int): ByteArray? = input!!.readNBytes(bytes)
+    open fun read(bytes: Int): ByteArray? {
+        val r = input!!.readXBytes(bytes)
+        return if (r.isEmpty()) null else r
+    }
 
     open fun read(bytes: Int, taskOwner: TaskOwner, timeout: Long, unit: TimeUnit): ByteArray? =
             taskOwner.executorService.submit<ByteArray?> { read(bytes) }[timeout, unit]

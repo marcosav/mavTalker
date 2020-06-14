@@ -58,7 +58,7 @@ class Main : ModuleScope {
     }
 
     fun main(args: Array<String>) {
-        PublicIPResolver.obtainPublicAddress()
+        PublicIPResolver.publicAddress
 
         log.log("Starting application...", VerboseLevel.MEDIUM)
         moduleManager.onEnable()
